@@ -261,40 +261,60 @@ async function triggerNotifications(order: any, paymentId: string) {
       html: `<h2>Radhe Radhe ${order.customer.name} ji,</h2><p>Your payment for <strong>${order.reportType}</strong> is confirmed. Check WhatsApp for updates!</p>`,
     }),
 
-    // Admin Email (Full details)
+    // Admin Email — keep the established paid-order format consistent with
+    // the checkout confirmation route. The webhook is the authoritative
+    // payment-confirmation path, so it must not produce a competing design.
     resend.emails.send({
       from: senderEmail,
       to: adminEmails,
-      subject: `🚨 NEW ORDER RECEIVED VIA WEBHOOK ORDER: ${order.customer.name} [₹${order.amount}]`,
+      subject: `🚨 NEW PAID ORDER: ${order.customer.name} [₹${order.amount}] | ${order.customer.language}`,
       html: `
-        <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden;">
-          <div style="background-color: #3D1600; padding: 20px; text-align: center;">
-            <h2 style="color: #F5D98A; margin: 0;">Webhook Order Captured! 🚀</h2>
-            <p style="color: #fff; font-size: 12px; margin-top: 5px;">Transaction ID: ${paymentId}</p>
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden;">
+          <div style="background-color: #8B1E1E; padding: 25px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 24px;">New Premium Order! 🚀</h1>
+            <p style="color: #F5D98A; margin: 5px 0 0 0; font-weight: bold; letter-spacing: 1px;">SURABHI ASTROLOGY</p>
           </div>
           
-          <div style="padding: 25px;">
-            <h3 style="color: #8B1E1E; border-bottom: 1px solid #eee; padding-bottom: 10px;">🛒 Details</h3>
-            <p><strong>Package:</strong> ${order.reportType} - ₹${order.amount}</p>
+          <div style="padding: 30px; background-color: #ffffff;">
+            <div style="margin-bottom: 25px; border-bottom: 2px solid #f8f8f8; padding-bottom: 15px;">
+              <h3 style="color: #8B1E1E; margin-bottom: 10px; font-size: 18px;">🛒 Transaction Summary</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr><td style="padding: 5px 0; color: #666;">Report Type:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${order.reportType}</td></tr>
+                <tr><td style="padding: 5px 0; color: #666;">Language:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${order.customer.language}</td></tr>
+                <tr><td style="padding: 5px 0; color: #666;">Amount Paid:</td><td style="padding: 5px 0; font-weight: bold; text-align: right; color: #1B4D30;">₹${order.amount}</td></tr>
+              </table>
+            </div>
 
-            <h3 style="color: #8B1E1E;">👤 Person 1 (Customer)</h3>
-            <p><strong>Name:</strong> ${order.customer.name}</p>
-            <p><strong>WhatsApp:</strong> <a href="https://wa.me/${formattedPhone}">+${formattedPhone}</a></p>
-            <div style="background-color: #FFFBF0; padding: 15px; border-radius: 8px;">
-              <p><strong>Birth Info:</strong> ${order.customer.dob} | ${order.customer.tob} | ${order.customer.city}</p>
+            <div style="margin-bottom: 25px; border-bottom: 2px solid #f8f8f8; padding-bottom: 15px;">
+              <h3 style="color: #8B1E1E; margin-bottom: 10px; font-size: 18px;">👤 Person 1 Details</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr><td style="padding: 5px 0; color: #666;">Name:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${order.customer.name}</td></tr>
+                <tr><td style="padding: 5px 0; color: #666;">Birth Info:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${order.customer.dob} | ${order.customer.tob}</td></tr>
+                <tr><td style="padding: 5px 0; color: #666;">Location:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${order.customer.city} (${order.customer.pinCode})</td></tr>
+              </table>
             </div>
 
             ${isMatchmaking && order.partner ? `
-            <h3 style="color: #8B1E1E; margin-top: 20px;">💑 Person 2 (Partner)</h3>
-            <p><strong>Name:</strong> ${order.partner.name}</p>
-            <div style="background-color: #F0F7FF; padding: 15px; border-radius: 8px;">
-              <p><strong>Birth Info:</strong> ${order.partner.dob} | ${order.partner.tob} | ${order.partner.city}</p>
+            <div style="margin-bottom: 25px; border-bottom: 2px solid #f8f8f8; padding-bottom: 15px;">
+              <h3 style="color: #8B1E1E; margin-bottom: 10px; font-size: 18px;">💑 Person 2 Details (Partner)</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr><td style="padding: 5px 0; color: #666;">Name:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${order.partner.name}</td></tr>
+                <tr><td style="padding: 5px 0; color: #666;">Birth Info:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${order.partner.dob} | ${order.partner.tob}</td></tr>
+                <tr><td style="padding: 5px 0; color: #666;">Location:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${order.partner.city}</td></tr>
+              </table>
             </div>
             ` : ''}
 
-           <div style="background: #f9f9f9; padding: 10px; margin-top: 10px;">
-            <strong>Current Challenge:</strong> ${order.challenge}
-          </div>
+            <div style="margin-bottom: 10px;">
+              <h3 style="color: #8B1E1E; margin-bottom: 10px; font-size: 18px;">🎯 Current Challenge / Question</h3>
+              <p style="background-color: #f4f4f4; padding: 15px; border-radius: 8px; color: #333; line-height: 1.5; font-style: italic;">
+                "${order.challenge || "No specific challenge provided."}"
+              </p>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+              <a href="https://wa.me/${formattedPhone}" style="background-color: #1B4D30; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 30px; font-weight: bold; display: inline-block;">Open User WhatsApp</a>
+            </div>
           </div>
         </div>
       `,
