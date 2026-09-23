@@ -1,6 +1,7 @@
 // app/api/create-order/route.ts
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
+import { getCheckoutPlanByReportType } from "@/lib/checkout-plans";
 
 export async function POST(req: Request) {
   const razorpay = new Razorpay({
@@ -10,16 +11,24 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { amount, form } = body; // <--- 1. Catch the form data here
+    const form = body?.form;
+    const checkoutPlan = getCheckoutPlanByReportType(form?.reportType);
+
+    if (!form || typeof form !== "object" || !checkoutPlan) {
+      return NextResponse.json({ error: "Invalid checkout plan" }, { status: 400 });
+    }
+
+    // Use the server-side catalogue amount and canonical report type. Values
+    // supplied in the browser can be edited and must never set the charge.
+    const trustedForm = { ...form, reportType: checkoutPlan.reportType };
 
     const options = {
-      amount: amount * 100,
+      amount: checkoutPlan.amount * 100,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
-      // 2. Staple the form data to the order using 'notes'
       notes: {
-        formData: JSON.stringify(form) 
-      }
+        formData: JSON.stringify(trustedForm),
+      },
     };
 
     const order = await razorpay.orders.create(options);

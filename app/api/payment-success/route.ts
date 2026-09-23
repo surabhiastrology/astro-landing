@@ -3,6 +3,7 @@ import crypto from "crypto";
 import mongoose from "mongoose";
 import { Resend } from "resend";
 import Redis from "ioredis";
+import { getCheckoutPlanByReportType } from "@/lib/checkout-plans";
 
 // ==========================================
 // 1. INITIALIZE SERVICES
@@ -114,7 +115,15 @@ async function sendWhatsAppMessage(to: string, text: string, buttons?: string[],
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, form, finalAmount } = body;
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, form } = body;
+    const checkoutPlan = getCheckoutPlanByReportType(form?.reportType);
+
+    if (!form || typeof form !== "object" || !checkoutPlan) {
+      return NextResponse.json({ error: "Invalid checkout plan." }, { status: 400 });
+    }
+
+    const trustedForm = { ...form, reportType: checkoutPlan.reportType };
+    const finalAmount = checkoutPlan.amount;
     
     // A. VERIFY SIGNATURE
     const secret = process.env.RAZORPAY_KEY_SECRET!;
@@ -139,17 +148,17 @@ export async function POST(req: Request) {
       paymentId: razorpay_payment_id,
       orderId: razorpay_order_id,
       amount: finalAmount,
-      reportType: form.reportType,
-      customer: form,
+      reportType: trustedForm.reportType,
+      customer: trustedForm,
       partner: {
-        name: form?.partnerName,
-        dob: form?.partnerDob,
-        tob: form?.partnerTob,
-        city: form?.partnerCity,
-        gender: form?.partnerGender
+        name: trustedForm.partnerName,
+        dob: trustedForm.partnerDob,
+        tob: trustedForm.partnerTob,
+        city: trustedForm.partnerCity,
+        gender: trustedForm.partnerGender
       },
       // CAPTURING THE DYNAMIC CHALLENGE FROM FORM
-      challenge: form.challenge || "No specific challenge provided",
+      challenge: trustedForm.challenge || "No specific challenge provided",
       reportSent: false,
       answerSent: false,
       status: "Paid",
@@ -169,15 +178,15 @@ export async function POST(req: Request) {
     const adminEmails = ["developer.thinqit@gmail.com", "surabhiastrology9@gmail.com"]; 
     const senderEmail = process.env.EMAIL_FROM || "Surabhi Astrology <careers@thinqit.in>";
     
-    let formattedPhone = form.phone.replace(/\D/g, "");
+    let formattedPhone = trustedForm.phone.replace(/\D/g, "");
     if (formattedPhone.length === 10) formattedPhone = `91${formattedPhone}`;
 
-    const reportType = form.reportType || "Service";
-    const isHi = form.language === "hindi";
+    const reportType = trustedForm.reportType || "Service";
+    const isHi = trustedForm.language === "hindi";
     const isCareer = reportType.toLowerCase().includes("career") || reportType.toLowerCase().includes("करियर");
     const isMatchmaking = reportType.toLowerCase().includes("couple match making");
 
-    let replyMessage = `✅ *Payment Confirmed!*\n\n🙏 *Radhe Radhe, ${form.name || "ji"}!*\nYour order for the *${reportType}* has been successfully confirmed.\n\nSurbhi ji and the team will deliver your detailed analysis right here within *72 hours*. ⏳`;
+    let replyMessage = `✅ *Payment Confirmed!*\n\n🙏 *Radhe Radhe, ${trustedForm.name || "ji"}!*\nYour order for the *${reportType}* has been successfully confirmed.\n\nSurbhi ji and the team will deliver your detailed analysis right here within *72 hours*. ⏳`;
     let waButtons: string[] | undefined = undefined;
 
     if (isCareer) {
@@ -196,7 +205,7 @@ export async function POST(req: Request) {
     const waTemplateData = {
       name: templateName,
       language: isHi ? "hi" : "en",
-      params: [form.name || "Customer", reportType]
+      params: [trustedForm.name || "Customer", reportType]
     };
 
     // D. EXECUTE ALL NOTIFICATIONS
@@ -204,16 +213,16 @@ export async function POST(req: Request) {
       // 1. Customer Email
       resend.emails.send({
         from: senderEmail,
-        to: form.email,
-        subject: `Order Confirmed: ${form.reportType} ✨`,
-        html: `<h2>Radhe Radhe ${form.name} ji,</h2><p>Your payment of ₹${finalAmount} for the <strong>${form.reportType}</strong> is confirmed. Please check your WhatsApp for next steps!</p>`,
+        to: trustedForm.email,
+        subject: `Order Confirmed: ${trustedForm.reportType} ✨`,
+        html: `<h2>Radhe Radhe ${trustedForm.name} ji,</h2><p>Your payment of ₹${finalAmount} for the <strong>${trustedForm.reportType}</strong> is confirmed. Please check your WhatsApp for next steps!</p>`,
       }),
       
       // 2. Admin Email
       resend.emails.send({
         from: senderEmail,
         to: adminEmails,
-        subject: `🚨 NEW PAID ORDER: ${form.name} [₹${finalAmount}] | ${form.language}`,
+        subject: `🚨 NEW PAID ORDER: ${trustedForm.name} [₹${finalAmount}] | ${trustedForm.language}`,
         html: `
           <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden;">
             <div style="background-color: #8B1E1E; padding: 25px; text-align: center;">
@@ -225,8 +234,8 @@ export async function POST(req: Request) {
               <div style="margin-bottom: 25px; border-bottom: 2px solid #f8f8f8; padding-bottom: 15px;">
                 <h3 style="color: #8B1E1E; margin-bottom: 10px; font-size: 18px;">🛒 Transaction Summary</h3>
                 <table style="width: 100%; border-collapse: collapse;">
-                  <tr><td style="padding: 5px 0; color: #666;">Report Type:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${form.reportType}</td></tr>
-                  <tr><td style="padding: 5px 0; color: #666;">Language:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${form.language}</td></tr>
+                  <tr><td style="padding: 5px 0; color: #666;">Report Type:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${trustedForm.reportType}</td></tr>
+                  <tr><td style="padding: 5px 0; color: #666;">Language:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${trustedForm.language}</td></tr>
                   <tr><td style="padding: 5px 0; color: #666;">Amount Paid:</td><td style="padding: 5px 0; font-weight: bold; text-align: right; color: #1B4D30;">₹${finalAmount}</td></tr>
                 </table>
               </div>
@@ -234,9 +243,9 @@ export async function POST(req: Request) {
               <div style="margin-bottom: 25px; border-bottom: 2px solid #f8f8f8; padding-bottom: 15px;">
                 <h3 style="color: #8B1E1E; margin-bottom: 10px; font-size: 18px;">👤 Person 1 Details</h3>
                 <table style="width: 100%; border-collapse: collapse;">
-                  <tr><td style="padding: 5px 0; color: #666;">Name:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${form.name}</td></tr>
-                  <tr><td style="padding: 5px 0; color: #666;">Birth Info:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${form.dob} | ${form.tob}</td></tr>
-                  <tr><td style="padding: 5px 0; color: #666;">Location:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${form.city} (${form.pinCode})</td></tr>
+                  <tr><td style="padding: 5px 0; color: #666;">Name:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${trustedForm.name}</td></tr>
+                  <tr><td style="padding: 5px 0; color: #666;">Birth Info:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${trustedForm.dob} | ${trustedForm.tob}</td></tr>
+                  <tr><td style="padding: 5px 0; color: #666;">Location:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${trustedForm.city} (${trustedForm.pinCode})</td></tr>
                 </table>
               </div>
 
@@ -244,9 +253,9 @@ export async function POST(req: Request) {
               <div style="margin-bottom: 25px; border-bottom: 2px solid #f8f8f8; padding-bottom: 15px;">
                 <h3 style="color: #8B1E1E; margin-bottom: 10px; font-size: 18px;">💑 Person 2 Details (Partner)</h3>
                 <table style="width: 100%; border-collapse: collapse;">
-                  <tr><td style="padding: 5px 0; color: #666;">Name:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${form.partnerName}</td></tr>
-                  <tr><td style="padding: 5px 0; color: #666;">Birth Info:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${form.partnerDob} | ${form.partnerTob}</td></tr>
-                  <tr><td style="padding: 5px 0; color: #666;">Location:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${form.partnerCity}</td></tr>
+                  <tr><td style="padding: 5px 0; color: #666;">Name:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${trustedForm.partnerName}</td></tr>
+                  <tr><td style="padding: 5px 0; color: #666;">Birth Info:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${trustedForm.partnerDob} | ${trustedForm.partnerTob}</td></tr>
+                  <tr><td style="padding: 5px 0; color: #666;">Location:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${trustedForm.partnerCity}</td></tr>
                 </table>
               </div>
               ` : ''}
@@ -254,7 +263,7 @@ export async function POST(req: Request) {
               <div style="margin-bottom: 10px;">
                 <h3 style="color: #8B1E1E; margin-bottom: 10px; font-size: 18px;">🎯 Current Challenge / Question</h3>
                 <p style="background-color: #f4f4f4; padding: 15px; border-radius: 8px; color: #333; line-height: 1.5; font-style: italic;">
-                  "${form.challenge || "No specific challenge provided."}"
+                  "${trustedForm.challenge || "No specific challenge provided."}"
                 </p>
               </div>
 
@@ -275,10 +284,10 @@ export async function POST(req: Request) {
         JSON.stringify({ 
           step: isCareer ? "F1_START" : "F1_END", 
           userData: { 
-            name: form.name, 
+            name: trustedForm.name,
             intent: reportType, 
             language: isHi ? "hi" : "en",
-            challenge: form.challenge // Sync challenge to Bot state
+            challenge: trustedForm.challenge // Sync challenge to Bot state
           } 
         }), 
         "EX", 86400

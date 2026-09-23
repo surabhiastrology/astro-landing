@@ -4,6 +4,10 @@ import { useEffect, useState, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import {
+  DEFAULT_CHECKOUT_PLAN,
+  getCheckoutPlan,
+} from "@/lib/checkout-plans";
 
 // ==========================================
 // 1. QUESTION DATABASE
@@ -67,8 +71,12 @@ function CheckoutContent() {
   const urlService = searchParams.get("service");
   const urlPlan = searchParams.get("plan");
   
-  const serviceName = urlService ? decodeURIComponent(urlService) : "Premium Personalized Kundali";
-  const planName = urlPlan ? decodeURIComponent(urlPlan) : "10-Year Report (₹999)";
+  // Query parameters select a product but never decide its price. Unknown or
+  // edited links safely fall back to the default catalogue product.
+  const checkoutPlan =
+    getCheckoutPlan(urlService, urlPlan) ?? DEFAULT_CHECKOUT_PLAN;
+  const serviceName = checkoutPlan.service;
+  const planName = checkoutPlan.plan;
 
   const hasStartedForm = useRef(false);
 
@@ -82,14 +90,9 @@ function CheckoutContent() {
     planNameLower.includes("question") || 
     planNameLower.includes("प्रश्न");
 
-  let basePrice = 999;
-  const priceMatch = planName.match(/₹([\d,]+)/);
-  if (priceMatch && priceMatch[1]) {
-    basePrice = parseInt(priceMatch[1].replace(/,/g, ""), 10);
-  }
-
-  const cleanPlanName = planName.replace(/\s*\(₹[\d,]+\)/, "");
-  const fullReportType = `${serviceName} - ${cleanPlanName}`;
+  const basePrice = checkoutPlan.amount;
+  const cleanPlanName = planName;
+  const fullReportType = checkoutPlan.reportType;
 
   useEffect(() => {
     if (window.fbq) {
@@ -206,13 +209,16 @@ function CheckoutContent() {
     try {
       const res = await fetch("/api/create-order", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          amount: finalAmount, 
           form: form 
         }),
       });
   
       const order = await res.json();
+      if (!res.ok || !order?.id) {
+        throw new Error(order?.error || "Unable to create the payment order.");
+      }
 
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
@@ -232,7 +238,7 @@ function CheckoutContent() {
 
           await fetch("/api/payment-success", {
             method: "POST",
-            body: JSON.stringify({ ...response, form, finalAmount }),
+            body: JSON.stringify({ ...response, form }),
           });
           window.location.href = "/success";
         },

@@ -202,7 +202,7 @@ export async function POST(req: Request) {
 
       // 2. TRIGGER NOTIFICATIONS
       const finalOrder = await Order.findOne({ orderId: razorpayOrderId }).lean();
-      await triggerNotifications(finalOrder, paymentId);
+      await triggerNotifications(finalOrder);
     }
 
     return NextResponse.json({ status: "ok" }, { status: 200 });
@@ -216,7 +216,7 @@ export async function POST(req: Request) {
 // ==========================================
 // 5. NOTIFICATIONS
 // ==========================================
-async function triggerNotifications(order: any, paymentId: string) {
+async function triggerNotifications(order: any) {
   const adminEmails = ["developer.thinqit@gmail.com", "surabhiastrology9@gmail.com"]; 
   const senderEmail = process.env.EMAIL_FROM || "Surabhi Astrology <info@surabhiastrology.com>";
   
