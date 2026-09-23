@@ -995,7 +995,7 @@ const time = useCountdown();
       <div className="max-w-[1400px] mx-auto px-4 sm:px-5">
         <div className="text-center mb-12 reveal">
           <div className="inline-block bg-white/5 text-[#E2C06A] text-[10px] sm:text-xs font-medium tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-6 border border-[#E2C06A]/30">
-            The Transformation
+            The Transformation tushar
           </div>
           <h2 className="fraunces text-4xl lg:text-5xl font-medium text-white mb-6">
             Life Before vs After Your <span className="italic text-[#E2C06A]">Kundali Report</span>
