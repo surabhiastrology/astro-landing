@@ -65,7 +65,7 @@ export async function sendWhatsAppMessage(
     try {
       const imgRes = await fetch(url, {
         ...fetchOptions,
-        body: JSON.stringify({ messaging_product: "whatsapp", to, type: "image", image: { link: options.image } }),
+        body: JSON.stringify({ messaging_product: "whatsapp", to, type: "image", image: { link: options!.image! } }),
       });
       if (!imgRes.ok) console.error("Img Error:", await imgRes.json());
     } catch (e) { console.error("Img Fetch Error:", e); }
