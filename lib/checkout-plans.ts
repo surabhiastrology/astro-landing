@@ -212,6 +212,22 @@ const WHATSAPP_PLAN_ID_ALIASES: Record<string, Record<string, string>> = {
   surbhi_kundli: { p1: "kundli_999", p2: "kundli_2999", p3: "kundli_11000" },
 };
 
+// Existing Redis conversations stored the visible service title. New
+// conversations store WhatsApp's stable row ID. Support both while resolving
+// the same server-owned checkout plan.
+const WHATSAPP_INTENT_ALIASES: Record<string, string> = {
+  "career & business": "career",
+  "marriage & relationships": "love",
+  "money & finances": "money",
+  "health issues": "health",
+  "family concerns": "family",
+  "surbhi kundali": "surbhi_kundli",
+  "surbhi consultation": "surbhi_consultation",
+  "numerology report": "numerology_report",
+  "couple match making": "couple_match_making",
+  "baby name report": "baby_name_report",
+};
+
 function normalisePlanName(plan: string) {
   return plan.replace(/\s*\(₹[\d,]+\)\s*$/, "").trim();
 }
@@ -245,11 +261,14 @@ export function getCheckoutPlanByWhatsAppSelection(
     return undefined;
   }
 
-  const resolvedPlanId = WHATSAPP_PLAN_ID_ALIASES[intent]?.[planId] ?? planId;
+  const normalisedIntent = intent.trim().replace(/\s+/g, " ").toLowerCase();
+  const resolvedIntent = WHATSAPP_INTENT_ALIASES[normalisedIntent] ?? normalisedIntent;
+  const normalisedPlanId = planId.trim().toLowerCase();
+  const resolvedPlanId = WHATSAPP_PLAN_ID_ALIASES[resolvedIntent]?.[normalisedPlanId] ?? normalisedPlanId;
 
   return CHECKOUT_PLANS.find(
     (checkoutPlan) =>
-      checkoutPlan.whatsappSelection?.intent === intent &&
+      checkoutPlan.whatsappSelection?.intent === resolvedIntent &&
       checkoutPlan.whatsappSelection?.planId === resolvedPlanId
   );
 }
