@@ -1,4 +1,5 @@
 // lib/waFlow.ts
+import { getCheckoutPlanByWhatsAppSelection } from "@/lib/checkout-plans";
 
 export type BotStep =
   | "START" | "F2_INTENT" | "F2_HOOK" | "F2_CHECKOUT"
@@ -151,8 +152,8 @@ export function nextMessage(
   const userName = data.name && data.name !== "Seeker" ? data.name : "";
 
   const serviceNames = [
-    "surbhi consultation", "surbhi  kundali ", "numerology report", 
-    "couple match making", "baby name report", "career", "love", "health", "money", "family",
+    "surbhi consultation", "surbhi_consultation", "surbhi  kundali ", "surbhi_kundli", "numerology report", "numerology_report",
+    "couple match making", "couple_match_making", "baby name report", "baby_name_report", "career", "love", "health", "money", "family",
     "सुरभि गुप्ता परामर्श", "सुरभि कुंडली", "अंकशास्त्र रिपोर्ट", "कुंडली मिलान", "बच्चों के नाम की रिपोर्ट"
   ];
   const isSelectingNewService = serviceNames.some(s => lowerMsg.includes(s.toLowerCase()));
@@ -276,13 +277,23 @@ export function nextMessage(
       };
 
     case "F2_CHECKOUT":
-      data.plan = msg;
-      const encodedService = encodeURIComponent(data.intent || "Service");
-      const encodedPlan = encodeURIComponent(data.plan || "Plan");
+      const checkoutPlan = getCheckoutPlanByWhatsAppSelection(data.intent, msg);
+
+      if (!checkoutPlan) {
+        return {
+          reply: "I couldn't identify that plan. Please choose an option from the service list again.",
+          buttons: ["Main Menu"],
+          newState: { step: "F2_HOOK", userData: data },
+        };
+      }
+
+      data.plan = checkoutPlan.plan;
+      const encodedService = encodeURIComponent(checkoutPlan.service);
+      const encodedPlan = encodeURIComponent(checkoutPlan.plan);
       const checkoutUrl = `${paymentLink}?service=${encodedService}&plan=${encodedPlan}`;
 
       const selectedService = (data.intent || "").toLowerCase();
-      const isSurbhiKundli = selectedService.includes("surbhi  kundali ") || selectedService.includes("सुरभि कुंडली");
+      const isSurbhiKundli = selectedService === "surbhi_kundli" || selectedService.includes("सुरभि कुंडली");
       const checkoutImage = isSurbhiKundli ? `${baseUrl}/surbhi-15.png` : `${baseUrl}/surbhi-16.png`;
       
       let checkoutMsg = isHi

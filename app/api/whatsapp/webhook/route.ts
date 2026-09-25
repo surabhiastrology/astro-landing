@@ -57,8 +57,9 @@ export async function sendWhatsAppMessage(
     keepalive: true, 
   };
 
-  const supportsHeader = !!options?.urlButton || (options?.buttons && options.buttons.length > 0);
-  const needsPreSend = options?.image && options.list && !supportsHeader;
+  // A URL CTA cannot carry the image header used by reply buttons. Send its
+  // image separately, then send the payment CTA as a valid standalone message.
+  const needsPreSend = Boolean(options?.image && (options?.list || options?.urlButton));
 
   if (needsPreSend) {
     try {
@@ -76,7 +77,6 @@ export async function sendWhatsAppMessage(
     payload.type = "interactive";
     payload.interactive = {
       type: "cta_url",
-      header: options.image ? { type: "image", image: { link: options.image } } : undefined,
       body: { text: text },
       action: {
         name: "cta_url",
@@ -219,13 +219,20 @@ export async function POST(req: NextRequest) {
     redis.set(`msg_processed:${messageId}`, "1", "EX", 3600);
 
     let incomingText = "";
+    let flowInput = "";
     let msgType = "text";
 
     if (message.type === "interactive") {
-      incomingText = message.interactive?.list_reply?.title || message.interactive?.button_reply?.title || "";
-      msgType = message.interactive?.list_reply ? "list_selection" : "button_click";
+      const listReply = message.interactive?.list_reply;
+      const buttonReply = message.interactive?.button_reply;
+      incomingText = listReply?.title || buttonReply?.title || "";
+      // List IDs are stable identifiers; titles are truncated for WhatsApp's
+      // display limit and must not be used to choose the payable plan.
+      flowInput = listReply?.id || incomingText;
+      msgType = listReply ? "list_selection" : "button_click";
     } else {
       incomingText = message.text?.body || "";
+      flowInput = incomingText;
     }
 
     const rawPrevState = await redis.get(`user_state:${from}`);
@@ -235,6 +242,7 @@ export async function POST(req: NextRequest) {
 
     if (lowerInput.includes("main menu")) {
       incomingText = "restart";
+      flowInput = "restart";
       lowerInput = "restart";
     }
     
@@ -259,7 +267,7 @@ export async function POST(req: NextRequest) {
     let isAiResponse = false; 
 
     if (isInteractive || isStandardCommand || isExpectingFreeQuestion || isShortIntentKeyword) {
-      const result = nextMessage(incomingText, prev);
+      const result = nextMessage(flowInput, prev);
       finalReply = result.reply;
       finalButtons = result.buttons;
       finalList = result.list;
