@@ -157,9 +157,21 @@ export function nextMessage(
     "सुरभि गुप्ता परामर्श", "सुरभि कुंडली", "अंकशास्त्र रिपोर्ट", "कुंडली मिलान", "बच्चों के नाम की रिपोर्ट"
   ];
   const isSelectingNewService = serviceNames.some(s => lowerMsg.includes(s.toLowerCase()));
+  const isPlanRowId = /^p[1-4]$/.test(lowerMsg);
 
   if (isSelectingNewService && (currentState.step === "F2_CHECKOUT" || currentState.step === "F2_HOOK")) {
     currentState.step = "F2_HOOK";
+  }
+
+  // A row ID without its service context means the user tapped an old WhatsApp
+  // menu after the conversation state changed. Do not treat p1/p2 as a new
+  // service; reset the flow instead of creating a loop.
+  if (currentState.step === "F2_HOOK" && isPlanRowId) {
+    return {
+      reply: "That previous menu has expired. Please tap Main Menu to choose your service again.",
+      buttons: ["Main Menu"],
+      newState: { step: "START", userData: { name: data.name } },
+    };
   }
 
   if (lowerMsg === "restart" || lowerMsg === "hi" || lowerMsg === "hello" || lowerMsg === "hi surbhi") {
@@ -281,9 +293,9 @@ export function nextMessage(
 
       if (!checkoutPlan) {
         return {
-          reply: "I couldn't identify that plan. Please choose an option from the service list again.",
+          reply: "That previous menu has expired. Please tap Main Menu to choose your service again.",
           buttons: ["Main Menu"],
-          newState: { step: "F2_HOOK", userData: data },
+          newState: { step: "START", userData: { name: data.name } },
         };
       }
 
