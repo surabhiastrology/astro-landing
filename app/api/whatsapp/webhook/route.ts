@@ -267,7 +267,9 @@ export async function POST(req: NextRequest) {
     let isAiResponse = false; 
 
     if (isInteractive || isStandardCommand || isExpectingFreeQuestion || isShortIntentKeyword) {
-      const result = nextMessage(flowInput, prev);
+      // Build the CTA from the actual webhook origin. This prevents a stale
+      // NEXT_PUBLIC_BASE_URL value (such as localhost) from reaching users.
+      const result = nextMessage(flowInput, prev, req.nextUrl.origin);
       finalReply = result.reply;
       finalButtons = result.buttons;
       finalList = result.list;

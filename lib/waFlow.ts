@@ -136,14 +136,15 @@ function getServicePlans(intent: string = "", isHi: boolean) {
 
 export function nextMessage(
   input: string,
-  state: FlowState
+  state: FlowState,
+  publicBaseUrl?: string
 ): { reply: string; buttons?: string[]; list?: any; image?: string; urlButton?: { text: string; url: string }; newState: FlowState } {
   const msg = input.trim();
   const lowerMsg = msg.toLowerCase();
   const currentState = state?.step ? state : { step: "START" as BotStep, userData: {} };
   const data = { ...currentState.userData };
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const baseUrl = publicBaseUrl || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
   const paymentLink = `${baseUrl}/checkout`;
   const imgWelcome = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTuTgSGYd_yMRX4jHMgI_Pvfb2bqtVoqZM3eQ&s"; 
   const imgServices = "https://pbs.twimg.com/profile_images/2027040849813721088/X4RajwNP.jpg"; 
