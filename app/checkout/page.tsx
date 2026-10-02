@@ -102,21 +102,33 @@ const Label = ({
 
 const PICKER_FIELD_SX = {
   width: "100%",
-  "& .MuiOutlinedInput-root": {
-    minHeight: 54,
+  "& && .MuiOutlinedInput-root": {
+    minHeight: 52,
     borderRadius: "0.75rem",
     backgroundColor: "#FCF7EE",
     color: "#2A1400",
+    transition: "box-shadow 150ms ease, background-color 150ms ease",
   },
-  "& .MuiOutlinedInput-notchedOutline": { borderColor: "#E8D8B8" },
-  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+  "& && .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#E8D8B8",
+    borderWidth: 1,
+  },
+  "& && .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
     borderColor: "#C8A84B",
   },
-  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#8B1E1E",
-    borderWidth: 2,
+  "& && .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#C8A84B",
+    borderWidth: 1,
   },
-  "& .MuiInputBase-input": { fontSize: "16px", padding: "14px 12px" },
+  "& && .MuiOutlinedInput-root.Mui-focused": {
+    boxShadow: "0 0 0 2px rgba(200, 168, 75, 0.5)",
+  },
+  "& && .MuiInputBase-input": {
+    backgroundColor: "transparent",
+    color: "#2A1400",
+    fontSize: "16px",
+    padding: "13px 14px",
+  },
   "& .MuiInputAdornment-root .MuiIconButton-root": {
     minWidth: 44,
     minHeight: 44,
