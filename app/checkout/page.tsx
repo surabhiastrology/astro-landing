@@ -102,36 +102,38 @@ const Label = ({
 
 const PICKER_FIELD_SX = {
   width: "100%",
-  "& && .MuiPickersInputBase-root": {
+  "& .MuiPickersInputBase-root": {
     boxSizing: "border-box",
+    height: 52,
     minHeight: 52,
     borderRadius: "0.75rem",
     backgroundColor: "#FCF7EE",
     color: "#2A1400",
     transition: "box-shadow 150ms ease, background-color 150ms ease",
   },
-  "& && .MuiPickersInputBase-root .MuiPickersOutlinedInput-notchedOutline": {
+  "& .MuiPickersInputBase-root .MuiPickersOutlinedInput-notchedOutline": {
     borderColor: "#E8D8B8",
     borderWidth: 1,
   },
-  "& && .MuiPickersInputBase-root:hover .MuiPickersOutlinedInput-notchedOutline": {
+  "& .MuiPickersInputBase-root:hover .MuiPickersOutlinedInput-notchedOutline": {
     borderColor: "#C8A84B",
   },
-  "& && .MuiPickersInputBase-root.Mui-focused .MuiPickersOutlinedInput-notchedOutline": {
+  "& .MuiPickersInputBase-root.Mui-focused .MuiPickersOutlinedInput-notchedOutline": {
     borderColor: "#C8A84B",
     borderWidth: 1,
   },
-  "& && .MuiPickersInputBase-root.Mui-focused": {
+  "& .MuiPickersInputBase-root.Mui-focused": {
     boxShadow: "0 0 0 2px rgba(200, 168, 75, 0.5)",
   },
-  "& && .MuiPickersSectionList-root": {
+  "& .MuiPickersSectionList-root": {
     color: "#2A1400",
     fontFamily: "inherit",
     fontSize: "16px",
     lineHeight: "24px",
     padding: "13px 0",
+    opacity: 1,
   },
-  "& && .MuiPickersSectionList-sectionContent[aria-valuetext='Empty']": {
+  "& .MuiPickersSectionList-sectionContent[aria-valuetext='Empty']": {
     color: "#6B7280",
   },
   "& .MuiInputAdornment-root .MuiIconButton-root": {
