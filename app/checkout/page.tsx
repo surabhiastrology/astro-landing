@@ -1,9 +1,39 @@
 "use client";
 
 import { useEffect, useState, Suspense, useRef } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import dayjs, { type Dayjs } from "dayjs";
+import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
+import { MobileTimePicker } from "@mui/x-date-pickers/MobileTimePicker";
+
+type RazorpayPaymentResponse = {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+};
+
+type RazorpayOptions = {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  handler: (response: RazorpayPaymentResponse) => Promise<void>;
+  prefill: { name: string; email: string; contact: string };
+  theme: { color: string };
+  modal: { ondismiss: () => void };
+};
+
+type RazorpayInstance = {
+  open: () => void;
+  on: (event: "payment.failed", handler: (response: unknown) => void) => void;
+};
+
+type RazorpayConstructor = new (options: RazorpayOptions) => RazorpayInstance;
 
 // ==========================================
 // 1. QUESTION DATABASE
@@ -56,11 +86,188 @@ const QUESTION_DATA = {
   }
 };
 
-const Label = ({ children }: { children: React.ReactNode }) => (
-  <label className="block text-xs font-bold text-[#4A2E10] mb-1.5 uppercase tracking-wider">
-    {children} <span className="text-[#8B1E1E]">*</span>
+const Label = ({
+  children,
+  htmlFor,
+  required = true,
+}: {
+  children: React.ReactNode;
+  htmlFor?: string;
+  required?: boolean;
+}) => (
+  <label htmlFor={htmlFor} className="block text-sm font-semibold text-[#4A2E10] mb-2 leading-5">
+    {children}{required && <> <span className="text-[#8B1E1E]" aria-hidden="true">*</span></>}
   </label>
 );
+
+const PICKER_FIELD_SX = {
+  width: "100%",
+  "& .MuiOutlinedInput-root": {
+    minHeight: 54,
+    borderRadius: "0.75rem",
+    backgroundColor: "#FCF7EE",
+    color: "#2A1400",
+  },
+  "& .MuiOutlinedInput-notchedOutline": { borderColor: "#E8D8B8" },
+  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#C8A84B",
+  },
+  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#8B1E1E",
+    borderWidth: 2,
+  },
+  "& .MuiInputBase-input": { fontSize: "16px", padding: "14px 12px" },
+  "& .MuiInputAdornment-root .MuiIconButton-root": {
+    minWidth: 44,
+    minHeight: 44,
+    color: "#8B1E1E",
+  },
+};
+
+function parseDatePickerValue(value: string): Dayjs | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return null;
+
+  const [, yearText, monthText, dayText] = match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const localDate = new Date(year, month - 1, day, 12);
+
+  if (
+    localDate.getFullYear() !== year ||
+    localDate.getMonth() !== month - 1 ||
+    localDate.getDate() !== day
+  ) {
+    return null;
+  }
+
+  return dayjs(localDate);
+}
+
+function parseTimePickerValue(value: string): Dayjs | null {
+  const match = /^(\d{2}):(\d{2})$/.exec(value);
+  if (!match) return null;
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (hours > 23 || minutes > 59) return null;
+
+  return dayjs(new Date(2000, 0, 1, hours, minutes));
+}
+
+function FieldError({ field, message }: { field: string; message?: string }) {
+  if (!message) return null;
+
+  return (
+    <p id={`${field}-error`} aria-live="polite" className="mt-1.5 text-sm font-medium text-[#A32424]">
+      {message}
+    </p>
+  );
+}
+
+type PickerFieldProps = {
+  field: string;
+  label: string;
+  value: string;
+  error?: string;
+  onValueChange: (value: string) => void;
+  onValidationError: (message: string | null) => void;
+  onFocus: () => void;
+};
+
+function BirthDatePickerField({
+  field,
+  label,
+  value,
+  error,
+  onValueChange,
+  onValidationError,
+  onFocus,
+}: PickerFieldProps) {
+  return (
+    <div>
+      <Label htmlFor={field}>{label}</Label>
+      <MobileDatePicker
+        name={field}
+        value={parseDatePickerValue(value)}
+        onChange={(newValue, context) => {
+          onFocus();
+          if (!newValue) onValueChange("");
+          else if (newValue.isValid() && !context.validationError) onValueChange(newValue.format("YYYY-MM-DD"));
+        }}
+        onError={(reason) => {
+          onValidationError(
+            reason
+              ? reason === "invalidDate"
+                ? "Choose a valid date of birth."
+                : "Choose a date between 1 Jan 1900 and today."
+              : null,
+          );
+        }}
+        format="DD/MM/YYYY"
+        views={["year", "month", "day"]}
+        openTo="year"
+        yearsOrder="desc"
+        minDate={dayjs(new Date(1900, 0, 1))}
+        maxDate={dayjs()}
+        slotProps={{
+          textField: {
+            id: field,
+            fullWidth: true,
+            required: true,
+            error: Boolean(error),
+            onFocus,
+            sx: PICKER_FIELD_SX,
+            slotProps: { htmlInput: { "aria-describedby": error ? `${field}-error` : undefined } },
+          },
+        }}
+      />
+      <FieldError field={field} message={error} />
+    </div>
+  );
+}
+
+function BirthTimePickerField({
+  field,
+  label,
+  value,
+  error,
+  onValueChange,
+  onValidationError,
+  onFocus,
+}: PickerFieldProps) {
+  return (
+    <div>
+      <Label htmlFor={field}>{label}</Label>
+      <MobileTimePicker
+        name={field}
+        value={parseTimePickerValue(value)}
+        onChange={(newValue, context) => {
+          onFocus();
+          if (!newValue) onValueChange("");
+          else if (newValue.isValid() && !context.validationError) onValueChange(newValue.format("HH:mm"));
+        }}
+        onError={(reason) => onValidationError(reason ? "Choose a valid time of birth." : null)}
+        ampm
+        format="hh:mm A"
+        views={["hours", "minutes"]}
+        slotProps={{
+          textField: {
+            id: field,
+            fullWidth: true,
+            required: true,
+            error: Boolean(error),
+            onFocus,
+            sx: PICKER_FIELD_SX,
+            slotProps: { htmlInput: { "aria-describedby": error ? `${field}-error` : undefined } },
+          },
+        }}
+      />
+      <FieldError field={field} message={error} />
+    </div>
+  );
+}
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
@@ -122,6 +329,8 @@ function CheckoutContent() {
 
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [paymentError, setPaymentError] = useState("");
   const finalAmount = basePrice; 
 
   useEffect(() => {
@@ -143,54 +352,83 @@ function CheckoutContent() {
     }
   };
 
-  const handleChange = (e: any) => {
-    trackFormStart();
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const clearFieldError = (field: string) => {
+    setFieldErrors((current) => {
+      if (!current[field]) return current;
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
   };
 
-  const handlePayment = async () => {
+  const handlePickerValueChange = (field: string, value: string) => {
+    setForm((current) => ({ ...current, [field]: value }));
+    clearFieldError(field);
+  };
+
+  const handlePickerValidationError = (field: string, message: string | null) => {
+    if (message) setFieldErrors((current) => ({ ...current, [field]: message }));
+    else clearFieldError(field);
+  };
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    trackFormStart();
+    setForm((current) => ({ ...current, [e.target.name]: e.target.value }));
+    clearFieldError(e.target.name);
+  };
+
+  const handlePayment = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const pickerFields = ["dob", "tob", "partnerDob", "partnerTob"];
+    const nextErrors: Record<string, string> = Object.fromEntries(
+      pickerFields.flatMap((field) => fieldErrors[field] ? [[field, fieldErrors[field]]] : []),
+    );
+    if (!form.phone.trim()) nextErrors.phone = "Enter your WhatsApp number.";
+    if (!form.email.trim()) {
+      nextErrors.email = "Enter your email address.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      nextErrors.email = "Enter a valid email address.";
+    }
+    if (!form.name.trim()) nextErrors.name = "Enter your full name.";
+    if (!form.dob.trim()) nextErrors.dob = "Choose your date of birth.";
+    else if (!parseDatePickerValue(form.dob)) nextErrors.dob = "Choose a valid date of birth.";
+    if (!form.tob.trim()) nextErrors.tob = "Choose your time of birth.";
+    else if (!parseTimePickerValue(form.tob)) nextErrors.tob = "Choose a valid time of birth.";
+    if (!form.city.trim()) nextErrors.city = "Enter your place of birth.";
+    if (!form.pinCode.trim()) nextErrors.pinCode = "Enter your PIN code.";
+    if (!form.gender.trim()) nextErrors.gender = "Choose an option.";
+
+    if (isMatchmaking) {
+      if (!form.partnerName.trim()) nextErrors.partnerName = "Enter your partner's name.";
+      if (!form.partnerDob.trim()) nextErrors.partnerDob = "Choose your partner's date of birth.";
+      else if (!parseDatePickerValue(form.partnerDob)) nextErrors.partnerDob = "Choose a valid date of birth.";
+      if (!form.partnerTob.trim()) nextErrors.partnerTob = "Choose your partner's time of birth.";
+      else if (!parseTimePickerValue(form.partnerTob)) nextErrors.partnerTob = "Choose a valid time of birth.";
+      if (!form.partnerCity.trim()) nextErrors.partnerCity = "Enter your partner's place of birth.";
+      if (!form.partnerGender.trim()) nextErrors.partnerGender = "Choose an option.";
+    }
+
+    if (!form.challenge.trim()) nextErrors.challenge = "Choose or enter your question to continue.";
+    if (!agreedToTerms) nextErrors.terms = "Confirm the details and agree to the terms to continue.";
+
+    setFieldErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) {
+      const firstInvalidField = document.getElementById(Object.keys(nextErrors)[0]);
+      if (firstInvalidField) {
+        firstInvalidField.scrollIntoView({ behavior: "smooth", block: "center" });
+        firstInvalidField.focus({ preventScroll: true });
+      }
+      return;
+    }
+
+    setPaymentError("");
     if (window.fbq) {
       window.fbq('trackCustom', 'ClickPaySecurely', {
         content_name: form.reportType,
         value: finalAmount,
         currency: 'INR'
       });
-    }
-
-    if (!agreedToTerms) {
-      alert("Please agree to the Terms and Conditions to proceed.");
-      return;
-    }
-
-    // 1. STRICT CHECK: Every single common field must be filled
-    const isCommonValid = 
-      form.name.trim() !== "" && 
-      form.email.trim() !== "" && 
-      form.phone.trim() !== "" && 
-      form.dob.trim() !== "" && 
-      form.tob.trim() !== "" && 
-      form.city.trim() !== "" && 
-      form.pinCode.trim() !== "" && 
-      form.gender.trim() !== "";
-
-    // 2. STRICT CHECK: If Matchmaking, every partner field must be filled
-    let isPartnerValid = true;
-    if (isMatchmaking) {
-      isPartnerValid = 
-        form.partnerName.trim() !== "" &&
-        form.partnerDob.trim() !== "" &&
-        form.partnerTob.trim() !== "" &&
-        form.partnerCity.trim() !== "" &&
-        form.partnerGender.trim() !== "";
-    }
-
-    // 3. STRICT CHECK: Challenge/Question must be filled (unless Matchmaking where it's auto-filled)
-    const isChallengeValid = form.challenge.trim() !== "";
-
-    // 4. FINAL GATE: Stop them if ANYTHING is missing
-    if (!isCommonValid || !isPartnerValid || !isChallengeValid) {
-      alert("Please fill in ALL required fields (including Time of Birth, Place, Gender, and your Question) before proceeding to payment.");
-      return;
     }
 
     if (window.fbq) {
@@ -201,27 +439,40 @@ function CheckoutContent() {
       });
     }
 
+    const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+    const Razorpay = (window as unknown as { Razorpay?: RazorpayConstructor }).Razorpay;
+    if (!razorpayKey || !Razorpay) {
+      setPaymentError("Secure checkout is still loading. Please wait a moment and try again.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const res = await fetch("/api/create-order", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           amount: finalAmount, 
           form: form 
         }),
       });
-  
-      const order = await res.json();
 
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      if (!res.ok) throw new Error("Order creation request failed");
+      const order = await res.json() as { id?: unknown; amount?: unknown };
+      if (!order?.id || !order?.amount) throw new Error("Order response was incomplete");
+      if (typeof order.id !== "string" || typeof order.amount !== "number") {
+        throw new Error("Order response had an unexpected format");
+      }
+
+      const options: RazorpayOptions = {
+        key: razorpayKey,
         amount: order.amount,
         currency: "INR",
         name: "Astro Surbhi Gupta",
         description: form.reportType, 
         order_id: order.id,
-        handler: async function (response: any) {
+        handler: async function (response: RazorpayPaymentResponse) {
           if (window.fbq) {
             window.fbq('track', 'Purchase', {
               value: finalAmount,
@@ -238,26 +489,33 @@ function CheckoutContent() {
         },
         prefill: { name: form.name, email: form.email, contact: form.phone },
         theme: { color: "#8B1E1E" },
+        modal: {
+          ondismiss: () => setPaymentError("Payment was not completed. Your details are still here if you'd like to try again."),
+        },
       };
 
-      const rzp = new (window as any).Razorpay(options);
+      const rzp = new Razorpay(options);
+      rzp.on("payment.failed", () => {
+        setPaymentError("The payment could not be completed. Your details are still here—please try again or use another payment method.");
+      });
       rzp.open();
     } catch (error) {
       console.error("Payment initiation failed:", error);
+      setPaymentError("We couldn't open secure checkout. Your details are still here—please try again in a moment.");
     } finally {
       setLoading(false);
     }
   };
 
-  const inputClass = "w-full bg-[#FCF7EE] border border-[#E8D8B8] rounded-xl p-3.5 text-sm text-[#2A1400] focus:outline-none focus:ring-2 focus:ring-[#C8A84B]/50 transition-all placeholder-gray-400";
-  const matchmakingInputClass = "w-full bg-transparent border-b border-[#E8D8B8] p-2 text-sm text-[#2A1400] focus:outline-none focus:border-[#8B1E1E] transition-all placeholder-gray-400/50 mb-2";
+  const inputClass = "w-full min-h-[52px] bg-[#FCF7EE] border border-[#E8D8B8] rounded-xl px-3.5 py-3 text-base text-[#2A1400] focus:outline-none focus:ring-2 focus:ring-[#C8A84B]/50 transition-all placeholder:text-gray-500";
+  const matchmakingInputClass = "w-full min-h-[48px] bg-transparent border-b border-[#E8D8B8] px-2 py-2 text-base text-[#2A1400] focus:outline-none focus:border-[#8B1E1E] transition-all placeholder:text-gray-500 mb-2";
 
   return (
     <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_1.2fr] gap-8 lg:gap-12 items-start px-4">
       
       {/* ================= LEFT: PRODUCT SUMMARY ================= */}
-      <div className="bg-white rounded-3xl p-8 lg:p-10 shadow-[0_15px_40px_rgba(61,22,0,0.06)] border border-[#E8D8B8]/50 lg:sticky lg:top-8">
-        <div className="w-full aspect-[4/3] bg-[#FCF7EE] rounded-2xl flex items-center justify-center border border-[#E8D8B8] mb-8 overflow-hidden relative">
+      <div className="bg-white rounded-3xl p-5 sm:p-8 lg:p-10 shadow-[0_15px_40px_rgba(61,22,0,0.06)] border border-[#E8D8B8]/50 lg:sticky lg:top-8">
+        <div className="w-full aspect-[16/9] sm:aspect-[4/3] bg-[#FCF7EE] rounded-2xl flex items-center justify-center border border-[#E8D8B8] mb-5 sm:mb-8 overflow-hidden relative">
           <Image src="/surbhi-narendra.JPG" alt={serviceName} className="h-full object-cover object-left mix-blend-multiply drop-shadow-2xl" fill priority />
         </div>
         <div className="inline-block bg-[#8B1E1E]/10 text-[#8B1E1E] text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-md mb-3">Order Summary</div>
@@ -267,7 +525,7 @@ function CheckoutContent() {
         <ul className="text-sm text-[#6B4423] space-y-3 mt-6">
           <li className="flex items-start gap-3 font-medium">✓ Authentic Vedic Analysis</li>
           <li className="flex items-start gap-3 font-medium">✓ 100% Confidential</li>
-          <li className="flex items-start gap-3 font-medium">✓ Personal Guidance by Surbhi's Team</li>
+          <li className="flex items-start gap-3 font-medium">✓ Personal Guidance by Surbhi&apos;s Team</li>
         </ul>
         <div className="mt-8 bg-[#FFFBF0] border border-[#C8A84B]/30 rounded-xl p-4 flex items-center gap-3">
           <span className="text-2xl">🔒</span>
@@ -278,21 +536,30 @@ function CheckoutContent() {
       </div>
 
       {/* ================= RIGHT: CHECKOUT FORM ================= */}
-      <div className="bg-white rounded-3xl p-8 lg:p-10 shadow-[0_15px_40px_rgba(61,22,0,0.06)] border border-[#E8D8B8]/50">
+      <div className="bg-white rounded-3xl p-5 sm:p-8 lg:p-10 shadow-[0_15px_40px_rgba(61,22,0,0.06)] border border-[#E8D8B8]/50">
         <h3 className="text-xl font-bold text-[#2A1400] mb-6 font-serif border-b border-[#E8D8B8] pb-4 text-center">
           {isMatchmaking ? "Matchmaking Calculator" : "Birth Details & Delivery Info"}
         </h3>
 
-        <div className="space-y-6">
+        <form className="space-y-6" onSubmit={handlePayment} noValidate>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div><Label>Main WhatsApp Number</Label><input name="phone" placeholder="+91 98765 43210" className={inputClass} onChange={handleChange} onFocus={trackFormStart} /></div>
-            <div><Label>Main Email Address</Label><input name="email" type="email" placeholder="john@example.com" className={inputClass} onChange={handleChange} onFocus={trackFormStart} /></div>
+            <div>
+              <Label htmlFor="phone">WhatsApp Number</Label>
+              <input id="phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" required aria-invalid={Boolean(fieldErrors.phone)} aria-describedby={fieldErrors.phone ? "phone-error" : undefined} placeholder="+91 98765 43210" className={inputClass} onChange={handleChange} onFocus={trackFormStart} />
+              <FieldError field="phone" message={fieldErrors.phone} />
+            </div>
+            <div>
+              <Label htmlFor="email">Email Address</Label>
+              <input id="email" name="email" type="email" inputMode="email" autoComplete="email" required aria-invalid={Boolean(fieldErrors.email)} aria-describedby={fieldErrors.email ? "email-error" : undefined} placeholder="you@example.com" className={inputClass} onChange={handleChange} onFocus={trackFormStart} />
+              <FieldError field="email" message={fieldErrors.email} />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <Label>Selected Package</Label>
+              <Label htmlFor="reportType" required={false}>Selected Package</Label>
               <input 
+                id="reportType"
                 name="reportType" 
                 value={form.reportType} 
                 title={form.reportType}
@@ -301,8 +568,8 @@ function CheckoutContent() {
               />
             </div>
             <div>
-              <Label>Report Language</Label>
-              <select required name="language" className={inputClass} value={form.language} onChange={handleChange}>
+              <Label htmlFor="language">Report Language</Label>
+              <select id="language" required name="language" className={inputClass} value={form.language} onChange={handleChange}>
                 <option value="hindi">Hindi (हिंदी)</option>
                 <option value="english">English</option>
               </select>
@@ -314,35 +581,51 @@ function CheckoutContent() {
               {isMatchmaking ? "Person 1 Details (You)" : "Birth Details"}
             </h4>
             <div className={isMatchmaking ? "grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4" : "space-y-4"}>
-              <div><Label>Full Name</Label><input name="name" placeholder="Enter name" className={isMatchmaking ? matchmakingInputClass : inputClass} onChange={handleChange} /></div>
+              <div>
+                <Label htmlFor="name">Full Name</Label>
+                <input id="name" name="name" autoComplete="name" required aria-invalid={Boolean(fieldErrors.name)} aria-describedby={fieldErrors.name ? "name-error" : undefined} placeholder="Enter your full name" className={isMatchmaking ? matchmakingInputClass : inputClass} onChange={handleChange} onFocus={trackFormStart} />
+                <FieldError field="name" message={fieldErrors.name} />
+              </div>
               
-              <div className={isMatchmaking ? "block" : "grid grid-cols-1 sm:grid-cols-2 gap-5"}>
-                  <div className="mb-4">
-                    <Label>Date of Birth</Label>
-                    <input required name="dob" type="date" className={isMatchmaking ? matchmakingInputClass : inputClass} onChange={handleChange} />
-                  </div>
-                  
-                  <div>
-                    <Label>Time of Birth</Label>
-                    <input required name="tob" type="time" className={isMatchmaking ? matchmakingInputClass : inputClass} onChange={handleChange} />
-                  </div>
+              <div className={isMatchmaking ? "block" : "grid grid-cols-1 min-[440px]:grid-cols-2 gap-4 sm:gap-5"}>
+                <BirthDatePickerField
+                  field="dob"
+                  label="Date of Birth"
+                  value={form.dob}
+                  error={fieldErrors.dob}
+                  onValueChange={(value) => handlePickerValueChange("dob", value)}
+                  onValidationError={(message) => handlePickerValidationError("dob", message)}
+                  onFocus={trackFormStart}
+                />
+                <BirthTimePickerField
+                  field="tob"
+                  label="Time of Birth"
+                  value={form.tob}
+                  error={fieldErrors.tob}
+                  onValueChange={(value) => handlePickerValueChange("tob", value)}
+                  onValidationError={(message) => handlePickerValidationError("tob", message)}
+                  onFocus={trackFormStart}
+                />
               </div>
               <div className={isMatchmaking ? "block" : "grid grid-cols-1 sm:grid-cols-2 gap-5"}>
                 <div className="mb-4">
-                   <Label>Place of Birth</Label>
-                   <input required name="city" placeholder="Enter place of birth" className={isMatchmaking ? matchmakingInputClass : inputClass} onChange={handleChange} />
+                   <Label htmlFor="city">Place of Birth</Label>
+                   <input id="city" required name="city" aria-invalid={Boolean(fieldErrors.city)} aria-describedby={fieldErrors.city ? "city-error" : undefined} placeholder="Search or enter place of birth" className={isMatchmaking ? matchmakingInputClass : inputClass} onChange={handleChange} onFocus={trackFormStart} />
+                   <FieldError field="city" message={fieldErrors.city} />
                 </div>
                 <div>
-              <Label>Pin Code</Label>
-              <input required name="pinCode" placeholder="e.g. 110001" className={inputClass} onChange={handleChange} />
+              <Label htmlFor="pinCode">PIN Code</Label>
+              <input id="pinCode" required name="pinCode" inputMode="numeric" autoComplete="postal-code" aria-invalid={Boolean(fieldErrors.pinCode)} aria-describedby={fieldErrors.pinCode ? "pinCode-error" : undefined} placeholder="e.g. 110001" className={inputClass} onChange={handleChange} onFocus={trackFormStart} />
+              <FieldError field="pinCode" message={fieldErrors.pinCode} />
             </div>
                 <div>
-                   <Label>Gender</Label>
-                   <select required name="gender" className={isMatchmaking ? matchmakingInputClass : inputClass} onChange={handleChange}>
+                   <Label htmlFor="gender">Gender</Label>
+                   <select id="gender" required name="gender" aria-invalid={Boolean(fieldErrors.gender)} aria-describedby={fieldErrors.gender ? "gender-error" : undefined} className={isMatchmaking ? matchmakingInputClass : inputClass} onChange={handleChange} onFocus={trackFormStart}>
                       <option value="">Select</option>
                       <option value="male">Male</option>
                       <option value="female">Female</option>
                    </select>
+                   <FieldError field="gender" message={fieldErrors.gender} />
                 </div>
               </div>
             </div>
@@ -354,17 +637,42 @@ function CheckoutContent() {
                 Person 2 Details (Partner)
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
-                <div><Label>Partner's Name</Label><input name="partnerName" placeholder="Enter partner's name" className={matchmakingInputClass} onChange={handleChange} /></div>
-                <div><Label>Partner's Date of Birth</Label><input name="partnerDob" type="date" className={matchmakingInputClass} onChange={handleChange} /></div>
-                <div><Label>Partner's Time of Birth</Label><input name="partnerTob" type="time" className={matchmakingInputClass} onChange={handleChange} /></div>
-                <div><Label>Partner's Place of Birth</Label><input name="partnerCity" placeholder="Enter place of birth" className={matchmakingInputClass} onChange={handleChange} /></div>
                 <div>
-                   <Label>Partner's Gender</Label>
-                   <select name="partnerGender" className={matchmakingInputClass} onChange={handleChange}>
+                  <Label htmlFor="partnerName">Partner&apos;s Name</Label>
+                  <input id="partnerName" name="partnerName" autoComplete="off" required aria-invalid={Boolean(fieldErrors.partnerName)} aria-describedby={fieldErrors.partnerName ? "partnerName-error" : undefined} placeholder="Enter partner's name" className={matchmakingInputClass} onChange={handleChange} />
+                  <FieldError field="partnerName" message={fieldErrors.partnerName} />
+                </div>
+                <BirthDatePickerField
+                  field="partnerDob"
+                  label="Partner's Date of Birth"
+                  value={form.partnerDob}
+                  error={fieldErrors.partnerDob}
+                  onValueChange={(value) => handlePickerValueChange("partnerDob", value)}
+                  onValidationError={(message) => handlePickerValidationError("partnerDob", message)}
+                  onFocus={trackFormStart}
+                />
+                <BirthTimePickerField
+                  field="partnerTob"
+                  label="Partner's Time of Birth"
+                  value={form.partnerTob}
+                  error={fieldErrors.partnerTob}
+                  onValueChange={(value) => handlePickerValueChange("partnerTob", value)}
+                  onValidationError={(message) => handlePickerValidationError("partnerTob", message)}
+                  onFocus={trackFormStart}
+                />
+                <div>
+                  <Label htmlFor="partnerCity">Partner&apos;s Place of Birth</Label>
+                  <input id="partnerCity" name="partnerCity" required aria-invalid={Boolean(fieldErrors.partnerCity)} aria-describedby={fieldErrors.partnerCity ? "partnerCity-error" : undefined} placeholder="Enter place of birth" className={matchmakingInputClass} onChange={handleChange} />
+                  <FieldError field="partnerCity" message={fieldErrors.partnerCity} />
+                </div>
+                <div>
+                   <Label htmlFor="partnerGender">Partner&apos;s Gender</Label>
+                   <select id="partnerGender" name="partnerGender" required aria-invalid={Boolean(fieldErrors.partnerGender)} aria-describedby={fieldErrors.partnerGender ? "partnerGender-error" : undefined} className={matchmakingInputClass} onChange={handleChange}>
                       <option value="">Select</option>
                       <option value="male">Male</option>
                       <option value="female">Female</option>
                    </select>
+                   <FieldError field="partnerGender" message={fieldErrors.partnerGender} />
                 </div>
               </div>
             </div>
@@ -373,8 +681,8 @@ function CheckoutContent() {
           {/* FIXED: Dropdown now appears for ANY plan that includes a question */}
           {showQuestionDropdown && (
             <div className="pt-2">
-              <Label>Select Your 1 Primary Question</Label>
-              <select name="challenge" className={`${inputClass} border-2 border-[#C8A84B]/30`} onChange={handleChange} value={form.challenge}>
+              <Label htmlFor="challenge">Select Your 1 Primary Question</Label>
+              <select id="challenge" name="challenge" required aria-invalid={Boolean(fieldErrors.challenge)} aria-describedby={fieldErrors.challenge ? "challenge-error" : undefined} className={`${inputClass} border-2 border-[#C8A84B]/30`} onChange={handleChange} onFocus={trackFormStart} value={form.challenge}>
                 <option value="">-- Choose your question --</option>
                 {Object.entries(QUESTION_DATA).map(([key, group]) => (
                   <optgroup key={key} label={form.language === 'hindi' ? group.label.hindi : group.label.english}>
@@ -384,33 +692,44 @@ function CheckoutContent() {
                   </optgroup>
                 ))}
               </select>
+              <FieldError field="challenge" message={fieldErrors.challenge} />
             </div>
           )}
 
           {/* New Challenge TextArea: Shows only when dropdown is hidden and NOT matchmaking */}
           {!isMatchmaking && !showQuestionDropdown && (
             <div className="animate-in fade-in slide-in-from-top-2 duration-500 pt-2">
-                <Label>Current Challenge You Are Facing</Label>
+                <Label htmlFor="challenge">Current Challenge You Are Facing</Label>
                 <textarea 
+                  id="challenge"
                   name="challenge"
                   rows={4}
+                  required
+                  aria-invalid={Boolean(fieldErrors.challenge)}
+                  aria-describedby={fieldErrors.challenge ? "challenge-error" : undefined}
                   placeholder="Describe your current situation, problem, or the specific question you want surbhi ji to look into..."
                   className={`${inputClass} resize-none`}
                   onChange={handleChange}
                   onFocus={trackFormStart}
                 />
+                <FieldError field="challenge" message={fieldErrors.challenge} />
             </div>
           )}
 
-          <div className="flex items-start gap-3 mt-8 p-4 bg-[#FCF7EE] rounded-xl border border-[#E8D8B8]/50">
-            <input type="checkbox" id="terms" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} className="w-5 h-5 accent-[#8B1E1E]" />
+          <div className="mt-8 p-4 bg-[#FCF7EE] rounded-xl border border-[#E8D8B8]/50">
+            <div className="flex items-start gap-3">
+            <input type="checkbox" id="terms" required checked={agreedToTerms} aria-invalid={Boolean(fieldErrors.terms)} aria-describedby={fieldErrors.terms ? "terms-error" : undefined} onChange={(e) => { setAgreedToTerms(e.target.checked); if (e.target.checked) clearFieldError("terms"); }} onFocus={trackFormStart} className="mt-0.5 w-6 h-6 shrink-0 accent-[#8B1E1E]" />
             <label htmlFor="terms" className="text-sm text-[#6B4423]">I verify details are accurate. I agree to <Link href="/terms-and-conditions" className="text-[#8B1E1E] font-bold">Terms</Link>.</label>
+            </div>
+            <FieldError field="terms" message={fieldErrors.terms} />
           </div>
 
-          <button onClick={handlePayment} disabled={loading} className="w-full bg-gradient-to-r from-[#8B1E1E] to-[#5C1414] text-white py-5 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-all disabled:opacity-70">
+          {paymentError && <p role="alert" className="rounded-xl border border-[#A32424]/30 bg-[#FFF5F3] px-4 py-3 text-sm font-medium text-[#8B1E1E]">{paymentError}</p>}
+
+          <button type="submit" disabled={loading} aria-busy={loading} className="w-full min-h-[58px] bg-gradient-to-r from-[#8B1E1E] to-[#5C1414] text-white px-4 py-4 rounded-xl font-bold text-lg shadow-lg active:scale-[0.99] transition-all disabled:opacity-70 disabled:cursor-wait">
             {loading ? "Processing Securely..." : `Pay ₹${finalAmount} Securely`}
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );
