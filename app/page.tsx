@@ -1287,12 +1287,12 @@ Our Premium Surbhi Kundali Report helps you understand your planetary positions,
 
               {/* Action Area */}
               <div className="flex flex-col sm:flex-row items-center gap-6 pt-6 border-t border-[#E8D8B8]/50">
-                <a 
-                  href="https://kundalireport.surabhiastrology.com/checkout?service=Baby%20Name%20Report&plan=Baby%20Report%20(%E2%82%B91,100)" 
+                <Link
+                  href="/checkout?service=Baby%20Name%20Report&plan=Baby%20Report%20(%E2%82%B91,100)"
                   className="btn-auto-shine w-full sm:w-auto bg-gradient-to-r from-[#2A0E00] to-[#4A2E10] text-[#FDF7EC] px-8 py-4 rounded-xl font-medium text-center shadow-[0_10px_20px_rgba(42,14,0,0.2)] hover:shadow-[0_15px_30px_rgba(42,14,0,0.3)] hover:-translate-y-1 transition-all duration-300"
                 >
                   Get My Baby Report →
-                </a>
+                </Link>
                 <div className="flex flex-col items-center sm:items-start">
                   <span className="text-[#8B6B52] text-[10px] font-bold uppercase tracking-[0.15em] mb-1">Starting At</span>
                   <div className="flex items-baseline text-[#2A1400]">
@@ -1460,9 +1460,9 @@ Our Premium Surbhi Kundali Report helps you understand your planetary positions,
                 </div>
 
                 {/* CTA Button */}
-                <a href="https://kundalireport.surabhiastrology.com/checkout?service=Surbhi%20Kundali&plan=10-Yr%20Report%20%2B%201Question%20(%E2%82%B9999)" className="btn-auto-shine block w-full bg-gradient-to-r from-[#D9481E] to-[#A32A0C] text-white py-4 rounded-xl font-medium text-center text-lg shadow-[0_10px_20px_rgba(217,72,30,0.3)] hover:-translate-y-0.5 transition-transform duration-300">
+                <Link href="/checkout?service=Surbhi%20Kundali&plan=10-Yr%20Report%20%2B%201Question%20(%E2%82%B9999)" className="btn-auto-shine block w-full bg-gradient-to-r from-[#D9481E] to-[#A32A0C] text-white py-4 rounded-xl font-medium text-center text-lg shadow-[0_10px_20px_rgba(217,72,30,0.3)] hover:-translate-y-0.5 transition-transform duration-300">
                   BUY NOW →
-                </a>
+                </Link>
 
               </div>
             </div>
