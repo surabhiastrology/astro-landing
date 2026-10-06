@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       return privateResponse({ error: "Receipt details unavailable" }, 404);
     }
 
-    const form = JSON.parse(order.notes.formData) as { name?: string; reportType?: string };
+    const form = JSON.parse(order.notes.formData) as { name?: string; reportType?: string; language?: string };
     const checkoutPlan = getCheckoutPlanByReportType(form.reportType);
     if (
       !checkoutPlan ||
@@ -77,6 +77,7 @@ export async function POST(request: Request) {
         amount: checkoutPlan.amount,
         orderId: order.id,
         paymentId,
+        language: form.language || "english",
       },
     });
   } catch (error) {

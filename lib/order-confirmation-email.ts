@@ -26,7 +26,7 @@ export function buildOrderConfirmationEmail(order: ConfirmationEmailInput) {
   const orderId = escapeHtml(order.orderId);
   const paymentId = escapeHtml(order.paymentId);
   const amount = `₹${order.amount.toLocaleString("en-IN")}`;
-  const isHindi = order.language === "hindi";
+  const isHindi = order.language?.trim().toLowerCase() === "hindi";
 
   const subject = isHindi
     ? `भुगतान की पुष्टि: ${order.reportType}`
