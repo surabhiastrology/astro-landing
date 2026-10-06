@@ -79,7 +79,6 @@ export default function SuccessPage() {
     return () => window.clearTimeout(timer);
   }, [checkReceipt, retry]);
 
-  const isHindi = receipt?.language?.toLowerCase() === "hindi";
   const isPaid = state === "paid";
   const isChecking = state === "checking";
   const supportText = orderId
@@ -88,34 +87,7 @@ export default function SuccessPage() {
   const whatsappUrl = `https://wa.me/919251151330?text=${encodeURIComponent(supportText)}`;
   const emailUrl = `mailto:info@surabhiastrology.com?subject=${encodeURIComponent("Help confirming my payment")}&body=${encodeURIComponent(supportText)}`;
 
-  const copy = isHindi ? {
-    support: "सहायता",
-    checking: "भुगतान की पुष्टि की जा रही है",
-    paid: "आपका ऑर्डर पक्का हो गया है",
-    pending: "भुगतान की पुष्टि जारी है",
-    unavailable: "ऑर्डर की पुष्टि में मदद चाहिए?",
-    checkingBody: "हम Razorpay पर आपके भुगतान की सुरक्षित रूप से जाँच कर रहे हैं। इसमें कुछ सेकंड लग सकते हैं।",
-    paidBody: "आपका भुगतान दर्ज हो गया है। आपकी रिपोर्ट तैयार होने पर हम आपको अपडेट करेंगे।",
-    pendingBody: "Razorpay ने अभी अंतिम स्थिति की पुष्टि नहीं की है। कृपया दोबारा भुगतान न करें; सहायता के लिए नीचे दिया ऑर्डर नंबर भेजें।",
-    unavailableBody: "यदि आपने भुगतान पूरा किया है, तो ऑर्डर नंबर के साथ हमसे संपर्क करें। हम स्थिति जाँचने में मदद करेंगे।",
-    receipt: "भुगतान रसीद",
-    report: "रिपोर्ट",
-    amount: "भुगतान राशि",
-    orderReference: "ऑर्डर नंबर",
-    paymentReference: "भुगतान नंबर",
-    next: "अब आगे क्या होगा",
-    stepOne: "आपका भुगतान सुरक्षित रूप से दर्ज है। दोबारा भुगतान करने की ज़रूरत नहीं है।",
-    stepTwo: "हमारी टीम आपकी जानकारी देखकर रिपोर्ट तैयार करेगी।",
-    stepThree: "रिपोर्ट तैयार होने पर हम इसे WhatsApp पर भेजेंगे। ईमेल भी साझा करेंगे यदि आपने ईमेल दिया है।",
-    pendingHelp: "हमारी सहायता टीम ऑर्डर नंबर से स्थिति जाँच सकती है। पुष्टि लंबित होने पर कृपया दोबारा भुगतान न करें।",
-    checkAgain: "फिर से जाँचें",
-    checkingButton: "जाँच हो रही है…",
-    whatsapp: "WhatsApp सहायता",
-    email: "ईमेल सहायता",
-    returnHome: "Surabhi Astrology पर वापस जाएँ",
-    brandLine: "आपकी जन्म जानकारी, हमारी टीम की व्यक्तिगत देखभाल।",
-    language: "रिपोर्ट की भाषा",
-  } : {
+  const copy = {
     support: "Support",
     checking: "We’re checking your payment",
     paid: "Your order is confirmed",
@@ -183,8 +155,8 @@ export default function SuccessPage() {
                 {isPaid ? <Check size={23} strokeWidth={2.2} aria-hidden="true" /> : isChecking || state === "pending" ? <Clock3 size={22} aria-hidden="true" /> : <ShieldCheck size={22} aria-hidden="true" />}
               </span>
               <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#8B6A4B]">{isPaid ? (isHindi ? "भुगतान प्राप्त" : "Payment received") : isChecking ? (isHindi ? "सुरक्षित पुष्टि" : "Secure check") : isHindi ? "सहायता उपलब्ध" : "Here to help"}</p>
-                <h1 className="font-[var(--font-serif)] text-3xl font-medium leading-tight text-[#351A11] sm:text-4xl">{isPaid && receipt?.name ? `${isHindi ? `धन्यवाद, ${receipt.name} जी` : `Thank you, ${receipt.name}`}` : title}</h1>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#8B6A4B]">{isPaid ? "Payment received" : isChecking ? "Secure check" : "Here to help"}</p>
+                <h1 className="font-[var(--font-serif)] text-3xl font-medium leading-tight text-[#351A11] sm:text-4xl">{isPaid && receipt?.name ? `Thank you, ${receipt.name}` : title}</h1>
                 {isPaid && receipt?.name && <p className="mt-1 text-lg text-[#6B3924]">{title}</p>}
                 <p className="mt-3 max-w-xl text-[15px] leading-7 text-[#6B5B4D]">{description}</p>
               </div>
