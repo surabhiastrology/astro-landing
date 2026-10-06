@@ -3,12 +3,18 @@ import crypto from "crypto";
 import mongoose from "mongoose";
 import { Resend } from "resend";
 import Redis from "ioredis";
+import Razorpay from "razorpay";
 import { getCheckoutPlanByReportType } from "@/lib/checkout-plans";
+import { buildOrderConfirmationEmail } from "@/lib/order-confirmation-email";
 
 // ==========================================
 // 1. INITIALIZE SERVICES
 // ==========================================
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) throw new Error("RESEND_API_KEY is not configured.");
+  return new Resend(apiKey);
+}
 const redis = new Redis(process.env.REDIS_URL!, {
   lazyConnect: true,
   maxRetriesPerRequest: 3
@@ -115,15 +121,14 @@ async function sendWhatsAppMessage(to: string, text: string, buttons?: string[],
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, form } = body;
-    const checkoutPlan = getCheckoutPlanByReportType(form?.reportType);
-
-    if (!form || typeof form !== "object" || !checkoutPlan) {
-      return NextResponse.json({ error: "Invalid checkout plan." }, { status: 400 });
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = body;
+    if (
+      typeof razorpay_payment_id !== "string" ||
+      typeof razorpay_order_id !== "string" ||
+      typeof razorpay_signature !== "string"
+    ) {
+      return NextResponse.json({ error: "Invalid payment details." }, { status: 400 });
     }
-
-    const trustedForm = { ...form, reportType: checkoutPlan.reportType };
-    const finalAmount = checkoutPlan.amount;
     
     // A. VERIFY SIGNATURE
     const secret = process.env.RAZORPAY_KEY_SECRET!;
@@ -132,9 +137,48 @@ export async function POST(req: Request) {
       .update(razorpay_order_id + "|" + razorpay_payment_id)
       .digest("hex");
 
-    if (generatedSignature !== razorpay_signature) {
+    if (
+      generatedSignature.length !== razorpay_signature.length ||
+      !crypto.timingSafeEqual(Buffer.from(generatedSignature), Buffer.from(razorpay_signature))
+    ) {
       return NextResponse.json({ error: "Invalid signature." }, { status: 400 });
     }
+
+    // Confirm against Razorpay's server-side records. The browser's form and
+    // success callback are not authoritative for either payment state or price.
+    const razorpay = new Razorpay({
+      key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID as string,
+      key_secret: secret,
+    });
+    const [gatewayOrder, gatewayPayment] = await Promise.all([
+      razorpay.orders.fetch(razorpay_order_id),
+      razorpay.payments.fetch(razorpay_payment_id),
+    ]);
+    const savedFormData = gatewayOrder.notes?.formData;
+    const savedForm = typeof savedFormData === "string"
+      ? JSON.parse(savedFormData)
+      : null;
+    const checkoutPlan = getCheckoutPlanByReportType(savedForm?.reportType);
+
+    if (
+      gatewayOrder.id !== razorpay_order_id ||
+      gatewayPayment.order_id !== razorpay_order_id ||
+      gatewayPayment.id !== razorpay_payment_id ||
+      gatewayOrder.currency !== "INR" ||
+      gatewayPayment.currency !== "INR" ||
+      !checkoutPlan ||
+      Number(gatewayOrder.amount) !== checkoutPlan.amount * 100 ||
+      Number(gatewayPayment.amount) !== checkoutPlan.amount * 100
+    ) {
+      return NextResponse.json({ error: "Payment does not match this order." }, { status: 400 });
+    }
+
+    if (gatewayPayment.status !== "captured" || gatewayOrder.status !== "paid") {
+      return NextResponse.json({ success: false, pending: true }, { status: 202 });
+    }
+
+    const trustedForm = { ...savedForm, reportType: checkoutPlan.reportType };
+    const finalAmount = checkoutPlan.amount;
 
     // B. SAVE TO MONGODB
     await connectDB();
@@ -211,15 +255,21 @@ export async function POST(req: Request) {
     // D. EXECUTE ALL NOTIFICATIONS
     const results = await Promise.allSettled([
       // 1. Customer Email
-      resend.emails.send({
+      getResend().emails.send({
         from: senderEmail,
         to: trustedForm.email,
-        subject: `Order Confirmed: ${trustedForm.reportType} ✨`,
-        html: `<h2>Radhe Radhe ${trustedForm.name} ji,</h2><p>Your payment of ₹${finalAmount} for the <strong>${trustedForm.reportType}</strong> is confirmed. Please check your WhatsApp for next steps!</p>`,
+        ...buildOrderConfirmationEmail({
+          name: trustedForm.name,
+          reportType: trustedForm.reportType,
+          amount: finalAmount,
+          orderId: razorpay_order_id,
+          paymentId: razorpay_payment_id,
+          language: trustedForm.language,
+        }),
       }),
       
       // 2. Admin Email
-      resend.emails.send({
+      getResend().emails.send({
         from: senderEmail,
         to: adminEmails,
         subject: `🚨 NEW PAID ORDER: ${trustedForm.name} [₹${finalAmount}] | ${trustedForm.language}`,

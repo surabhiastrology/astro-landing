@@ -4,11 +4,16 @@ import crypto from "crypto";
 import mongoose from "mongoose";
 import { Resend } from "resend";
 import Redis from "ioredis";
+import { buildOrderConfirmationEmail } from "@/lib/order-confirmation-email";
 
 // ==========================================
 // 1. INITIALIZE SERVICES (With Caching)
 // ==========================================
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) throw new Error("RESEND_API_KEY is not configured.");
+  return new Resend(apiKey);
+}
 
 let redis: Redis;
 const getRedis = () => {
@@ -254,17 +259,23 @@ async function triggerNotifications(order: any) {
 
   await Promise.allSettled([
     // Customer Email
-    resend.emails.send({
+    getResend().emails.send({
       from: senderEmail,
       to: order.customer.email,
-      subject: `Order Confirmed: ${order.reportType} ✨`,
-      html: `<h2>Radhe Radhe ${order.customer.name} ji,</h2><p>Your payment for <strong>${order.reportType}</strong> is confirmed. Check WhatsApp for updates!</p>`,
+      ...buildOrderConfirmationEmail({
+        name: order.customer.name,
+        reportType: order.reportType,
+        amount: order.amount,
+        orderId: order.orderId,
+        paymentId: order.paymentId,
+        language: order.customer.language,
+      }),
     }),
 
     // Admin Email — keep the established paid-order format consistent with
     // the checkout confirmation route. The webhook is the authoritative
     // payment-confirmation path, so it must not produce a competing design.
-    resend.emails.send({
+    getResend().emails.send({
       from: senderEmail,
       to: adminEmails,
       subject: `🚨 NEW PAID ORDER: ${order.customer.name} [₹${order.amount}] | ${order.customer.language}`,

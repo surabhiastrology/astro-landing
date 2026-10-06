@@ -478,13 +478,21 @@ function CheckoutContent() {
           form: form 
         }),
       });
-      const order = await res.json() as { id?: unknown; amount?: unknown; error?: unknown };
+      const order = await res.json() as { id?: unknown; amount?: unknown; receiptToken?: unknown; error?: unknown };
       if (!res.ok) {
         throw new Error(typeof order?.error === "string" ? order.error : "Unable to create the payment order.");
       }
-      if (typeof order?.id !== "string" || typeof order.amount !== "number" || order.amount <= 0) {
+      if (
+        typeof order?.id !== "string" ||
+        typeof order.amount !== "number" ||
+        order.amount <= 0 ||
+        typeof order.receiptToken !== "string" ||
+        !/^[a-f0-9]{64}$/.test(order.receiptToken)
+      ) {
         throw new Error("The payment order response was incomplete or invalid.");
       }
+
+      sessionStorage.setItem(`order-receipt:${order.id}`, order.receiptToken);
 
       const options: RazorpayOptions = {
         key: razorpayKey,
@@ -502,11 +510,17 @@ function CheckoutContent() {
             });
           }
 
-          await fetch("/api/payment-success", {
-            method: "POST",
-            body: JSON.stringify({ ...response, form }),
-          });
-          window.location.href = "/success";
+          try {
+            await fetch("/api/payment-success", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ ...response, form }),
+            });
+          } catch (error) {
+            console.error("Payment confirmation request failed; the receipt page will recheck Razorpay.", error);
+          } finally {
+            window.location.href = `/success?orderId=${encodeURIComponent(order.id as string)}`;
+          }
         },
         prefill: { name: form.name, email: form.email, contact: form.phone },
         theme: { color: "#8B1E1E" },

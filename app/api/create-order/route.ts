@@ -1,5 +1,6 @@
 // app/api/create-order/route.ts
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 import Razorpay from "razorpay";
 import { getCheckoutPlanByReportType } from "@/lib/checkout-plans";
 
@@ -21,6 +22,7 @@ export async function POST(req: Request) {
     // Use the server-side catalogue amount and canonical report type. Values
     // supplied in the browser can be edited and must never set the charge.
     const trustedForm = { ...form, reportType: checkoutPlan.reportType };
+    const receiptToken = crypto.randomBytes(32).toString("hex");
 
     const options = {
       amount: checkoutPlan.amount * 100,
@@ -28,11 +30,17 @@ export async function POST(req: Request) {
       receipt: `receipt_${Date.now()}`,
       notes: {
         formData: JSON.stringify(trustedForm),
+        receiptTokenHash: crypto.createHash("sha256").update(receiptToken).digest("hex"),
       },
     };
 
     const order = await razorpay.orders.create(options);
-    return NextResponse.json(order);
+    return NextResponse.json({
+      id: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      receiptToken,
+    });
   } catch (error) {
     return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
