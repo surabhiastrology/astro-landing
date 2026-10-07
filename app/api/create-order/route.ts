@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import Razorpay from "razorpay";
 import { getCheckoutPlanByReportType } from "@/lib/checkout-plans";
+import { isApproximateBirthTimeRange } from "@/lib/birth-time";
 
 export async function POST(req: Request) {
   const razorpay = new Razorpay({
@@ -21,7 +22,17 @@ export async function POST(req: Request) {
 
     // Use the server-side catalogue amount and canonical report type. Values
     // supplied in the browser can be edited and must never set the charge.
-    const trustedForm = { ...form, reportType: checkoutPlan.reportType };
+    if (form.tobAccuracy === "approximate" && !isApproximateBirthTimeRange(form.tobApproximateRange)) {
+      return NextResponse.json({ error: "Choose an estimated time range" }, { status: 400 });
+    }
+
+    const trustedForm = {
+      ...form,
+      reportType: checkoutPlan.reportType,
+      tobAccuracy: form.tobAccuracy === "approximate" ? "approximate" : "exact",
+      tob: form.tobAccuracy === "approximate" ? "" : form.tob,
+      tobApproximateRange: form.tobAccuracy === "approximate" ? form.tobApproximateRange : "",
+    };
     const receiptToken = crypto.randomBytes(32).toString("hex");
 
     const options = {

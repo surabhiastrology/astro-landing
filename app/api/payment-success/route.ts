@@ -6,6 +6,7 @@ import Redis from "ioredis";
 import Razorpay from "razorpay";
 import { getCheckoutPlanByReportType } from "@/lib/checkout-plans";
 import { buildOrderConfirmationEmail } from "@/lib/order-confirmation-email";
+import { formatBirthTime } from "@/lib/birth-time";
 
 // ==========================================
 // 1. INITIALIZE SERVICES
@@ -35,7 +36,7 @@ const OrderSchema = new mongoose.Schema({
   reportType: { type: String },
   customer: {
     name: String, email: String, phone: String,
-    dob: String, tob: String, city: String,
+    dob: String, tob: String, tobAccuracy: String, tobApproximateRange: String, city: String,
     pinCode: String, gender: String, language: String, 
     challenge: String, // Stores the value from the form
   },
@@ -294,7 +295,7 @@ export async function POST(req: Request) {
                 <h3 style="color: #8B1E1E; margin-bottom: 10px; font-size: 18px;">👤 Person 1 Details</h3>
                 <table style="width: 100%; border-collapse: collapse;">
                   <tr><td style="padding: 5px 0; color: #666;">Name:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${trustedForm.name}</td></tr>
-                  <tr><td style="padding: 5px 0; color: #666;">Birth Info:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${trustedForm.dob} | ${trustedForm.tob}</td></tr>
+                  <tr><td style="padding: 5px 0; color: #666;">Birth Info:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${trustedForm.dob} | ${formatBirthTime(trustedForm.tob, trustedForm.tobAccuracy, trustedForm.tobApproximateRange)}</td></tr>
                   <tr><td style="padding: 5px 0; color: #666;">Location:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${trustedForm.city} (${trustedForm.pinCode})</td></tr>
                 </table>
               </div>

@@ -12,6 +12,7 @@ import {
 import dayjs, { type Dayjs } from "dayjs";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { MobileTimePicker } from "@mui/x-date-pickers/MobileTimePicker";
+import { APPROXIMATE_BIRTH_TIME_RANGES, isApproximateBirthTimeRange } from "@/lib/birth-time";
 
 type RazorpayPaymentResponse = {
   razorpay_payment_id: string;
@@ -337,6 +338,8 @@ function CheckoutContent() {
     reportType: fullReportType, 
     dob: "",       
     tob: "",       
+    tobAccuracy: "exact",
+    tobApproximateRange: "",
     city: "",      
     pinCode: "",   
     gender: "",    
@@ -393,6 +396,18 @@ function CheckoutContent() {
     else clearFieldError(field);
   };
 
+  const handleApproximateBirthTimeToggle = (checked: boolean) => {
+    trackFormStart();
+    setForm((current) => ({
+      ...current,
+      tob: "",
+      tobAccuracy: checked ? "approximate" : "exact",
+      tobApproximateRange: "",
+    }));
+    clearFieldError("tob");
+    clearFieldError("tobApproximateRange");
+  };
+
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     trackFormStart();
     setForm((current) => ({ ...current, [e.target.name]: e.target.value }));
@@ -402,7 +417,7 @@ function CheckoutContent() {
   const handlePayment = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const pickerFields = ["dob", "tob", "partnerDob", "partnerTob"];
+    const pickerFields = ["dob", "partnerDob", "partnerTob", ...(form.tobAccuracy === "approximate" && !isMatchmaking ? ["tobApproximateRange"] : ["tob"])];
     const nextErrors: Record<string, string> = Object.fromEntries(
       pickerFields.flatMap((field) => fieldErrors[field] ? [[field, fieldErrors[field]]] : []),
     );
@@ -415,7 +430,11 @@ function CheckoutContent() {
     if (!form.name.trim()) nextErrors.name = "Enter your full name.";
     if (!form.dob.trim()) nextErrors.dob = "Choose your date of birth.";
     else if (!parseDatePickerValue(form.dob)) nextErrors.dob = "Choose a valid date of birth.";
-    if (!form.tob.trim()) nextErrors.tob = "Choose your time of birth.";
+    if (!isMatchmaking && form.tobAccuracy === "approximate") {
+      if (!isApproximateBirthTimeRange(form.tobApproximateRange)) {
+        nextErrors.tobApproximateRange = "Choose the closest estimated time range.";
+      }
+    } else if (!form.tob.trim()) nextErrors.tob = "Choose your time of birth.";
     else if (!parseTimePickerValue(form.tob)) nextErrors.tob = "Choose a valid time of birth.";
     if (!form.city.trim()) nextErrors.city = "Enter your place of birth.";
     if (!form.pinCode.trim()) nextErrors.pinCode = "Enter your PIN code.";
@@ -632,15 +651,54 @@ function CheckoutContent() {
                   onValidationError={(message) => handlePickerValidationError("dob", message)}
                   onFocus={trackFormStart}
                 />
-                <BirthTimePickerField
-                  field="tob"
-                  label="Time of Birth"
-                  value={form.tob}
-                  error={fieldErrors.tob}
-                  onValueChange={(value) => handlePickerValueChange("tob", value)}
-                  onValidationError={(message) => handlePickerValidationError("tob", message)}
-                  onFocus={trackFormStart}
-                />
+                <div>
+                  {form.tobAccuracy === "approximate" && !isMatchmaking ? (
+                    <div>
+                      <Label htmlFor="tobApproximateRange">Estimated Time of Birth</Label>
+                      <select
+                        id="tobApproximateRange"
+                        name="tobApproximateRange"
+                        required
+                        aria-invalid={Boolean(fieldErrors.tobApproximateRange)}
+                        aria-describedby={fieldErrors.tobApproximateRange ? "tobApproximateRange-error tobApproximateRange-help" : "tobApproximateRange-help"}
+                        className={inputClass}
+                        value={form.tobApproximateRange}
+                        onChange={handleChange}
+                        onFocus={trackFormStart}
+                      >
+                        <option value="">Select the closest time range</option>
+                        {APPROXIMATE_BIRTH_TIME_RANGES.map((range) => (
+                          <option key={range.value} value={range.value}>{range.label}</option>
+                        ))}
+                      </select>
+                      <p id="tobApproximateRange-help" className="mt-1.5 text-xs leading-5 text-[#6B5A48]">
+                        An estimate may make time-sensitive chart details less precise.
+                      </p>
+                      <FieldError field="tobApproximateRange" message={fieldErrors.tobApproximateRange} />
+                    </div>
+                  ) : (
+                    <BirthTimePickerField
+                      field="tob"
+                      label="Time of Birth"
+                      value={form.tob}
+                      error={fieldErrors.tob}
+                      onValueChange={(value) => handlePickerValueChange("tob", value)}
+                      onValidationError={(message) => handlePickerValidationError("tob", message)}
+                      onFocus={trackFormStart}
+                    />
+                  )}
+                  {!isMatchmaking && (
+                    <label className="mt-2 flex min-h-11 cursor-pointer items-center gap-2 rounded-lg text-sm text-[#4A2E10] focus-within:ring-2 focus-within:ring-[#C8A84B]/50">
+                      <input
+                        type="checkbox"
+                        checked={form.tobAccuracy === "approximate"}
+                        onChange={(event) => handleApproximateBirthTimeToggle(event.target.checked)}
+                        className="h-4 w-4 accent-[#8B1E1E]"
+                      />
+                      <span>I don&apos;t know my exact time of birth</span>
+                    </label>
+                  )}
+                </div>
               </div>
               <div className={isMatchmaking ? "block" : "grid grid-cols-1 sm:grid-cols-2 gap-5"}>
                 <div className="mb-4">

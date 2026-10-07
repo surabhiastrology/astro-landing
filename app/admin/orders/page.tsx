@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { formatBirthTime } from "@/lib/birth-time";
 import { 
   Package, Send, FileText, User, Phone, X, Loader2, 
   Download, Search, Filter, ArrowUpRight, CheckCircle2,
@@ -334,7 +335,7 @@ export default function OrdersPage() {
                      </div>
                      <div className="flex justify-between">
                        <span className="text-xs text-slate-400 font-bold">Time</span>
-                       <span className="text-xs font-black text-slate-800">{viewOrder.customer?.tob}</span>
+                       <span className="text-xs font-black text-slate-800">{formatBirthTime(viewOrder.customer?.tob, viewOrder.customer?.tobAccuracy, viewOrder.customer?.tobApproximateRange)}</span>
                      </div>
                      <div className="flex justify-between items-start gap-4 text-right">
                        <span className="text-xs text-slate-400 font-bold">Location</span>

@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import { Resend } from "resend";
 import Redis from "ioredis";
 import { buildOrderConfirmationEmail } from "@/lib/order-confirmation-email";
+import { formatBirthTime } from "@/lib/birth-time";
 
 // ==========================================
 // 1. INITIALIZE SERVICES (With Caching)
@@ -59,7 +60,7 @@ const OrderSchema = new mongoose.Schema({
   reportType: { type: String },
   customer: {
     name: String, email: String, phone: String,
-    dob: String, tob: String, city: String,
+    dob: String, tob: String, tobAccuracy: String, tobApproximateRange: String, city: String,
     pinCode: String, gender: String, language: String, challenge: String,
   },
   partner: {
@@ -300,7 +301,7 @@ async function triggerNotifications(order: any) {
               <h3 style="color: #8B1E1E; margin-bottom: 10px; font-size: 18px;">👤 Person 1 Details</h3>
               <table style="width: 100%; border-collapse: collapse;">
                 <tr><td style="padding: 5px 0; color: #666;">Name:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${order.customer.name}</td></tr>
-                <tr><td style="padding: 5px 0; color: #666;">Birth Info:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${order.customer.dob} | ${order.customer.tob}</td></tr>
+                <tr><td style="padding: 5px 0; color: #666;">Birth Info:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${order.customer.dob} | ${formatBirthTime(order.customer.tob, order.customer.tobAccuracy, order.customer.tobApproximateRange)}</td></tr>
                 <tr><td style="padding: 5px 0; color: #666;">Location:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${order.customer.city} (${order.customer.pinCode})</td></tr>
               </table>
             </div>
