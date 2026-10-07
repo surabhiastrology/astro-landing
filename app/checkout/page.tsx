@@ -1059,14 +1059,14 @@ function CheckoutContent() {
                     />
                   )}
                   {!isMatchmaking && (
-                    <label className="mt-2 flex min-h-11 cursor-pointer items-center gap-2 rounded-lg text-sm text-[#4A2E10] focus-within:ring-2 focus-within:ring-[#C8A84B]/50">
+                    <label className="mt-2 flex min-h-10 w-full cursor-pointer items-center gap-2.5 rounded-lg border border-[#E8DCC4] bg-[#FFFCF6] px-3 py-2 text-sm leading-5 text-[#4A2E10] transition-colors hover:bg-[#FBF4E8] focus-within:ring-2 focus-within:ring-[#C8A84B]/60 focus-within:ring-offset-1">
                       <input
                         type="checkbox"
                         checked={form.tobAccuracy === "approximate"}
                         onChange={(event) => handleApproximateBirthTimeToggle(event.target.checked)}
-                        className="h-4 w-4 accent-[#8B1E1E]"
+                        className="h-4 w-4 shrink-0 accent-[#8B1E1E]"
                       />
-                      <span>I don&apos;t know my exact time of birth</span>
+                      <span>I don&apos;t know the exact birth time</span>
                     </label>
                   )}
                 </div>
@@ -1245,9 +1245,64 @@ function CheckoutContent() {
 
           {paymentError && <p role="alert" className="rounded-xl border border-[#A32424]/30 bg-[#FFF5F3] px-4 py-3 text-sm font-medium text-[#8B1E1E]">{paymentError}</p>}
 
-          <button type="submit" disabled={loading} aria-busy={loading} className="w-full min-h-[58px] bg-gradient-to-r from-[#8B1E1E] to-[#5C1414] text-white px-4 py-4 rounded-xl font-bold text-lg shadow-lg active:scale-[0.99] transition-all disabled:opacity-70 disabled:cursor-wait">
-            {loading ? "Processing Securely..." : `Pay ₹${finalAmount} Securely`}
-          </button>
+          <div className="mt-6 rounded-2xl border border-[#E8D8B8] bg-gradient-to-b from-white to-[#FFFAF1] p-3.5 shadow-[0_8px_24px_rgba(61,22,0,0.06)] sm:p-5">
+            <button type="submit" disabled={loading} aria-busy={loading} className="flex min-h-[58px] w-full items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-[#8B1E1E] to-[#651717] px-4 py-3.5 text-base font-bold text-white shadow-[0_5px_14px_rgba(101,23,23,0.24)] transition-[transform,box-shadow,opacity] duration-200 hover:shadow-[0_7px_18px_rgba(101,23,23,0.3)] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B1E1E] focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-75 sm:text-lg">
+              {loading ? (
+                <>
+                  <svg aria-hidden="true" className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.35" strokeWidth="3" />
+                    <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                  </svg>
+                  <span>Opening secure payment…</span>
+                </>
+              ) : (
+                <>
+                  <svg aria-hidden="true" className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" fill="white" />
+                    <path d="m7.8 12.2 2.7 2.7 5.8-6" stroke="#7A1B1B" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <span>Pay securely</span>
+                  <span className="tabular-nums">₹{finalAmount}</span>
+                </>
+              )}
+            </button>
+
+            <div className="mt-3 flex items-center justify-center gap-5 sm:gap-7" aria-label="Security certifications">
+              <img
+                src="https://d3ldyx3r2ad3ic.cloudfront.net/templates/template-assets/images/store-checkout-2/mcafe.png"
+                alt="McAfee SECURE"
+                width={120}
+                height={40}
+                loading="lazy"
+                className="h-8 w-auto max-w-[42%] object-contain"
+              />
+              <img
+                src="https://d3ldyx3r2ad3ic.cloudfront.net/templates/template-assets/images/store-checkout-2/norton.png"
+                alt="Norton Secured"
+                width={120}
+                height={40}
+                loading="lazy"
+                className="h-8 w-auto max-w-[42%] object-contain"
+              />
+            </div>
+
+            <div className="mx-auto mt-3 grid max-w-2xl grid-cols-1 gap-2 text-center text-xs font-medium leading-5 text-[#3D5E4B] sm:grid-cols-2 sm:gap-3">
+              <div className="flex items-center justify-center gap-2 rounded-lg px-2 py-1.5">
+                <svg aria-hidden="true" className="h-4 w-4 shrink-0 text-[#00A88F]" viewBox="0 0 20 20" fill="currentColor">
+                  <circle cx="10" cy="10" r="10" />
+                  <path d="m5.6 10.2 2.8 2.7 6-6" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>Verified checkout protection</span>
+              </div>
+              <div className="flex items-center justify-center gap-2 rounded-lg px-2 py-1.5">
+                <svg aria-hidden="true" className="h-4 w-4 shrink-0 text-[#00A88F]" viewBox="0 0 20 20" fill="currentColor">
+                  <circle cx="10" cy="10" r="10" />
+                  <path d="m5.6 10.2 2.8 2.7 6-6" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>Secure online payments</span>
+              </div>
+            </div>
+          </div>
         </form>
       </div>
     </div>

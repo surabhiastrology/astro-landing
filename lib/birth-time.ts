@@ -23,5 +23,23 @@ export function formatBirthTime(
     return range ? `Approximate — ${range.label}` : "Approximate time (range not selected)";
   }
 
-  return time || "Not provided";
+  if (!time) return "Not provided";
+
+  // Exact birth times are stored in 24-hour HH:mm format for the checkout
+  // and downstream integrations. Make the period explicit in customer/admin
+  // emails while continuing to accept older values that already include it.
+  const match = /^(\d{1,2}):(\d{2})(?:\s*(AM|PM))?$/i.exec(time.trim());
+  if (!match) return time;
+
+  const hour = Number(match[1]);
+  const minute = match[2];
+  const suppliedPeriod = match[3]?.toUpperCase();
+  if (suppliedPeriod) {
+    return `${String(hour).padStart(2, "0")}:${minute} ${suppliedPeriod}`;
+  }
+  if (hour > 23) return time;
+
+  const period = hour >= 12 ? "PM" : "AM";
+  const hour12 = hour % 12 || 12;
+  return `${String(hour12).padStart(2, "0")}:${minute} ${period}`;
 }
