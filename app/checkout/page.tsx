@@ -12,6 +12,9 @@ import {
 import dayjs, { type Dayjs } from "dayjs";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { MobileTimePicker } from "@mui/x-date-pickers/MobileTimePicker";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import ListSubheader from "@mui/material/ListSubheader";
 import { APPROXIMATE_BIRTH_TIME_RANGES, isApproximateBirthTimeRange } from "@/lib/birth-time";
 
 type RazorpayPaymentResponse = {
@@ -94,16 +97,141 @@ const QUESTION_DATA = {
 const Label = ({
   children,
   htmlFor,
+  id,
   required = true,
 }: {
   children: React.ReactNode;
   htmlFor?: string;
+  id?: string;
   required?: boolean;
 }) => (
-  <label htmlFor={htmlFor} className="block text-sm font-semibold text-[#4A2E10] mb-2 leading-5">
+  <label id={id} htmlFor={htmlFor} className="block text-sm font-semibold text-[#4A2E10] mb-2 leading-5">
     {children}{required && <> <span className="text-[#8B1E1E]" aria-hidden="true">*</span></>}
   </label>
 );
+
+function SelectChevron({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="m7 10 5 5 5-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+const SELECT_SX = {
+  width: "100%",
+  minHeight: 52,
+  backgroundColor: "#FCF7EE",
+  borderRadius: "0.75rem",
+  color: "#2A1400",
+  transition: "box-shadow 150ms ease, background-color 150ms ease",
+  "& .MuiOutlinedInput-notchedOutline": { borderColor: "#E8D8B8", borderWidth: 1 },
+  "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#C8A84B" },
+  "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#C8A84B", borderWidth: 1 },
+  "&.Mui-focused": { boxShadow: "0 0 0 2px rgba(200, 168, 75, 0.35)" },
+  "&.Mui-error .MuiOutlinedInput-notchedOutline": { borderColor: "#A32424" },
+  "& .MuiSelect-select": {
+    boxSizing: "border-box",
+    display: "flex",
+    alignItems: "center",
+    minHeight: "52px !important",
+    padding: "13px 38px 13px 14px !important",
+    fontSize: "16px",
+    lineHeight: "24px",
+    whiteSpace: "normal",
+  },
+  "& .MuiSelect-icon": { color: "#8B1E1E", right: 10, width: 20, height: 20 },
+};
+
+const SELECT_MENU_PROPS = {
+  slotProps: {
+    paper: {
+      sx: {
+        maxHeight: 320,
+        border: "1px solid #E8D8B8",
+        borderRadius: "12px",
+        boxShadow: "0 12px 32px rgba(61, 22, 0, 0.16)",
+        "& .MuiMenuItem-root": { color: "#2A1400" },
+        "& .MuiMenuItem-root.Mui-selected": { backgroundColor: "#F4EAD6" },
+        "& .MuiMenuItem-root.Mui-selected:hover": { backgroundColor: "#EBD8B1" },
+        "& .MuiMenuItem-root:hover, & .MuiMenuItem-root.Mui-focusVisible": { backgroundColor: "#FFFBF0" },
+      },
+    },
+    list: { sx: { py: 0.5 } },
+  },
+};
+
+type StyledSelectFieldProps = {
+  id: string;
+  labelId: string;
+  name?: string;
+  value: string;
+  placeholder?: string;
+  error?: boolean;
+  errorId?: string;
+  ariaLabel: string;
+  required?: boolean;
+  compact?: boolean;
+  onChange: (value: string) => void;
+  onFocus?: () => void;
+  children: React.ReactNode;
+};
+
+function StyledSelectField({
+  id,
+  labelId,
+  name,
+  value,
+  placeholder,
+  error = false,
+  errorId,
+  ariaLabel,
+  required = false,
+  compact = false,
+  onChange,
+  onFocus,
+  children,
+}: StyledSelectFieldProps) {
+  return (
+    <Select
+      id={id}
+      labelId={labelId}
+      name={name}
+      value={value}
+      displayEmpty
+      required={required}
+      error={error}
+      onChange={(event) => onChange(String(event.target.value))}
+      onFocus={onFocus}
+      IconComponent={SelectChevron}
+      SelectDisplayProps={{
+        "aria-label": ariaLabel,
+        "aria-invalid": error,
+        "aria-describedby": errorId,
+      }}
+      MenuProps={SELECT_MENU_PROPS}
+      sx={compact ? {
+        ...SELECT_SX,
+        minHeight: 48,
+        "& .MuiSelect-select": {
+          ...SELECT_SX["& .MuiSelect-select"],
+          minHeight: "48px !important",
+          padding: "10px 20px 10px 8px !important",
+          fontSize: "14px",
+          lineHeight: "20px",
+        },
+        "& .MuiSelect-icon": { color: "#8B1E1E", right: 2, width: 16, height: 16 },
+      } : SELECT_SX}
+    >
+      {placeholder && (
+        <MenuItem value="" disabled sx={{ minHeight: 44, color: "#6B7280", fontSize: 15 }}>
+          {placeholder}
+        </MenuItem>
+      )}
+      {children}
+    </Select>
+  );
+}
 
 const PICKER_FIELD_SX = {
   width: "100%",
@@ -199,6 +327,200 @@ type PickerFieldProps = {
   onValidationError: (message: string | null) => void;
   onFocus: () => void;
 };
+
+const MONTH_OPTIONS = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+function datePartsFromValue(value: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  return match ? { year: match[1], month: match[2], day: String(Number(match[3])) } : { year: "", month: "", day: "" };
+}
+
+function BirthDateSelectField({ field, label, value, error, onValueChange, onValidationError, onFocus }: PickerFieldProps) {
+  const [parts, setParts] = useState(() => datePartsFromValue(value));
+  const currentYear = new Date().getFullYear();
+  const selectedYear = Number(parts.year) || 2000;
+  const daysInMonth = parts.month ? new Date(selectedYear, Number(parts.month), 0).getDate() : 31;
+  const dayOptions = Array.from({ length: daysInMonth }, (_, index) => String(index + 1));
+  const yearOptions = Array.from({ length: currentYear - 1899 }, (_, index) => String(currentYear - index));
+
+  const updatePart = (part: "day" | "month" | "year", nextValue: string) => {
+    onFocus();
+    const next = { ...parts, [part]: nextValue };
+    const maxDay = next.month
+      ? new Date(Number(next.year) || 2000, Number(next.month), 0).getDate()
+      : 31;
+    if ((part === "month" || part === "year") && Number(next.day) > maxDay) next.day = "";
+    setParts(next);
+    onValueChange("");
+    onValidationError(null);
+
+    if (!next.day || !next.month || !next.year) return;
+
+    const year = Number(next.year);
+    const month = Number(next.month);
+    const day = Number(next.day);
+    const date = new Date(year, month - 1, day, 12);
+    const isValidDate = date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+    const isFuture = date > new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 12);
+    if (!isValidDate || isFuture) {
+      onValidationError("Choose a valid date of birth that is not in the future.");
+      return;
+    }
+
+    onValueChange(`${next.year}-${next.month}-${String(day).padStart(2, "0")}`);
+  };
+
+  const options = (items: string[]) => items.map((item) => (
+    <MenuItem key={item} value={item} sx={{ minHeight: 44, fontSize: 15 }}>{item}</MenuItem>
+  ));
+
+  return (
+    <div>
+      <Label id={`${field}-label`} htmlFor={field}>{label}</Label>
+      <span id={`${field}-day-label`} className="sr-only">Day</span>
+      <span id={`${field}-month-label`} className="sr-only">Month</span>
+      <span id={`${field}-year-label`} className="sr-only">Year</span>
+      <div className="grid grid-cols-[0.85fr_1.25fr_1fr] gap-1.5 sm:gap-2">
+        <StyledSelectField
+          id={field}
+          labelId={`${field}-label ${field}-day-label`}
+          value={parts.day}
+          placeholder="Day"
+          ariaLabel="Day of birth"
+          compact
+          error={Boolean(error)}
+          errorId={error ? `${field}-error` : undefined}
+          onChange={(next) => updatePart("day", next)}
+          onFocus={onFocus}
+        >
+          {options(dayOptions)}
+        </StyledSelectField>
+        <StyledSelectField
+          id={`${field}-month`}
+          labelId={`${field}-label ${field}-month-label`}
+          value={parts.month}
+          placeholder="Month"
+          ariaLabel="Month of birth"
+          compact
+          error={Boolean(error)}
+          errorId={error ? `${field}-error` : undefined}
+          onChange={(next) => updatePart("month", next)}
+          onFocus={onFocus}
+        >
+          {MONTH_OPTIONS.map((month, index) => (
+            <MenuItem key={index + 1} value={String(index + 1).padStart(2, "0")} sx={{ minHeight: 44, fontSize: 15 }}>{month}</MenuItem>
+          ))}
+        </StyledSelectField>
+        <StyledSelectField
+          id={`${field}-year`}
+          labelId={`${field}-label ${field}-year-label`}
+          value={parts.year}
+          placeholder="Year"
+          ariaLabel="Year of birth"
+          compact
+          error={Boolean(error)}
+          errorId={error ? `${field}-error` : undefined}
+          onChange={(next) => updatePart("year", next)}
+          onFocus={onFocus}
+        >
+          {options(yearOptions)}
+        </StyledSelectField>
+      </div>
+      <FieldError field={field} message={error} />
+    </div>
+  );
+}
+
+function timePartsFromValue(value: string) {
+  const match = /^(\d{2}):(\d{2})$/.exec(value);
+  if (!match) return { hour: "", minute: "", period: "" };
+  const hour24 = Number(match[1]);
+  return {
+    hour: String(hour24 % 12 || 12),
+    minute: match[2],
+    period: hour24 >= 12 ? "PM" : "AM",
+  };
+}
+
+function BirthTimeSelectField({ field, label, value, error, onValueChange, onValidationError, onFocus }: PickerFieldProps) {
+  const [parts, setParts] = useState(() => timePartsFromValue(value));
+  const updatePart = (part: "hour" | "minute" | "period", nextValue: string) => {
+    onFocus();
+    const next = { ...parts, [part]: nextValue };
+    setParts(next);
+    onValidationError(null);
+    if (!next.hour || !next.minute || !next.period) {
+      onValueChange("");
+      return;
+    }
+
+    const hour12 = Number(next.hour);
+    const hour24 = (hour12 % 12) + (next.period === "PM" ? 12 : 0);
+    onValueChange(`${String(hour24).padStart(2, "0")}:${next.minute}`);
+  };
+
+  return (
+    <div>
+      <Label id={`${field}-label`} htmlFor={field}>{label}</Label>
+      <span id={`${field}-hour-label`} className="sr-only">Hour</span>
+      <span id={`${field}-minute-label`} className="sr-only">Minute</span>
+      <span id={`${field}-period-label`} className="sr-only">AM or PM</span>
+      <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+        <StyledSelectField
+          id={field}
+          labelId={`${field}-label ${field}-hour-label`}
+          value={parts.hour}
+          placeholder="Hour"
+          ariaLabel="Birth hour"
+          compact
+          error={Boolean(error)}
+          errorId={error ? `${field}-error` : undefined}
+          onChange={(next) => updatePart("hour", next)}
+          onFocus={onFocus}
+        >
+          {Array.from({ length: 12 }, (_, index) => String(index + 1)).map((hour) => (
+            <MenuItem key={hour} value={hour} sx={{ minHeight: 44, fontSize: 15 }}>{hour}</MenuItem>
+          ))}
+        </StyledSelectField>
+        <StyledSelectField
+          id={`${field}-minute`}
+          labelId={`${field}-label ${field}-minute-label`}
+          value={parts.minute}
+          placeholder="Min"
+          ariaLabel="Birth minute"
+          compact
+          error={Boolean(error)}
+          errorId={error ? `${field}-error` : undefined}
+          onChange={(next) => updatePart("minute", next)}
+          onFocus={onFocus}
+        >
+          {Array.from({ length: 60 }, (_, index) => String(index).padStart(2, "0")).map((minute) => (
+            <MenuItem key={minute} value={minute} sx={{ minHeight: 44, fontSize: 15 }}>{minute}</MenuItem>
+          ))}
+        </StyledSelectField>
+        <StyledSelectField
+          id={`${field}-period`}
+          labelId={`${field}-label ${field}-period-label`}
+          value={parts.period}
+          placeholder="AM/PM"
+          ariaLabel="Birth time AM or PM"
+          compact
+          error={Boolean(error)}
+          errorId={error ? `${field}-error` : undefined}
+          onChange={(next) => updatePart("period", next)}
+          onFocus={onFocus}
+        >
+          <MenuItem value="AM" sx={{ minHeight: 44, fontSize: 15 }}>AM</MenuItem>
+          <MenuItem value="PM" sx={{ minHeight: 44, fontSize: 15 }}>PM</MenuItem>
+        </StyledSelectField>
+      </div>
+      <FieldError field={field} message={error} />
+    </div>
+  );
+}
 
 function BirthDatePickerField({
   field,
@@ -414,6 +736,12 @@ function CheckoutContent() {
     clearFieldError(e.target.name);
   };
 
+  const handleSelectValueChange = (field: string, value: string) => {
+    trackFormStart();
+    setForm((current) => ({ ...current, [field]: value }));
+    clearFieldError(field);
+  };
+
   const handlePayment = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -622,11 +950,31 @@ function CheckoutContent() {
               />
             </div>
             <div>
-              <Label htmlFor="language">Report Language</Label>
-              <select id="language" required name="language" className={inputClass} value={form.language} onChange={handleChange}>
-                <option value="hindi">Hindi (हिंदी)</option>
-                <option value="english">English</option>
-              </select>
+              {isMatchmaking ? (
+                <>
+                  <Label htmlFor="language">Report Language</Label>
+                  <select id="language" required name="language" className={inputClass} value={form.language} onChange={handleChange}>
+                    <option value="hindi">Hindi (हिंदी)</option>
+                    <option value="english">English</option>
+                  </select>
+                </>
+              ) : (
+                <>
+                  <Label id="language-label" htmlFor="language">Report Language</Label>
+                  <StyledSelectField
+                    id="language"
+                    labelId="language-label"
+                    name="language"
+                    value={form.language}
+                    ariaLabel="Report language"
+                    required
+                    onChange={(value) => handleSelectValueChange("language", value)}
+                  >
+                    <MenuItem value="hindi" sx={{ minHeight: 44 }}>Hindi (हिंदी)</MenuItem>
+                    <MenuItem value="english" sx={{ minHeight: 44 }}>English</MenuItem>
+                  </StyledSelectField>
+                </>
+              )}
             </div>
           </div>
 
@@ -641,43 +989,66 @@ function CheckoutContent() {
                 <FieldError field="name" message={fieldErrors.name} />
               </div>
               
-              <div className={isMatchmaking ? "block" : "grid grid-cols-1 min-[440px]:grid-cols-2 gap-4 sm:gap-5"}>
-                <BirthDatePickerField
-                  field="dob"
-                  label="Date of Birth"
-                  value={form.dob}
-                  error={fieldErrors.dob}
-                  onValueChange={(value) => handlePickerValueChange("dob", value)}
-                  onValidationError={(message) => handlePickerValidationError("dob", message)}
-                  onFocus={trackFormStart}
-                />
+              <div className={isMatchmaking ? "block" : "grid grid-cols-1 min-[1280px]:grid-cols-2 gap-4 sm:gap-5"}>
+                {isMatchmaking ? (
+                  <BirthDatePickerField
+                    field="dob"
+                    label="Date of Birth"
+                    value={form.dob}
+                    error={fieldErrors.dob}
+                    onValueChange={(value) => handlePickerValueChange("dob", value)}
+                    onValidationError={(message) => handlePickerValidationError("dob", message)}
+                    onFocus={trackFormStart}
+                  />
+                ) : (
+                  <BirthDateSelectField
+                    field="dob"
+                    label="Date of Birth"
+                    value={form.dob}
+                    error={fieldErrors.dob}
+                    onValueChange={(value) => handlePickerValueChange("dob", value)}
+                    onValidationError={(message) => handlePickerValidationError("dob", message)}
+                    onFocus={trackFormStart}
+                  />
+                )}
                 <div>
                   {form.tobAccuracy === "approximate" && !isMatchmaking ? (
                     <div>
-                      <Label htmlFor="tobApproximateRange">Estimated Time of Birth</Label>
-                      <select
+                      <Label id="tobApproximateRange-label" htmlFor="tobApproximateRange">Estimated Time of Birth</Label>
+                      <StyledSelectField
                         id="tobApproximateRange"
+                        labelId="tobApproximateRange-label"
                         name="tobApproximateRange"
-                        required
-                        aria-invalid={Boolean(fieldErrors.tobApproximateRange)}
-                        aria-describedby={fieldErrors.tobApproximateRange ? "tobApproximateRange-error tobApproximateRange-help" : "tobApproximateRange-help"}
-                        className={inputClass}
                         value={form.tobApproximateRange}
-                        onChange={handleChange}
+                        placeholder="Select the closest time range"
+                        ariaLabel="Estimated time of birth range"
+                        required
+                        error={Boolean(fieldErrors.tobApproximateRange)}
+                        errorId={fieldErrors.tobApproximateRange ? "tobApproximateRange-error tobApproximateRange-help" : "tobApproximateRange-help"}
+                        onChange={(value) => handleSelectValueChange("tobApproximateRange", value)}
                         onFocus={trackFormStart}
                       >
-                        <option value="">Select the closest time range</option>
                         {APPROXIMATE_BIRTH_TIME_RANGES.map((range) => (
-                          <option key={range.value} value={range.value}>{range.label}</option>
+                          <MenuItem key={range.value} value={range.value} sx={{ minHeight: 44, whiteSpace: "normal", py: 1.25 }}>{range.label}</MenuItem>
                         ))}
-                      </select>
+                      </StyledSelectField>
                       <p id="tobApproximateRange-help" className="mt-1.5 text-xs leading-5 text-[#6B5A48]">
                         An estimate may make time-sensitive chart details less precise.
                       </p>
                       <FieldError field="tobApproximateRange" message={fieldErrors.tobApproximateRange} />
                     </div>
-                  ) : (
+                  ) : isMatchmaking ? (
                     <BirthTimePickerField
+                      field="tob"
+                      label="Time of Birth"
+                      value={form.tob}
+                      error={fieldErrors.tob}
+                      onValueChange={(value) => handlePickerValueChange("tob", value)}
+                      onValidationError={(message) => handlePickerValidationError("tob", message)}
+                      onFocus={trackFormStart}
+                    />
+                  ) : (
+                    <BirthTimeSelectField
                       field="tob"
                       label="Time of Birth"
                       value={form.tob}
@@ -710,14 +1081,38 @@ function CheckoutContent() {
               <Label htmlFor="pinCode">PIN Code</Label>
               <input id="pinCode" required name="pinCode" inputMode="numeric" autoComplete="postal-code" aria-invalid={Boolean(fieldErrors.pinCode)} aria-describedby={fieldErrors.pinCode ? "pinCode-error" : undefined} placeholder="e.g. 110001" className={inputClass} onChange={handleChange} onFocus={trackFormStart} />
               <FieldError field="pinCode" message={fieldErrors.pinCode} />
-            </div>
+                </div>
                 <div>
-                   <Label htmlFor="gender">Gender</Label>
-                   <select id="gender" required name="gender" aria-invalid={Boolean(fieldErrors.gender)} aria-describedby={fieldErrors.gender ? "gender-error" : undefined} className={isMatchmaking ? matchmakingInputClass : inputClass} onChange={handleChange} onFocus={trackFormStart}>
-                      <option value="">Select</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                   </select>
+                   {isMatchmaking ? (
+                     <>
+                       <Label htmlFor="gender">Gender</Label>
+                       <select id="gender" required name="gender" aria-invalid={Boolean(fieldErrors.gender)} aria-describedby={fieldErrors.gender ? "gender-error" : undefined} className={matchmakingInputClass} onChange={handleChange} onFocus={trackFormStart}>
+                         <option value="">Select</option>
+                         <option value="male">Male</option>
+                         <option value="female">Female</option>
+                       </select>
+                     </>
+                   ) : (
+                     <>
+                       <Label id="gender-label" htmlFor="gender">Gender</Label>
+                       <StyledSelectField
+                         id="gender"
+                         labelId="gender-label"
+                         name="gender"
+                         value={form.gender}
+                         placeholder="Select"
+                         ariaLabel="Gender"
+                         required
+                         error={Boolean(fieldErrors.gender)}
+                         errorId={fieldErrors.gender ? "gender-error" : undefined}
+                         onChange={(value) => handleSelectValueChange("gender", value)}
+                         onFocus={trackFormStart}
+                       >
+                         <MenuItem value="male" sx={{ minHeight: 44 }}>Male</MenuItem>
+                         <MenuItem value="female" sx={{ minHeight: 44 }}>Female</MenuItem>
+                       </StyledSelectField>
+                     </>
+                   )}
                    <FieldError field="gender" message={fieldErrors.gender} />
                 </div>
               </div>
@@ -761,9 +1156,9 @@ function CheckoutContent() {
                 <div>
                    <Label htmlFor="partnerGender">Partner&apos;s Gender</Label>
                    <select id="partnerGender" name="partnerGender" required aria-invalid={Boolean(fieldErrors.partnerGender)} aria-describedby={fieldErrors.partnerGender ? "partnerGender-error" : undefined} className={matchmakingInputClass} onChange={handleChange}>
-                      <option value="">Select</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
+                     <option value="">Select</option>
+                     <option value="male">Male</option>
+                     <option value="female">Female</option>
                    </select>
                    <FieldError field="partnerGender" message={fieldErrors.partnerGender} />
                 </div>
@@ -774,17 +1169,48 @@ function CheckoutContent() {
           {/* FIXED: Dropdown now appears for ANY plan that includes a question */}
           {showQuestionDropdown && (
             <div className="pt-2">
-              <Label htmlFor="challenge">Select Your 1 Primary Question</Label>
-              <select id="challenge" name="challenge" required aria-invalid={Boolean(fieldErrors.challenge)} aria-describedby={fieldErrors.challenge ? "challenge-error" : undefined} className={`${inputClass} border-2 border-[#C8A84B]/30`} onChange={handleChange} onFocus={trackFormStart} value={form.challenge}>
-                <option value="">-- Choose your question --</option>
-                {Object.entries(QUESTION_DATA).map(([key, group]) => (
-                  <optgroup key={key} label={form.language === 'hindi' ? group.label.hindi : group.label.english}>
-                    {group.questions.map((q, idx) => (
-                      <option key={idx} value={form.language === 'hindi' ? q.hi : q.en}>{form.language === 'hindi' ? q.hi : q.en}</option>
+              {isMatchmaking ? (
+                <>
+                  <Label htmlFor="challenge">Select Your 1 Primary Question</Label>
+                  <select id="challenge" name="challenge" required aria-invalid={Boolean(fieldErrors.challenge)} aria-describedby={fieldErrors.challenge ? "challenge-error" : undefined} className={`${inputClass} border-2 border-[#C8A84B]/30`} onChange={handleChange} onFocus={trackFormStart} value={form.challenge}>
+                    <option value="">-- Choose your question --</option>
+                    {Object.entries(QUESTION_DATA).map(([key, group]) => (
+                      <optgroup key={key} label={form.language === "hindi" ? group.label.hindi : group.label.english}>
+                        {group.questions.map((question, index) => (
+                          <option key={index} value={form.language === "hindi" ? question.hi : question.en}>{form.language === "hindi" ? question.hi : question.en}</option>
+                        ))}
+                      </optgroup>
                     ))}
-                  </optgroup>
-                ))}
-              </select>
+                  </select>
+                </>
+              ) : (
+                <>
+                  <Label id="challenge-label" htmlFor="challenge">Select Your 1 Primary Question</Label>
+                  <StyledSelectField
+                    id="challenge"
+                    labelId="challenge-label"
+                    name="challenge"
+                    value={form.challenge}
+                    placeholder="Choose your question"
+                    ariaLabel="Your primary question"
+                    required
+                    error={Boolean(fieldErrors.challenge)}
+                    errorId={fieldErrors.challenge ? "challenge-error" : undefined}
+                    onChange={(value) => handleSelectValueChange("challenge", value)}
+                    onFocus={trackFormStart}
+                  >
+                    {Object.entries(QUESTION_DATA).flatMap(([key, group]) => [
+                      <ListSubheader key={`group-${key}`} sx={{ color: "#8B1E1E", fontWeight: 700, lineHeight: "40px" }}>
+                        {form.language === "hindi" ? group.label.hindi : group.label.english}
+                      </ListSubheader>,
+                      ...group.questions.map((question, index) => {
+                        const text = form.language === "hindi" ? question.hi : question.en;
+                        return <MenuItem key={`${key}-${index}`} value={text} sx={{ minHeight: 48, whiteSpace: "normal", py: 1.25 }}>{text}</MenuItem>;
+                      }),
+                    ])}
+                  </StyledSelectField>
+                </>
+              )}
               <FieldError field="challenge" message={fieldErrors.challenge} />
             </div>
           )}
