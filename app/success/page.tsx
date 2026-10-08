@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { Check, Clock3, Mail, MessageCircle, RotateCcw, ShieldCheck } from "lucide-react";
+import { Check, Clock3, ClipboardList, CreditCard, Headset, IndianRupee, Mail, MessageCircle, RotateCcw, ShieldCheck, Sparkles, Tag } from "lucide-react";
 
 type Receipt = {
   name: string;
@@ -118,7 +118,7 @@ export default function SuccessPage() {
   const description = isPaid ? copy.paidBody : isChecking ? copy.checkingBody : state === "pending" ? copy.pendingBody : copy.unavailableBody;
 
   return (
-    <main className="min-h-dvh bg-[#F7F1E7] text-[#2A1400]">
+    <main className="min-h-dvh bg-[#FCF7EE] text-[#2A1400]">
       <header className="sticky top-0 z-50 border-b border-[#E8D8B8] bg-white px-4 py-1">
         <div className="mx-auto flex max-w-[1320px] items-center justify-between">
           <Link href="/" aria-label="Surabhi Astrology home" className="flex items-center gap-2">
@@ -140,76 +140,109 @@ export default function SuccessPage() {
 
         <div className="overflow-hidden rounded-[26px] border border-[#DCC9A8] bg-[#FFFEFB] shadow-[0_18px_54px_rgba(68,39,17,0.08)]">
           <div className="grid lg:grid-cols-[0.92fr_1.08fr]">
-            <section className="order-2 border-t border-[#E8D8B8] bg-[#FCF8F0] lg:order-1 lg:border-r lg:border-t-0">
-              <div className="relative h-64 overflow-hidden bg-[#32170F] sm:h-80 lg:h-[340px]">
-                <Image
-                  src="/astrology-confirmation-still-life.webp"
-                  alt="A brass oil lamp beside burgundy astrology books and a subtle birth-chart illustration"
-                  fill
-                  preload
-                  sizes="(max-width: 1023px) 100vw, 42vw"
-                  className="object-cover object-[43%_center]"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#1C0D08]/80 via-[#1C0D08]/5 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-7">
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#F1D5A0]">SURABHI ASTROLOGY</p>
-                  <p className="max-w-sm font-[var(--font-serif)] text-2xl leading-tight sm:text-3xl">{copy.brandLine}</p>
-                </div>
-              </div>
-
+            <section aria-label="Order receipt" className="order-2 border-t border-[#E8D8B8] bg-[#FCF8F0] lg:order-1 lg:border-r lg:border-t-0">
               <div className="p-5 sm:p-7 lg:p-8">
+                <div className="relative mb-7 hidden aspect-[16/9] overflow-hidden rounded-2xl bg-[#F2E7D4] md:block">
+                  <Image
+                    src="/surbhi-kundali-report-mobile-banner.png"
+                    alt="Surbhi Kundali report prepared by Surabhi Astrology"
+                    fill
+                    sizes="(max-width: 1023px) 50vw, 42vw"
+                    className="object-cover"
+                  />
+                </div>
+
                 <div className="mb-5 flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full border border-[#E7D3AE] bg-white text-[#9B5D17]">
-                    <ShieldCheck size={19} aria-hidden="true" />
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F4EADF] text-[#C8A84B]">
+                    <ClipboardList size={19} aria-hidden="true" />
                   </span>
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8B6A4B]">Order details</p>
-                    <h2 className="font-[var(--font-serif)] text-xl font-semibold text-[#4C2013]">{copy.receipt}</h2>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8B1E1E]">Order receipt</p>
+                    <h2 className="font-serif text-xl font-semibold text-[#2A1400]">{copy.receipt}</h2>
                   </div>
                 </div>
+
                 {receipt ? (
-                  <dl className="divide-y divide-dashed divide-[#E3D3B7] text-sm sm:text-[15px]">
-                    <div className="flex items-start justify-between gap-4 py-3"><dt className="shrink-0 text-[#725F4B]">{copy.report}</dt><dd className="max-w-[68%] text-right font-medium leading-5 text-[#351A11]">{receipt.reportType}</dd></div>
-                    <div className="flex items-center justify-between gap-4 py-3"><dt className="text-[#725F4B]">{copy.amount}</dt><dd className="text-lg font-semibold tabular-nums text-[#351A11]">{formatAmount(receipt.amount)}</dd></div>
-                    <div className="flex items-start justify-between gap-4 py-3"><dt className="shrink-0 text-[#725F4B]">{copy.orderReference}</dt><dd className="max-w-[68%] break-all text-right font-mono text-[11px] leading-5 text-[#4C392D]">{receipt.orderId}</dd></div>
-                    {isPaid && receipt.paymentId && <div className="flex items-start justify-between gap-4 py-3"><dt className="shrink-0 text-[#725F4B]">{copy.paymentReference}</dt><dd className="max-w-[68%] break-all text-right font-mono text-[11px] leading-5 text-[#4C392D]">{receipt.paymentId}</dd></div>}
+                  <dl className="divide-y divide-dashed divide-[#E3D3B7]">
+                    <div className="flex items-center gap-3 py-3.5 sm:gap-4">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#C8A84B]"><ClipboardList size={17} aria-hidden="true" /></span>
+                      <dt className="shrink-0 text-sm text-[#6B4423]">{copy.report}</dt>
+                      <dd className="ml-auto max-w-[62%] text-right text-sm font-medium leading-5 text-[#2A1400] sm:text-[15px]">{receipt.reportType}</dd>
+                    </div>
+                    <div className="flex items-center gap-3 py-3.5 sm:gap-4">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#C8A84B]"><IndianRupee size={18} aria-hidden="true" /></span>
+                      <dt className="text-sm text-[#6B4423]">{copy.amount}</dt>
+                      <dd className="ml-auto text-xl font-semibold tabular-nums text-[#2A1400]">{formatAmount(receipt.amount)}</dd>
+                    </div>
+                    <div className="flex items-center gap-3 py-3.5 sm:gap-4">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#C8A84B]"><Tag size={17} aria-hidden="true" /></span>
+                      <dt className="shrink-0 text-sm text-[#6B4423]">{copy.orderReference}</dt>
+                      <dd className="ml-auto max-w-[62%] break-all text-right font-mono text-[11px] leading-5 text-[#4C392D]">{receipt.orderId}</dd>
+                    </div>
+                    {isPaid && receipt.paymentId && (
+                      <div className="flex items-center gap-3 py-3.5 sm:gap-4">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#C8A84B]"><CreditCard size={17} aria-hidden="true" /></span>
+                        <dt className="shrink-0 text-sm text-[#6B4423]">{copy.paymentReference}</dt>
+                        <dd className="ml-auto max-w-[62%] break-all text-right font-mono text-[11px] leading-5 text-[#4C392D]">{receipt.paymentId}</dd>
+                      </div>
+                    )}
                   </dl>
                 ) : orderId ? (
-                  <p className="break-all border-t border-dashed border-[#E3D3B7] pt-4 text-sm text-[#725F4B]">{copy.orderReference}: <span className="font-mono text-xs text-[#4C392D]">{orderId}</span></p>
+                  <p className="break-all border-t border-dashed border-[#E3D3B7] pt-4 text-sm text-[#6B4423]">{copy.orderReference}: <span className="font-mono text-xs text-[#4C392D]">{orderId}</span></p>
                 ) : (
-                  <p className="text-sm leading-6 text-[#725F4B]">Your order details will appear here once we can verify your checkout.</p>
+                  <p className="text-sm leading-6 text-[#6B4423]">Your order details will appear here once we can verify your checkout.</p>
                 )}
+
+                <div aria-live="polite" className={`mt-6 flex items-center gap-3 rounded-2xl p-4 sm:p-5 ${isPaid ? "bg-[#EEF4E9]" : "bg-[#F7F0E4]"}`}>
+                  <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${isPaid ? "bg-[#2D8A58] text-white" : "bg-[#F1E3C8] text-[#8B1E1E]"}`}>
+                    {isPaid ? <ShieldCheck size={24} aria-hidden="true" /> : isChecking || state === "pending" ? <Clock3 size={22} aria-hidden="true" /> : <ShieldCheck size={22} aria-hidden="true" />}
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-[#2A1400]">{isPaid ? "Payment successful" : isChecking ? "Checking your payment" : state === "pending" ? "Payment confirmation pending" : "Need help confirming?"}</p>
+                    <p className="mt-0.5 text-sm leading-5 text-[#6B4423]">{isPaid ? "Your payment has been securely processed." : description}</p>
+                  </div>
+                </div>
               </div>
             </section>
 
-            <section className="order-1 bg-white px-5 py-7 sm:px-8 sm:py-9 lg:order-2 lg:px-10 lg:py-10">
-              <div className="mb-8 flex items-start gap-4">
-                <span className={`mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${isPaid ? "bg-[#E8F2E8] text-[#356B43]" : "bg-[#F4EADF] text-[#8B1E1E]"}`}>
-                  {isPaid ? <Check size={23} strokeWidth={2.2} aria-hidden="true" /> : isChecking || state === "pending" ? <Clock3 size={22} aria-hidden="true" /> : <ShieldCheck size={22} aria-hidden="true" />}
+            <section aria-label="Payment confirmation" aria-live="polite" className="order-1 bg-white px-5 py-7 sm:px-8 sm:py-9 lg:order-2 lg:px-10 lg:py-10">
+              <div className="mb-7 flex items-start gap-4 sm:mb-8">
+                <span className={`mt-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${isPaid ? "bg-[#19965A] text-white" : "bg-[#F4EADF] text-[#8B1E1E]"}`}>
+                  {isPaid ? <Check size={25} strokeWidth={2.5} aria-hidden="true" /> : isChecking || state === "pending" ? <Clock3 size={23} aria-hidden="true" /> : <ShieldCheck size={23} aria-hidden="true" />}
                 </span>
-                <div>
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8B6A4B]">{isPaid ? "Payment received" : isChecking ? "Secure check" : "Here to help"}</p>
-                  <h1 className="font-[var(--font-serif)] text-3xl font-medium leading-tight text-[#351A11] sm:text-4xl">{isPaid && receipt?.name ? `Thank you, ${receipt.name}` : title}</h1>
-                  {isPaid && receipt?.name && <p className="mt-1 text-lg text-[#6B3924]">{title}</p>}
-                  <p className="mt-3 max-w-xl text-[15px] leading-7 text-[#5F5145]">{description}</p>
+                <div className="min-w-0">
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8B1E1E]">{isPaid ? "Payment received" : isChecking ? "Secure payment check" : "Payment support"}</p>
+                  <h1 className="font-serif text-[30px] font-medium leading-tight text-[#2A1400] sm:text-4xl">{isPaid && receipt?.name ? <>Thank you, <span className="text-[#8B1E1E]">{receipt.name}</span></> : title}</h1>
+                  {isPaid && receipt?.name && <p className="mt-1 text-lg font-semibold text-[#C8A84B]">Your order is confirmed!</p>}
+                  <p className="mt-3 max-w-xl text-[15px] leading-7 text-[#6B4423]">{description}</p>
                 </div>
+                {isPaid && <Sparkles className="mt-2 hidden shrink-0 text-[#B9782E] sm:block" size={23} aria-hidden="true" />}
               </div>
 
               {isPaid ? (
-                <div className="mb-8 rounded-2xl border border-[#E8D8B8] bg-[#FFFCF6] p-5 sm:p-6">
-                  <h2 className="mb-5 font-[var(--font-serif)] text-2xl font-semibold text-[#4C2013]">{copy.next}</h2>
-                  <ol className="space-y-4 text-sm leading-6 text-[#5F5145] sm:text-[15px]">
-                    {[copy.stepOne, copy.stepTwo, copy.stepThree].map((step, index) => (
-                      <li key={step} className="flex gap-4">
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#DCC9A8] font-mono text-xs text-[#8B1E1E]">0{index + 1}</span>
-                        <span className="pt-0.5">{step}</span>
+                <div className="mb-7 rounded-2xl border border-[#E8D8B8] bg-[#FFFCF6] p-5 sm:mb-8 sm:p-6">
+                  <h2 className="mb-5 flex items-center gap-2.5 font-serif text-2xl font-semibold text-[#2A1400]">
+                    <Sparkles size={20} className="text-[#C8A84B]" aria-hidden="true" /> {copy.next}?
+                  </h2>
+                  <ol className="relative space-y-5 before:absolute before:bottom-5 before:left-[15px] before:top-5 before:border-l-2 before:border-dashed before:border-[#D9B681]">
+                    {[
+                      { title: "Payment received", detail: copy.stepOne },
+                      { title: "Our team prepares your report", detail: "Our team will review your details and prepare your personalized Surbhi Kundali report." },
+                      { title: "Report delivered to you", detail: "When it’s ready, we’ll send it on WhatsApp and by email if you provided an email address." },
+                    ].map((step, index) => (
+                      <li key={step.title} className="relative flex gap-3.5 sm:gap-4">
+                        <span className="z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#E6C9A4] bg-[#F9EAE2] text-xs font-semibold text-[#8B1E1E]">0{index + 1}</span>
+                        <div className="pt-0.5">
+                          <h3 className="font-serif text-base font-semibold leading-5 text-[#2A1400]">{step.title}</h3>
+                          <p className="mt-1 text-sm leading-6 text-[#6B4423]">{step.detail}</p>
+                        </div>
                       </li>
                     ))}
                   </ol>
                 </div>
               ) : (
-                <div className="mb-8 rounded-2xl border border-[#E8D8B8] bg-[#FFFCF6] p-5 sm:p-6">
-                  <p className="mb-5 text-sm leading-6 text-[#5F5145]">{copy.pendingHelp}</p>
+                <div className="mb-7 rounded-2xl border border-[#E8D8B8] bg-[#FFFCF6] p-5 sm:mb-8 sm:p-6">
+                  <p className="mb-5 text-sm leading-6 text-[#6B4423]">{copy.pendingHelp}</p>
                   {state !== "unavailable" && (
                     <button onClick={() => setRetry((count) => count + 1)} disabled={isChecking} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#B99B74] px-4 text-sm font-semibold text-[#5D3522] transition hover:bg-[#FBF5EB] disabled:cursor-wait disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8B1E1E]">
                       <RotateCcw size={16} aria-hidden="true" /> {isChecking ? copy.checkingButton : copy.checkAgain}
@@ -218,13 +251,19 @@ export default function SuccessPage() {
                 </div>
               )}
 
-              <div className="border-t border-[#E8D8B8] pt-6">
-                <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#8B6A4B]">Need help?</p>
+              <div className="border-t border-[#E8D8B8] pt-5 sm:pt-6">
+                <div className="mb-4 flex items-center gap-3">
+                  <Headset size={22} className="text-[#C8A84B]" aria-hidden="true" />
+                  <div>
+                    <h2 className="font-serif text-xl font-semibold text-[#2A1400]">Need Help?</h2>
+                    <p className="text-sm text-[#6B4423]">We’re here to assist you with any questions.</p>
+                  </div>
+                </div>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <a href={whatsappUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#276A45] px-6 text-sm font-semibold text-white transition hover:bg-[#1E5738] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#276A45] sm:w-auto">
-                    <MessageCircle size={17} aria-hidden="true" /> {copy.whatsapp}
+                  <a href={whatsappUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#8B1E1E] px-6 text-sm font-semibold text-white transition hover:bg-[#741818] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8B1E1E] sm:w-auto">
+                    <MessageCircle size={17} aria-hidden="true" /> {copy.whatsapp} <span aria-hidden="true">→</span>
                   </a>
-                  <a href={emailUrl} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold text-[#6B3924] underline decoration-[#C8A77D] underline-offset-4 transition hover:text-[#8B1E1E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8B1E1E]">
+                  <a href={emailUrl} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#D7B17D] px-6 text-sm font-semibold text-[#6B3924] underline decoration-[#C8A77D] underline-offset-4 transition hover:bg-[#FBF5EB] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8B1E1E] sm:w-auto">
                     <Mail size={16} aria-hidden="true" /> {copy.email}
                   </a>
                 </div>
@@ -235,7 +274,7 @@ export default function SuccessPage() {
 
         <footer className="mt-6 flex flex-col items-center justify-between gap-3 border-t border-[#DCC9A8] pt-4 text-xs text-[#806E5D] sm:flex-row">
           <span>info@surabhiastrology.com</span>
-          <Link href="/" className="font-semibold text-[#6B3924] underline decoration-[#C8A77D] underline-offset-4">{copy.returnHome}</Link>
+          <Link href="/" className="font-semibold text-[#6B4423] underline decoration-[#C8A77D] underline-offset-4">{copy.returnHome}</Link>
         </footer>
       </div>
       </div>
