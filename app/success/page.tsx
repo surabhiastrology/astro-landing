@@ -118,7 +118,7 @@ export default function SuccessPage() {
   const description = isPaid ? copy.paidBody : isChecking ? copy.checkingBody : state === "pending" ? copy.pendingBody : copy.unavailableBody;
 
   return (
-    <main className="min-h-dvh bg-[#FCF7EE] text-[#2A1400]">
+    <main className="min-h-dvh bg-white text-[#2A1400] lg:bg-[#FCF7EE]">
       <header className="sticky top-0 z-50 border-b border-[#E8D8B8] bg-white px-4 py-1">
         <div className="mx-auto flex max-w-[1320px] items-center justify-between">
           <Link href="/" aria-label="Surabhi Astrology home" className="flex items-center gap-2">
@@ -138,9 +138,9 @@ export default function SuccessPage() {
       <div className="px-4 py-5 sm:px-6 sm:py-8">
       <div className="mx-auto max-w-6xl">
 
-        <div className="overflow-hidden rounded-[26px] border border-[#DCC9A8] bg-[#FFFEFB] shadow-[0_18px_54px_rgba(68,39,17,0.08)]">
+        <div className="bg-white lg:overflow-hidden lg:rounded-[26px] lg:border lg:border-[#DCC9A8] lg:bg-[#FFFEFB] lg:shadow-[0_18px_54px_rgba(68,39,17,0.08)]">
           <div className="grid lg:grid-cols-[0.92fr_1.08fr]">
-            <section aria-label="Order receipt" className="order-2 border-t border-[#E8D8B8] bg-[#FCF8F0] lg:order-1 lg:border-r lg:border-t-0">
+            <section aria-label="Order receipt" className="order-2 bg-white lg:order-1 lg:border-r lg:border-[#E8D8B8] lg:bg-[#FCF8F0]">
               <div className="p-5 sm:p-7 lg:p-8">
                 <div className="relative mb-7 hidden aspect-[16/9] overflow-hidden rounded-2xl bg-[#F2E7D4] md:block">
                   <Image
@@ -153,35 +153,35 @@ export default function SuccessPage() {
                 </div>
 
                 <div className="mb-5 flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F4EADF] text-[#C8A84B]">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F4EADF] text-[#8B1E1E]">
                     <ClipboardList size={19} aria-hidden="true" />
                   </span>
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8B1E1E]">Order receipt</p>
-                    <h2 className="font-serif text-xl font-semibold text-[#2A1400]">{copy.receipt}</h2>
+                    <h2 className="font-sans text-xl font-bold text-[#2A1400]">{copy.receipt}</h2>
                   </div>
                 </div>
 
                 {receipt ? (
                   <dl className="divide-y divide-dashed divide-[#E3D3B7]">
                     <div className="flex items-center gap-3 py-3.5 sm:gap-4">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#C8A84B]"><ClipboardList size={17} aria-hidden="true" /></span>
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#8B1E1E]"><ClipboardList size={17} aria-hidden="true" /></span>
                       <dt className="shrink-0 text-sm text-[#6B4423]">{copy.report}</dt>
                       <dd className="ml-auto max-w-[62%] text-right text-sm font-medium leading-5 text-[#2A1400] sm:text-[15px]">{receipt.reportType}</dd>
                     </div>
                     <div className="flex items-center gap-3 py-3.5 sm:gap-4">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#C8A84B]"><IndianRupee size={18} aria-hidden="true" /></span>
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#8B1E1E]"><IndianRupee size={18} aria-hidden="true" /></span>
                       <dt className="text-sm text-[#6B4423]">{copy.amount}</dt>
                       <dd className="ml-auto text-xl font-semibold tabular-nums text-[#2A1400]">{formatAmount(receipt.amount)}</dd>
                     </div>
                     <div className="flex items-center gap-3 py-3.5 sm:gap-4">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#C8A84B]"><Tag size={17} aria-hidden="true" /></span>
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#8B1E1E]"><Tag size={17} aria-hidden="true" /></span>
                       <dt className="shrink-0 text-sm text-[#6B4423]">{copy.orderReference}</dt>
                       <dd className="ml-auto max-w-[62%] break-all text-right font-mono text-[11px] leading-5 text-[#4C392D]">{receipt.orderId}</dd>
                     </div>
                     {isPaid && receipt.paymentId && (
                       <div className="flex items-center gap-3 py-3.5 sm:gap-4">
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#C8A84B]"><CreditCard size={17} aria-hidden="true" /></span>
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#8B1E1E]"><CreditCard size={17} aria-hidden="true" /></span>
                         <dt className="shrink-0 text-sm text-[#6B4423]">{copy.paymentReference}</dt>
                         <dd className="ml-auto max-w-[62%] break-all text-right font-mono text-[11px] leading-5 text-[#4C392D]">{receipt.paymentId}</dd>
                       </div>
@@ -233,7 +233,7 @@ export default function SuccessPage() {
                       <li key={step.title} className="relative flex gap-3.5 sm:gap-4">
                         <span className="z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#E6C9A4] bg-[#F9EAE2] text-xs font-semibold text-[#8B1E1E]">0{index + 1}</span>
                         <div className="pt-0.5">
-                          <h3 className="font-serif text-base font-semibold leading-5 text-[#2A1400]">{step.title}</h3>
+                          <h3 className="font-sans text-base font-bold leading-6 text-[#2A1400] sm:text-lg">{step.title}</h3>
                           <p className="mt-1 text-sm leading-6 text-[#6B4423]">{step.detail}</p>
                         </div>
                       </li>
@@ -253,7 +253,7 @@ export default function SuccessPage() {
 
               <div className="border-t border-[#E8D8B8] pt-5 sm:pt-6">
                 <div className="mb-4 flex items-center gap-3">
-                  <Headset size={22} className="text-[#C8A84B]" aria-hidden="true" />
+                  <Headset size={22} className="text-[#8B1E1E]" aria-hidden="true" />
                   <div>
                     <h2 className="font-serif text-xl font-semibold text-[#2A1400]">Need Help?</h2>
                     <p className="text-sm text-[#6B4423]">We’re here to assist you with any questions.</p>
