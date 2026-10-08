@@ -118,17 +118,25 @@ export default function SuccessPage() {
   const description = isPaid ? copy.paidBody : isChecking ? copy.checkingBody : state === "pending" ? copy.pendingBody : copy.unavailableBody;
 
   return (
-    <main className="min-h-dvh bg-[#F7F1E7] px-4 py-5 text-[#2A1400] sm:px-6 sm:py-8">
-      <div className="mx-auto max-w-6xl">
-        <header className="mb-6 flex items-center justify-between border-b border-[#DCC9A8] pb-4 sm:mb-8 sm:pb-5">
-          <Link href="/" aria-label="Surabhi Astrology home" className="leading-none">
-            <span className="block font-[var(--font-serif)] text-xl font-semibold tracking-wide text-[#4C2013] sm:text-2xl">Surabhi Astrology</span>
-            <span className="mt-1.5 block text-[10px] font-medium uppercase tracking-[0.19em] text-[#8B6A4B]">Personal guidance, thoughtfully prepared</span>
+    <main className="min-h-dvh bg-[#F7F1E7] text-[#2A1400]">
+      <header className="sticky top-0 z-50 border-b border-[#E8D8B8] bg-white px-4 py-1">
+        <div className="mx-auto flex max-w-[1320px] items-center justify-between">
+          <Link href="/" aria-label="Surabhi Astrology home" className="flex items-center gap-2">
+            <img src="/surbhi-astrology-logo.png" alt="Surbhi Astrology — Celebrity Astrologer Surbhi Gupta" className="h-12 w-auto object-contain md:h-16" />
           </Link>
-          <a href={whatsappUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-full px-3 text-sm font-semibold text-[#6B3924] transition hover:bg-[#EFE3D0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8B1E1E]">
-            <MessageCircle size={17} aria-hidden="true" /> <span className="hidden sm:inline">{copy.support}</span>
+          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp" className="flex min-h-10 items-center gap-2.5 rounded-xl border border-[#E8D8B8] bg-white px-2.5 py-1.5 text-[#168A55] shadow-[0_2px_8px_rgba(61,22,0,0.04)] transition-colors hover:bg-[#F5FBF7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#168A55] focus-visible:ring-offset-2 sm:px-3.5">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E6F5EE]">
+              <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.52 3.48A11.79 11.79 0 0 0 12.13 0C5.58 0 .25 5.33.25 11.88c0 2.1.55 4.16 1.59 5.98L.15 24l6.29-1.65a11.9 11.9 0 0 0 5.69 1.45h.01c6.55 0 11.88-5.33 11.88-11.88 0-3.17-1.24-6.15-3.5-8.44ZM12.14 21.8h-.01a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.73.98 1-3.64-.24-.37a9.88 9.88 0 1 1 8.38 4.62Zm5.42-7.4c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.27-.47-2.42-1.5-.9-.8-1.51-1.78-1.68-2.08-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.49 0 1.47 1.07 2.89 1.22 3.09.15.2 2.1 3.2 5.1 4.49.71.3 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.42.25-.7.25-1.3.17-1.42-.07-.13-.27-.2-.57-.35Z" />
+              </svg>
+            </span>
+            <span className="hidden text-left leading-tight sm:block"><span className="block text-[11px] font-medium text-[#475569]">Need Help?</span><span className="block text-xs font-semibold">Chat on WhatsApp →</span></span>
           </a>
-        </header>
+        </div>
+      </header>
+
+      <div className="px-4 py-5 sm:px-6 sm:py-8">
+      <div className="mx-auto max-w-6xl">
 
         <div className="overflow-hidden rounded-[26px] border border-[#DCC9A8] bg-[#FFFEFB] shadow-[0_18px_54px_rgba(68,39,17,0.08)]">
           <div className="grid lg:grid-cols-[0.92fr_1.08fr]">
@@ -229,6 +237,7 @@ export default function SuccessPage() {
           <span>info@surabhiastrology.com</span>
           <Link href="/" className="font-semibold text-[#6B3924] underline decoration-[#C8A77D] underline-offset-4">{copy.returnHome}</Link>
         </footer>
+      </div>
       </div>
     </main>
   );

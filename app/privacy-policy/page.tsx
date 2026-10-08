@@ -15,9 +15,9 @@ export default function PrivacyPolicy() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex-shrink-0 flex items-center">
             <img 
-              src="/logo.svg" 
+              src="/surbhi-astrology-logo.png"
               alt="Celebrity Astrologer Surbhi Gupta" 
-              className="h-14 sm:h-16 lg:h-16 w-auto object-cover"
+              className="h-14 sm:h-16 lg:h-16 w-auto object-contain"
             />
           </Link>
           <Link href="/" className="flex items-center gap-2 text-[#4A2E10] font-bold text-xs uppercase tracking-widest hover:text-[#8B1E1E] transition-colors">

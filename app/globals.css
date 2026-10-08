@@ -70,6 +70,49 @@ body::before {
   animation: bar-shimmer 8s infinite ease-in-out;
 }
 
+@keyframes checkout-button-shimmer {
+  0%, 62% { transform: translateX(-160%) skewX(-18deg); }
+  100% { transform: translateX(260%) skewX(-18deg); }
+}
+
+.checkout-page {
+  position: relative;
+  isolation: isolate;
+  background-color: #fcf7ee;
+}
+
+.checkout-page::before {
+  content: '';
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background: url("/checkout-zodiac-wheels.png") center top / min(100vw, 1920px) auto no-repeat;
+  opacity: 0.16;
+}
+
+@media (max-width: 767px) {
+  .checkout-page::before {
+    background-position: center 4rem;
+    background-size: auto 72vh;
+  }
+}
+
+.checkout-pay-button::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -20% auto -20% -35%;
+  width: 28%;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+  animation: checkout-button-shimmer 4.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkout-pay-button::after { animation: none; }
+}
+
 /* Pulsating gold dot */
 @keyframes gold-pd {
   0%,100%{box-shadow:0 0 0 0 rgba(200,168,75,.6)}

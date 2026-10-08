@@ -13,6 +13,7 @@ import dayjs, { type Dayjs } from "dayjs";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { MobileTimePicker } from "@mui/x-date-pickers/MobileTimePicker";
 import Select from "@mui/material/Select";
+import InputAdornment from "@mui/material/InputAdornment";
 import MenuItem from "@mui/material/MenuItem";
 import ListSubheader from "@mui/material/ListSubheader";
 import { APPROXIMATE_BIRTH_TIME_RANGES, isApproximateBirthTimeRange } from "@/lib/birth-time";
@@ -94,6 +95,38 @@ const QUESTION_DATA = {
   }
 };
 
+type FieldIconName = "mail" | "lock" | "package" | "globe" | "person" | "calendar" | "clock" | "pin" | "hash" | "message" | "info";
+
+function FieldIcon({ name, className = "h-4 w-4 shrink-0 text-[#C8A84B]" }: { name: FieldIconName; className?: string }) {
+  const paths: Record<FieldIconName, React.ReactNode> = {
+    mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m4 7 8 6 8-6" /></>,
+    lock: <><rect x="4" y="10" width="16" height="11" rx="2" /><path d="M8 10V7a4 4 0 1 1 8 0v3m-4 4v3" /></>,
+    package: <><path d="M6 3h9l4 4v14H6z" /><path d="M14 3v5h5M9 13h7m-7 4h7" /></>,
+    globe: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" /></>,
+    person: <><circle cx="12" cy="8" r="3.5" /><path d="M5 21a7 7 0 0 1 14 0" /></>,
+    calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4m10-4v4M3 10h18" /></>,
+    clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3.5 2" /></>,
+    pin: <><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.5" /></>,
+    hash: <><path d="M5 9h14M4 15h14M10 4 8 20m8-16-2 16" /></>,
+    message: <><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8 8 0 0 1-3.5-.8L4 20l1.2-3.4A7.2 7.2 0 0 1 4 12c0-4.1 3.6-7.5 8-7.5s8 3.1 8 7Z" /><path d="M8 12h8m-8 3h5" /></>,
+    info: <><circle cx="12" cy="12" r="9" /><path d="M12 11v5m0-8h.01" /></>,
+  };
+
+  return (
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      {paths[name]}
+    </svg>
+  );
+}
+
+function RequiredMark() {
+  return (
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 16 16" className="h-2.5 w-2.5 shrink-0 text-[#8B1E1E]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <path d="M8 2v12M2.8 5l10.4 6M2.8 11 13.2 5" />
+    </svg>
+  );
+}
+
 const Label = ({
   children,
   htmlFor,
@@ -105,10 +138,38 @@ const Label = ({
   id?: string;
   required?: boolean;
 }) => (
-  <label id={id} htmlFor={htmlFor} className="block text-sm font-semibold text-[#4A2E10] mb-2 leading-5">
-    {children}{required && <> <span className="text-[#8B1E1E]" aria-hidden="true">*</span></>}
+  <label id={id} htmlFor={htmlFor} className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold leading-5 text-black sm:text-sm">
+    {children}{required && <> <RequiredMark /></>}
   </label>
 );
+
+type FieldInputProps = React.InputHTMLAttributes<HTMLInputElement> & { leadingIcon?: FieldIconName };
+
+function FieldInput({ leadingIcon, className = "", ...props }: FieldInputProps) {
+  return (
+    <div className={leadingIcon ? "relative" : undefined}>
+      {leadingIcon && (
+        <span className="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2">
+          <FieldIcon name={leadingIcon} />
+        </span>
+      )}
+      <input {...props} className={`${className}${leadingIcon ? " pl-10" : ""}`} />
+    </div>
+  );
+}
+
+function FieldTextarea({ leadingIcon, className = "", ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { leadingIcon?: FieldIconName }) {
+  return (
+    <div className={leadingIcon ? "relative" : undefined}>
+      {leadingIcon && (
+        <span className="pointer-events-none absolute left-3.5 top-3.5 z-10">
+          <FieldIcon name={leadingIcon} />
+        </span>
+      )}
+      <textarea {...props} className={`${className}${leadingIcon ? " pl-10" : ""}`} />
+    </div>
+  );
+}
 
 function SelectChevron({ className }: { className?: string }) {
   return (
@@ -120,27 +181,34 @@ function SelectChevron({ className }: { className?: string }) {
 
 const SELECT_SX = {
   width: "100%",
-  minHeight: 52,
+  minHeight: 48,
   backgroundColor: "#FCF7EE",
-  borderRadius: "0.75rem",
+  borderRadius: "0.5rem",
   color: "#2A1400",
   transition: "box-shadow 150ms ease, background-color 150ms ease",
   "& .MuiOutlinedInput-notchedOutline": { borderColor: "#E8D8B8", borderWidth: 1 },
   "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#C8A84B" },
   "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#C8A84B", borderWidth: 1 },
   "&.Mui-focused": { boxShadow: "0 0 0 2px rgba(200, 168, 75, 0.35)" },
-  "&.Mui-error .MuiOutlinedInput-notchedOutline": { borderColor: "#A32424" },
+  "&.Mui-error .MuiOutlinedInput-notchedOutline": { borderColor: "#DC2626" },
   "& .MuiSelect-select": {
     boxSizing: "border-box",
     display: "flex",
     alignItems: "center",
-    minHeight: "52px !important",
-    padding: "13px 38px 13px 14px !important",
+    minHeight: "48px !important",
+    padding: "10px 38px 10px 14px !important",
     fontSize: "16px",
     lineHeight: "24px",
     whiteSpace: "normal",
   },
   "& .MuiSelect-icon": { color: "#8B1E1E", right: 10, width: 20, height: 20 },
+  "@media (min-width: 640px)": {
+    minHeight: 52,
+    "& .MuiSelect-select": {
+      minHeight: "52px !important",
+      padding: "13px 38px 13px 14px !important",
+    },
+  },
 };
 
 const SELECT_MENU_PROPS = {
@@ -172,6 +240,7 @@ type StyledSelectFieldProps = {
   ariaLabel: string;
   required?: boolean;
   compact?: boolean;
+  leadingIcon?: FieldIconName;
   onChange: (value: string) => void;
   onFocus?: () => void;
   children: React.ReactNode;
@@ -188,11 +257,32 @@ function StyledSelectField({
   ariaLabel,
   required = false,
   compact = false,
+  leadingIcon,
   onChange,
   onFocus,
   children,
 }: StyledSelectFieldProps) {
+  const selectSx = compact ? {
+    ...SELECT_SX,
+    minHeight: 48,
+    "& .MuiSelect-select": {
+      ...SELECT_SX["& .MuiSelect-select"],
+      minHeight: "48px !important",
+      padding: `${leadingIcon ? "10px 20px 10px 0" : "10px 20px 10px 8px"} !important`,
+      fontSize: "14px",
+      lineHeight: "20px",
+    },
+    "& .MuiSelect-icon": { color: "#8B1E1E", right: 2, width: 16, height: 16 },
+  } : {
+    ...SELECT_SX,
+    "& .MuiSelect-select": {
+      ...SELECT_SX["& .MuiSelect-select"],
+      padding: `${leadingIcon ? "10px 38px 10px 0" : "10px 38px 10px 14px"} !important`,
+    },
+  };
+
   return (
+    <div>
     <Select
       id={id}
       labelId={labelId}
@@ -201,6 +291,11 @@ function StyledSelectField({
       displayEmpty
       required={required}
       error={error}
+      startAdornment={leadingIcon ? (
+        <InputAdornment position="start" sx={{ ml: 0, mr: compact ? 0.75 : 1, pointerEvents: "none" }}>
+          <FieldIcon name={leadingIcon} />
+        </InputAdornment>
+      ) : undefined}
       onChange={(event) => onChange(String(event.target.value))}
       onFocus={onFocus}
       IconComponent={SelectChevron}
@@ -210,18 +305,7 @@ function StyledSelectField({
         "aria-describedby": errorId,
       }}
       MenuProps={SELECT_MENU_PROPS}
-      sx={compact ? {
-        ...SELECT_SX,
-        minHeight: 48,
-        "& .MuiSelect-select": {
-          ...SELECT_SX["& .MuiSelect-select"],
-          minHeight: "48px !important",
-          padding: "10px 20px 10px 8px !important",
-          fontSize: "14px",
-          lineHeight: "20px",
-        },
-        "& .MuiSelect-icon": { color: "#8B1E1E", right: 2, width: 16, height: 16 },
-      } : SELECT_SX}
+      sx={selectSx}
     >
       {placeholder && (
         <MenuItem value="" disabled sx={{ minHeight: 44, color: "#6B7280", fontSize: 15 }}>
@@ -230,6 +314,7 @@ function StyledSelectField({
       )}
       {children}
     </Select>
+    </div>
   );
 }
 
@@ -237,9 +322,9 @@ const PICKER_FIELD_SX = {
   width: "100%",
   "& .MuiPickersInputBase-root": {
     boxSizing: "border-box",
-    height: 52,
-    minHeight: 52,
-    borderRadius: "0.75rem",
+    height: 48,
+    minHeight: 48,
+    borderRadius: "0.5rem",
     backgroundColor: "#FCF7EE",
     color: "#2A1400",
     transition: "box-shadow 150ms ease, background-color 150ms ease",
@@ -254,6 +339,9 @@ const PICKER_FIELD_SX = {
   "& .MuiPickersInputBase-root.Mui-focused .MuiPickersOutlinedInput-notchedOutline": {
     borderColor: "#C8A84B",
     borderWidth: 1,
+  },
+  "& .MuiPickersInputBase-root.Mui-error .MuiPickersOutlinedInput-notchedOutline": {
+    borderColor: "#DC2626",
   },
   "& .MuiPickersInputBase-root.Mui-focused": {
     boxShadow: "0 0 0 2px rgba(200, 168, 75, 0.5)",
@@ -273,6 +361,15 @@ const PICKER_FIELD_SX = {
     minWidth: 44,
     minHeight: 44,
     color: "#2A1400",
+  },
+  "@media (min-width: 640px)": {
+    "& .MuiPickersInputBase-root": {
+      height: 52,
+      minHeight: 52,
+    },
+    "& .MuiPickersSectionList-root": {
+      padding: "13px 0",
+    },
   },
 };
 
@@ -312,7 +409,7 @@ function FieldError({ field, message }: { field: string; message?: string }) {
   if (!message) return null;
 
   return (
-    <p id={`${field}-error`} aria-live="polite" className="mt-1.5 text-sm font-medium text-[#A32424]">
+    <p id={`${field}-error`} aria-live="polite" className="mt-1.5 text-xs font-normal leading-4 text-[#DC2626]">
       {message}
     </p>
   );
@@ -674,6 +771,7 @@ function CheckoutContent() {
     partnerGender: ""
   });
 
+  const [countryCode, setCountryCode] = useState("+91");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -736,6 +834,15 @@ function CheckoutContent() {
     clearFieldError(e.target.name);
   };
 
+  const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
+    trackFormStart();
+    let digits = e.target.value.replace(/\D/g, "");
+    if (digits.startsWith("91") && digits.length === 12) digits = digits.slice(2);
+    if (digits.startsWith("0") && digits.length === 11) digits = digits.slice(1);
+    setForm((current) => ({ ...current, phone: digits.slice(0, 10) }));
+    clearFieldError("phone");
+  };
+
   const handleSelectValueChange = (field: string, value: string) => {
     trackFormStart();
     setForm((current) => ({ ...current, [field]: value }));
@@ -750,6 +857,7 @@ function CheckoutContent() {
       pickerFields.flatMap((field) => fieldErrors[field] ? [[field, fieldErrors[field]]] : []),
     );
     if (!form.phone.trim()) nextErrors.phone = "Enter your WhatsApp number.";
+    else if (!/^\d{10}$/.test(form.phone)) nextErrors.phone = "Enter a valid 10-digit Indian mobile number.";
     if (!form.email.trim()) {
       nextErrors.email = "Enter your email address.";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
@@ -818,11 +926,12 @@ function CheckoutContent() {
     setLoading(true);
 
     try {
+      const checkoutForm = { ...form, phone: `${countryCode}${form.phone}` };
       const res = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          form: form 
+          form: checkoutForm
         }),
       });
       const order = await res.json() as { id?: unknown; amount?: unknown; receiptToken?: unknown; error?: unknown };
@@ -861,7 +970,7 @@ function CheckoutContent() {
             await fetch("/api/payment-success", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ ...response, form }),
+              body: JSON.stringify({ ...response, form: checkoutForm }),
             });
           } catch (error) {
             console.error("Payment confirmation request failed; the receipt page will recheck Razorpay.", error);
@@ -869,7 +978,7 @@ function CheckoutContent() {
             window.location.href = `/success?orderId=${encodeURIComponent(order.id as string)}`;
           }
         },
-        prefill: { name: form.name, email: form.email, contact: form.phone },
+        prefill: { name: form.name, email: form.email, contact: checkoutForm.phone },
         theme: { color: "#8B1E1E" },
         modal: {
           ondismiss: () => setPaymentError("Payment was not completed. Your details are still here if you'd like to try again."),
@@ -889,50 +998,130 @@ function CheckoutContent() {
     }
   };
 
-  const inputClass = "w-full min-h-[52px] bg-[#FCF7EE] border border-[#E8D8B8] rounded-xl px-3.5 py-3 text-base text-[#2A1400] focus:outline-none focus:ring-2 focus:ring-[#C8A84B]/50 transition-all placeholder:text-gray-500";
-  const matchmakingInputClass = "w-full min-h-[48px] bg-transparent border-b border-[#E8D8B8] px-2 py-2 text-base text-[#2A1400] focus:outline-none focus:border-[#8B1E1E] transition-all placeholder:text-gray-500 mb-2";
+  const inputClass = "w-full min-h-[48px] bg-[#FCF7EE] border border-[#E8D8B8] aria-[invalid=true]:border-[#DC2626] rounded-lg px-3.5 py-2.5 text-base text-[#2A1400] focus:outline-none focus:ring-2 focus:ring-[#C8A84B]/50 transition-all placeholder:text-gray-500 sm:min-h-[52px] sm:py-3";
+  const matchmakingInputClass = "w-full min-h-[48px] bg-transparent border-b border-[#E8D8B8] aria-[invalid=true]:border-b-[#DC2626] px-2 py-2 text-base text-[#2A1400] focus:outline-none focus:border-[#8B1E1E] transition-all placeholder:text-gray-500 mb-2";
 
   return (
-    <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_1.2fr] gap-8 lg:gap-12 items-start px-4">
+    <>
+    <div className="mx-auto grid max-w-[1320px] items-start gap-0 px-0 py-3 lg:grid-cols-[minmax(360px,0.86fr)_minmax(0,1.55fr)] lg:gap-5 lg:px-4 [&>div+div]:border-t [&>div+div]:border-[#E8D8B8] [&>div+div]:pt-6 [&>div+div]:mt-6 lg:[&>div+div]:mt-0 lg:[&>div+div]:border-t-0 lg:[&>div+div]:pt-0">
       
       {/* ================= LEFT: PRODUCT SUMMARY ================= */}
-      <div className="bg-white rounded-3xl p-5 sm:p-8 lg:p-10 shadow-[0_15px_40px_rgba(61,22,0,0.06)] border border-[#E8D8B8]/50 lg:sticky lg:top-8">
-        <div className="w-full aspect-[16/9] sm:aspect-[4/3] bg-[#FCF7EE] rounded-2xl flex items-center justify-center border border-[#E8D8B8] mb-5 sm:mb-8 overflow-hidden relative">
-          <Image src="/surbhi-narendra.JPG" alt={serviceName} className="h-full object-cover object-left mix-blend-multiply drop-shadow-2xl" fill priority />
+      <div className="lg:sticky lg:top-8">
+      <div className="rounded-none border-0 bg-white p-5 shadow-none sm:rounded-3xl sm:border sm:border-[#E8D8B8]/50 sm:shadow-[0_15px_40px_rgba(61,22,0,0.06)] lg:p-6 xl:p-7">
+        <div className="relative mb-5 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-2xl bg-[#FCF7EE] sm:mb-6">
+          <Image src="/surbhi-kundali-report-mobile-banner.png" alt="Premium Surbhi Kundali Report" className="object-contain" fill priority unoptimized sizes="(max-width: 1023px) 100vw, 40vw" />
         </div>
-        <div className="inline-block bg-[#8B1E1E]/10 text-[#8B1E1E] text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-md mb-3">Order Summary</div>
-        <h2 className="text-2xl lg:text-3xl font-bold text-[#2A1400] font-serif mb-2">{serviceName}</h2>
-        <h3 className="text-lg text-[#C8A84B] font-bold mb-4 uppercase tracking-wide">Plan: {cleanPlanName}</h3>
-        <p className="text-[#8B1E1E] text-4xl font-extrabold pb-6 border-b border-[#E8D8B8]">₹{basePrice}</p>
-        <ul className="text-sm text-[#6B4423] space-y-3 mt-6">
-          <li className="flex items-start gap-3 font-medium">✓ Authentic Vedic Analysis</li>
-          <li className="flex items-start gap-3 font-medium">✓ 100% Confidential</li>
-          <li className="flex items-start gap-3 font-medium">✓ Personal Guidance by Surbhi&apos;s Team</li>
+        <div className="mb-3 inline-block rounded-md bg-[#8B1E1E]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#8B1E1E]">Order Summary</div>
+        <h2 className="mb-2 font-serif text-2xl font-bold text-[#2A1400] lg:text-[30px]">{serviceName}</h2>
+        <h3 className="mb-4 text-base font-bold uppercase tracking-wide text-[#C8A84B]">Plan: {cleanPlanName}</h3>
+        <ul className="mt-5 space-y-3 text-sm text-[#2A1400]">
+          {[
+            "Authentic Vedic Analysis",
+            "100% Confidential",
+            "Personal Guidance by Surbhi's Team",
+          ].map((benefit) => (
+            <li key={benefit} className="flex items-center gap-2.5 font-medium">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#C8A84B] text-white">
+                <svg aria-hidden="true" viewBox="0 0 16 16" className="h-3 w-3" fill="none">
+                  <path d="m3.5 8 3 3 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <span>{benefit}</span>
+            </li>
+          ))}
         </ul>
-        <div className="mt-8 bg-[#FFFBF0] border border-[#C8A84B]/30 rounded-xl p-4 flex items-center gap-3">
-          <span className="text-2xl">🔒</span>
-          <p className="text-xs text-[#4A2E10] leading-relaxed font-medium">
-            <strong>100% Secure Checkout.</strong> Your personal details are encrypted and kept strictly confidential.
-          </p>
+        <div className="my-5 h-px bg-[#E8D8B8]" />
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="font-serif text-[34px] font-bold leading-none text-[#8B1E1E]">₹{finalAmount.toLocaleString("en-IN")}</span>
+          {basePrice === 999 && (
+            <>
+              <del className="text-lg font-medium text-[#9CA3AF]">₹2,999</del>
+              <span className="rounded-full bg-[#F4EAD6] px-3 py-1 text-xs font-semibold text-[#8B1E1E]">Limited Offer</span>
+            </>
+          )}
         </div>
+        <div className="mt-5 flex items-center gap-3 rounded-xl bg-[#FCF7EE] px-4 py-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white">
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.5 11.5a8.5 8.5 0 0 1-12.6 7.4L4 20l1.2-3.7A8.5 8.5 0 1 1 20.5 11.5Z" />
+              <path d="M8.2 8.1c.3-.6.7-.6 1-.6.2 0 .4 0 .6.5l.7 1.5c.1.2.1.4-.1.6l-.6.7c.5 1 1.4 1.8 2.4 2.3l.6-.7c.2-.2.4-.2.7-.1l1.5.7c.4.2.5.3.5.6 0 .4-.3 1-.7 1.3-.4.4-1.1.6-1.8.4-1-.2-2.3-.8-3.7-2.2S7.5 10.5 7.4 9.6c-.1-.6.2-1.2.8-1.5Z" />
+            </svg>
+          </span>
+          <div>
+            <p className="text-sm font-semibold text-[#2A1400]">Delivered on WhatsApp + Email</p>
+            <p className="mt-0.5 text-xs leading-4 text-[#6B7280]">Your report will be sent to you once it is ready.</p>
+          </div>
+        </div>
+      </div>
+      <blockquote className="hidden items-start gap-3 px-8 pt-7 lg:flex">
+        <span className="font-serif text-5xl leading-none text-[#C8A84B]/60" aria-hidden="true">“</span>
+        <p className="max-w-[290px] font-serif text-[22px] italic leading-tight text-[#6B4423]">Answers to your life’s biggest questions through Vedic wisdom.</p>
+      </blockquote>
       </div>
 
       {/* ================= RIGHT: CHECKOUT FORM ================= */}
-      <div className="bg-white rounded-3xl p-5 sm:p-8 lg:p-10 shadow-[0_15px_40px_rgba(61,22,0,0.06)] border border-[#E8D8B8]/50">
-        <h3 className="text-xl font-bold text-[#2A1400] mb-6 font-serif border-b border-[#E8D8B8] pb-4 text-center">
-          {isMatchmaking ? "Matchmaking Calculator" : "Birth Details & Delivery Info"}
-        </h3>
+      <div className="rounded-none border-0 bg-white px-5 pb-5 shadow-none sm:rounded-3xl sm:border sm:border-[#E8D8B8]/50 sm:shadow-[0_15px_40px_rgba(61,22,0,0.06)] lg:px-7 lg:pb-7 xl:px-8 xl:pb-8" style={{ paddingTop: "clamp(48px, 3.5vw, 64px)" }}>
+        <div className="mb-5 pb-4">
+          <h3 className="font-serif text-2xl font-semibold leading-tight text-[#2A1400] sm:text-[30px]">
+            {isMatchmaking ? "Matchmaking Calculator" : <>Complete <span className="font-normal not-italic text-[#8B1E1E]">Your Details</span></>}
+          </h3>
+          {!isMatchmaking && <p className="mt-1.5 text-sm leading-6 text-[#6B7280]">Your personalized Kundali report will be prepared using the information below.</p>}
+        </div>
 
-        <form className="space-y-6" onSubmit={handlePayment} noValidate>
+        <form id="checkout-form" className="space-y-5" onSubmit={handlePayment} noValidate>
+          {!isMatchmaking && <div className="flex items-center gap-2.5 pb-0.5 text-xs font-bold uppercase tracking-[0.16em] text-[#C8A84B]"><FieldIcon name="person" /><span>Contact Information</span><span className="h-px flex-1 bg-[#E8D8B8]" /></div>}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <Label htmlFor="phone">WhatsApp Number</Label>
-              <input id="phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" required aria-invalid={Boolean(fieldErrors.phone)} aria-describedby={fieldErrors.phone ? "phone-error" : undefined} placeholder="+91 98765 43210" className={inputClass} onChange={handleChange} onFocus={trackFormStart} />
+              <div className={`flex min-h-12 items-center rounded-lg border bg-[#FCF7EE] transition-colors focus-within:ring-2 focus-within:ring-[#C8A84B]/50 sm:min-h-[52px] ${fieldErrors.phone ? "border-[#DC2626]" : "border-[#E8D8B8]"}`}>
+                <span className="ml-3 flex h-5 w-7 shrink-0 items-center" aria-hidden="true">
+                  <svg viewBox="0 0 28 20" className="h-4 w-6 rounded-[2px]" focusable="false">
+                    <path fill="#FF9933" d="M0 0h28v6.67H0z" />
+                    <path fill="#fff" d="M0 6.67h28v6.66H0z" />
+                    <path fill="#138808" d="M0 13.33h28V20H0z" />
+                    <circle cx="14" cy="10" r="2.1" fill="none" stroke="#000080" strokeWidth="0.7" />
+                    <circle cx="14" cy="10" r="0.55" fill="#000080" />
+                  </svg>
+                </span>
+                <div className="relative flex h-8 shrink-0 items-center border-r border-[#E8D8B8] pr-2">
+                  <select
+                    aria-label="Country calling code"
+                    value={countryCode}
+                    onChange={(event) => {
+                      setCountryCode(event.target.value);
+                      clearFieldError("phone");
+                    }}
+                    className="h-full w-[42px] appearance-none bg-transparent pl-1 pr-3 text-sm text-[#2A1400] focus:outline-none"
+                  >
+                    <option value="+91">+91</option>
+                  </select>
+                  <svg aria-hidden="true" viewBox="0 0 16 16" className="pointer-events-none absolute right-1 h-3.5 w-3.5 text-[#6B4423]">
+                    <path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel-national"
+                  required
+                  value={form.phone}
+                  aria-invalid={Boolean(fieldErrors.phone)}
+                  aria-describedby={fieldErrors.phone ? "phone-error" : "phone-help"}
+                  placeholder="WhatsApp Number"
+                  className="min-w-0 flex-1 bg-transparent px-3 py-2 text-base text-[#2A1400] focus:outline-none"
+                  onChange={handlePhoneChange}
+                  onFocus={trackFormStart}
+                />
+              </div>
               <FieldError field="phone" message={fieldErrors.phone} />
+              <p id="phone-help" className="mt-1.5 text-[11px] leading-4 text-[#6B4423]">Your report will be sent to this number.</p>
             </div>
             <div>
               <Label htmlFor="email">Email Address</Label>
-              <input id="email" name="email" type="email" inputMode="email" autoComplete="email" required aria-invalid={Boolean(fieldErrors.email)} aria-describedby={fieldErrors.email ? "email-error" : undefined} placeholder="you@example.com" className={inputClass} onChange={handleChange} onFocus={trackFormStart} />
+              <FieldInput leadingIcon="mail" id="email" name="email" type="email" inputMode="email" autoComplete="email" required aria-invalid={Boolean(fieldErrors.email)} aria-describedby={fieldErrors.email ? "email-error" : undefined} placeholder="you@example.com" className={inputClass} onChange={handleChange} onFocus={trackFormStart} />
+              <p className="mt-1.5 flex items-start gap-1.5 text-[11px] leading-4 text-[#6B4423]"><FieldIcon name="lock" /><span>We only use these details to prepare and deliver your report.</span></p>
               <FieldError field="email" message={fieldErrors.email} />
             </div>
           </div>
@@ -940,23 +1129,30 @@ function CheckoutContent() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <Label htmlFor="reportType" required={false}>Selected Package</Label>
-              <input 
+              <div className="relative">
+              <FieldInput
+                leadingIcon="package"
                 id="reportType"
                 name="reportType" 
                 value={form.reportType} 
                 title={form.reportType}
                 readOnly 
-                className={`${inputClass} bg-[#F4EAD6] text-[#6B4423] cursor-not-allowed border-transparent text-ellipsis overflow-hidden`} 
+                className={`${inputClass} pr-10 bg-[#FCF7EE] text-[#6B4423] cursor-not-allowed text-ellipsis overflow-hidden`}
               />
+              <SelectChevron className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#8B1E1E]" />
+              </div>
             </div>
             <div>
               {isMatchmaking ? (
                 <>
                   <Label htmlFor="language">Report Language</Label>
-                  <select id="language" required name="language" className={inputClass} value={form.language} onChange={handleChange}>
-                    <option value="hindi">Hindi (हिंदी)</option>
-                    <option value="english">English</option>
-                  </select>
+                  <div className="relative">
+                    <span className="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2"><FieldIcon name="globe" /></span>
+                    <select id="language" required name="language" className={`${inputClass} pl-10`} value={form.language} onChange={handleChange}>
+                      <option value="hindi">Hindi (हिंदी)</option>
+                      <option value="english">English</option>
+                    </select>
+                  </div>
                 </>
               ) : (
                 <>
@@ -966,6 +1162,7 @@ function CheckoutContent() {
                     labelId="language-label"
                     name="language"
                     value={form.language}
+                    leadingIcon="globe"
                     ariaLabel="Report language"
                     required
                     onChange={(value) => handleSelectValueChange("language", value)}
@@ -978,14 +1175,16 @@ function CheckoutContent() {
             </div>
           </div>
 
-          <div className="space-y-5 pt-4">
-            <h4 className="font-bold text-[#8B1E1E] text-sm uppercase tracking-widest border-l-4 border-[#8B1E1E] pl-3">
-              {isMatchmaking ? "Person 1 Details (You)" : "Birth Details"}
+            <div className="space-y-5 pt-4">
+            <h4 className="flex items-center gap-2.5 pt-4 text-xs font-bold uppercase tracking-[0.16em] text-[#C8A84B]">
+              <FieldIcon name="calendar" />
+              <span>{isMatchmaking ? "Person 1 Details (You)" : "Birth Details"}</span>
+              <span className="h-px flex-1 bg-[#E8D8B8]" />
             </h4>
             <div className={isMatchmaking ? "grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4" : "space-y-4"}>
               <div>
                 <Label htmlFor="name">Full Name</Label>
-                <input id="name" name="name" autoComplete="name" required aria-invalid={Boolean(fieldErrors.name)} aria-describedby={fieldErrors.name ? "name-error" : undefined} placeholder="Enter your full name" className={isMatchmaking ? matchmakingInputClass : inputClass} onChange={handleChange} onFocus={trackFormStart} />
+                {isMatchmaking ? <input id="name" name="name" autoComplete="name" required aria-invalid={Boolean(fieldErrors.name)} aria-describedby={fieldErrors.name ? "name-error" : undefined} placeholder="Enter your full name" className={matchmakingInputClass} onChange={handleChange} onFocus={trackFormStart} /> : <FieldInput leadingIcon="person" id="name" name="name" autoComplete="name" required aria-invalid={Boolean(fieldErrors.name)} aria-describedby={fieldErrors.name ? "name-error" : undefined} placeholder="Enter your full name" className={inputClass} onChange={handleChange} onFocus={trackFormStart} />}
                 <FieldError field="name" message={fieldErrors.name} />
               </div>
               
@@ -1032,9 +1231,6 @@ function CheckoutContent() {
                           <MenuItem key={range.value} value={range.value} sx={{ minHeight: 44, whiteSpace: "normal", py: 1.25 }}>{range.label}</MenuItem>
                         ))}
                       </StyledSelectField>
-                      <p id="tobApproximateRange-help" className="mt-1.5 text-xs leading-5 text-[#6B5A48]">
-                        An estimate may make time-sensitive chart details less precise.
-                      </p>
                       <FieldError field="tobApproximateRange" message={fieldErrors.tobApproximateRange} />
                     </div>
                   ) : isMatchmaking ? (
@@ -1059,62 +1255,46 @@ function CheckoutContent() {
                     />
                   )}
                   {!isMatchmaking && (
-                    <label className="mt-2 flex min-h-10 w-full cursor-pointer items-center gap-2.5 rounded-lg border border-[#E8DCC4] bg-[#FFFCF6] px-3 py-2 text-sm leading-5 text-[#4A2E10] transition-colors hover:bg-[#FBF4E8] focus-within:ring-2 focus-within:ring-[#C8A84B]/60 focus-within:ring-offset-1">
+                    <label className="mt-2 inline-flex min-h-6 cursor-pointer items-center gap-2.5 text-sm leading-5 text-[#2A1400] focus-within:rounded focus-within:ring-2 focus-within:ring-[#C8A84B]/60 focus-within:ring-offset-2">
                       <input
                         type="checkbox"
                         checked={form.tobAccuracy === "approximate"}
                         onChange={(event) => handleApproximateBirthTimeToggle(event.target.checked)}
-                        className="h-4 w-4 shrink-0 accent-[#8B1E1E]"
+                        className="h-[18px] w-[18px] shrink-0 accent-[#8B1E1E]"
                       />
                       <span>I don&apos;t know the exact birth time</span>
                     </label>
+                  )}
+                  {!isMatchmaking && form.tobAccuracy === "approximate" && (
+                    <p id="tobApproximateRange-help" className="mt-1.5 flex items-start gap-1.5 text-[11px] leading-4 text-[#6B4423]">
+                      <FieldIcon name="info" />
+                      <span>Approximate time is okay if exact time is unavailable.</span>
+                    </p>
                   )}
                 </div>
               </div>
               <div className={isMatchmaking ? "block" : "grid grid-cols-1 sm:grid-cols-2 gap-5"}>
                 <div className="mb-4">
                    <Label htmlFor="city">Place of Birth</Label>
-                   <input id="city" required name="city" aria-invalid={Boolean(fieldErrors.city)} aria-describedby={fieldErrors.city ? "city-error" : undefined} placeholder="Search or enter place of birth" className={isMatchmaking ? matchmakingInputClass : inputClass} onChange={handleChange} onFocus={trackFormStart} />
+                   {isMatchmaking ? <input id="city" required name="city" aria-invalid={Boolean(fieldErrors.city)} aria-describedby={fieldErrors.city ? "city-error" : undefined} placeholder="Search or enter place of birth" className={matchmakingInputClass} onChange={handleChange} onFocus={trackFormStart} /> : <FieldInput leadingIcon="pin" id="city" required name="city" aria-invalid={Boolean(fieldErrors.city)} aria-describedby={fieldErrors.city ? "city-error" : undefined} placeholder="Search or enter place of birth" className={inputClass} onChange={handleChange} onFocus={trackFormStart} />}
                    <FieldError field="city" message={fieldErrors.city} />
                 </div>
                 <div>
               <Label htmlFor="pinCode">PIN Code</Label>
-              <input id="pinCode" required name="pinCode" inputMode="numeric" autoComplete="postal-code" aria-invalid={Boolean(fieldErrors.pinCode)} aria-describedby={fieldErrors.pinCode ? "pinCode-error" : undefined} placeholder="e.g. 110001" className={inputClass} onChange={handleChange} onFocus={trackFormStart} />
+              <FieldInput leadingIcon="hash" id="pinCode" required name="pinCode" inputMode="numeric" autoComplete="postal-code" aria-invalid={Boolean(fieldErrors.pinCode)} aria-describedby={fieldErrors.pinCode ? "pinCode-error" : undefined} placeholder="e.g. 110001" className={inputClass} onChange={handleChange} onFocus={trackFormStart} />
               <FieldError field="pinCode" message={fieldErrors.pinCode} />
                 </div>
-                <div>
-                   {isMatchmaking ? (
-                     <>
-                       <Label htmlFor="gender">Gender</Label>
-                       <select id="gender" required name="gender" aria-invalid={Boolean(fieldErrors.gender)} aria-describedby={fieldErrors.gender ? "gender-error" : undefined} className={matchmakingInputClass} onChange={handleChange} onFocus={trackFormStart}>
-                         <option value="">Select</option>
-                         <option value="male">Male</option>
-                         <option value="female">Female</option>
-                       </select>
-                     </>
-                   ) : (
-                     <>
-                       <Label id="gender-label" htmlFor="gender">Gender</Label>
-                       <StyledSelectField
-                         id="gender"
-                         labelId="gender-label"
-                         name="gender"
-                         value={form.gender}
-                         placeholder="Select"
-                         ariaLabel="Gender"
-                         required
-                         error={Boolean(fieldErrors.gender)}
-                         errorId={fieldErrors.gender ? "gender-error" : undefined}
-                         onChange={(value) => handleSelectValueChange("gender", value)}
-                         onFocus={trackFormStart}
-                       >
-                         <MenuItem value="male" sx={{ minHeight: 44 }}>Male</MenuItem>
-                         <MenuItem value="female" sx={{ minHeight: 44 }}>Female</MenuItem>
-                       </StyledSelectField>
-                     </>
-                   )}
-                   <FieldError field="gender" message={fieldErrors.gender} />
-                </div>
+                {isMatchmaking && (
+                  <div>
+                    <Label htmlFor="gender">Gender</Label>
+                    <select id="gender" required name="gender" aria-invalid={Boolean(fieldErrors.gender)} aria-describedby={fieldErrors.gender ? "gender-error" : undefined} className={matchmakingInputClass} onChange={handleChange} onFocus={trackFormStart}>
+                      <option value="">Select</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                    </select>
+                    <FieldError field="gender" message={fieldErrors.gender} />
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -1167,51 +1347,101 @@ function CheckoutContent() {
           )}
 
           {/* FIXED: Dropdown now appears for ANY plan that includes a question */}
+          {!isMatchmaking && !showQuestionDropdown && (
+            <div>
+              <Label id="gender-label" htmlFor="gender">Gender</Label>
+              <StyledSelectField
+                id="gender"
+                labelId="gender-label"
+                name="gender"
+                value={form.gender}
+                leadingIcon="person"
+                placeholder="Select"
+                ariaLabel="Gender"
+                required
+                error={Boolean(fieldErrors.gender)}
+                errorId={fieldErrors.gender ? "gender-error" : undefined}
+                onChange={(value) => handleSelectValueChange("gender", value)}
+                onFocus={trackFormStart}
+              >
+                <MenuItem value="male" sx={{ minHeight: 44 }}>Male</MenuItem>
+                <MenuItem value="female" sx={{ minHeight: 44 }}>Female</MenuItem>
+              </StyledSelectField>
+              <FieldError field="gender" message={fieldErrors.gender} />
+            </div>
+          )}
+
           {showQuestionDropdown && (
-            <div className="pt-2">
-              {isMatchmaking ? (
-                <>
-                  <Label htmlFor="challenge">Select Your 1 Primary Question</Label>
-                  <select id="challenge" name="challenge" required aria-invalid={Boolean(fieldErrors.challenge)} aria-describedby={fieldErrors.challenge ? "challenge-error" : undefined} className={`${inputClass} border-2 border-[#C8A84B]/30`} onChange={handleChange} onFocus={trackFormStart} value={form.challenge}>
-                    <option value="">-- Choose your question --</option>
-                    {Object.entries(QUESTION_DATA).map(([key, group]) => (
-                      <optgroup key={key} label={form.language === "hindi" ? group.label.hindi : group.label.english}>
-                        {group.questions.map((question, index) => (
-                          <option key={index} value={form.language === "hindi" ? question.hi : question.en}>{form.language === "hindi" ? question.hi : question.en}</option>
-                        ))}
-                      </optgroup>
-                    ))}
-                  </select>
-                </>
-              ) : (
-                <>
-                  <Label id="challenge-label" htmlFor="challenge">Select Your 1 Primary Question</Label>
+            <div className={isMatchmaking ? "pt-2" : "grid grid-cols-1 gap-5 pt-2 sm:grid-cols-2"}>
+              {!isMatchmaking && (
+                <div>
+                  <Label id="gender-label" htmlFor="gender">Gender</Label>
                   <StyledSelectField
-                    id="challenge"
-                    labelId="challenge-label"
-                    name="challenge"
-                    value={form.challenge}
-                    placeholder="Choose your question"
-                    ariaLabel="Your primary question"
+                    id="gender"
+                    labelId="gender-label"
+                    name="gender"
+                    value={form.gender}
+                    leadingIcon="person"
+                    placeholder="Select"
+                    ariaLabel="Gender"
                     required
-                    error={Boolean(fieldErrors.challenge)}
-                    errorId={fieldErrors.challenge ? "challenge-error" : undefined}
-                    onChange={(value) => handleSelectValueChange("challenge", value)}
+                    error={Boolean(fieldErrors.gender)}
+                    errorId={fieldErrors.gender ? "gender-error" : undefined}
+                    onChange={(value) => handleSelectValueChange("gender", value)}
                     onFocus={trackFormStart}
                   >
-                    {Object.entries(QUESTION_DATA).flatMap(([key, group]) => [
-                      <ListSubheader key={`group-${key}`} sx={{ color: "#8B1E1E", fontWeight: 700, lineHeight: "40px" }}>
-                        {form.language === "hindi" ? group.label.hindi : group.label.english}
-                      </ListSubheader>,
-                      ...group.questions.map((question, index) => {
-                        const text = form.language === "hindi" ? question.hi : question.en;
-                        return <MenuItem key={`${key}-${index}`} value={text} sx={{ minHeight: 48, whiteSpace: "normal", py: 1.25 }}>{text}</MenuItem>;
-                      }),
-                    ])}
+                    <MenuItem value="male" sx={{ minHeight: 44 }}>Male</MenuItem>
+                    <MenuItem value="female" sx={{ minHeight: 44 }}>Female</MenuItem>
                   </StyledSelectField>
-                </>
+                  <FieldError field="gender" message={fieldErrors.gender} />
+                </div>
               )}
-              <FieldError field="challenge" message={fieldErrors.challenge} />
+              <div>
+                {isMatchmaking ? (
+                  <>
+                    <Label htmlFor="challenge">Select Your 1 Primary Question</Label>
+                    <select id="challenge" name="challenge" required aria-invalid={Boolean(fieldErrors.challenge)} aria-describedby={fieldErrors.challenge ? "challenge-error" : undefined} className={`${inputClass} border-2 border-[#C8A84B]/30`} onChange={handleChange} onFocus={trackFormStart} value={form.challenge}>
+                      <option value="">-- Choose your question --</option>
+                      {Object.entries(QUESTION_DATA).map(([key, group]) => (
+                        <optgroup key={key} label={form.language === "hindi" ? group.label.hindi : group.label.english}>
+                          {group.questions.map((question, index) => (
+                            <option key={index} value={form.language === "hindi" ? question.hi : question.en}>{form.language === "hindi" ? question.hi : question.en}</option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                  </>
+                ) : (
+                  <>
+                    <Label id="challenge-label" htmlFor="challenge">Select Your 1 Primary Question</Label>
+                    <StyledSelectField
+                      id="challenge"
+                      labelId="challenge-label"
+                      name="challenge"
+                      value={form.challenge}
+                      leadingIcon="message"
+                      placeholder="Choose your question"
+                      ariaLabel="Your primary question"
+                      required
+                      error={Boolean(fieldErrors.challenge)}
+                      errorId={fieldErrors.challenge ? "challenge-error" : undefined}
+                      onChange={(value) => handleSelectValueChange("challenge", value)}
+                      onFocus={trackFormStart}
+                    >
+                      {Object.entries(QUESTION_DATA).flatMap(([key, group]) => [
+                        <ListSubheader key={`group-${key}`} sx={{ color: "#8B1E1E", fontWeight: 700, lineHeight: "40px" }}>
+                          {form.language === "hindi" ? group.label.hindi : group.label.english}
+                        </ListSubheader>,
+                        ...group.questions.map((question, index) => {
+                          const text = form.language === "hindi" ? question.hi : question.en;
+                          return <MenuItem key={`${key}-${index}`} value={text} sx={{ minHeight: 48, whiteSpace: "normal", py: 1.25 }}>{text}</MenuItem>;
+                        }),
+                      ])}
+                    </StyledSelectField>
+                  </>
+                )}
+                <FieldError field="challenge" message={fieldErrors.challenge} />
+              </div>
             </div>
           )}
 
@@ -1219,7 +1449,7 @@ function CheckoutContent() {
           {!isMatchmaking && !showQuestionDropdown && (
             <div className="animate-in fade-in slide-in-from-top-2 duration-500 pt-2">
                 <Label htmlFor="challenge">Current Challenge You Are Facing</Label>
-                <textarea 
+                <FieldTextarea leadingIcon="message"
                   id="challenge"
                   name="challenge"
                   rows={4}
@@ -1235,90 +1465,107 @@ function CheckoutContent() {
             </div>
           )}
 
-          <div className="mt-8 p-4 bg-[#FCF7EE] rounded-xl border border-[#E8D8B8]/50">
-            <div className="flex items-start gap-3">
-            <input type="checkbox" id="terms" required checked={agreedToTerms} aria-invalid={Boolean(fieldErrors.terms)} aria-describedby={fieldErrors.terms ? "terms-error" : undefined} onChange={(e) => { setAgreedToTerms(e.target.checked); if (e.target.checked) clearFieldError("terms"); }} onFocus={trackFormStart} className="mt-0.5 w-6 h-6 shrink-0 accent-[#8B1E1E]" />
-            <label htmlFor="terms" className="text-sm text-[#6B4423]">I verify details are accurate. I agree to <Link href="/terms-and-conditions" className="text-[#8B1E1E] font-bold">Terms</Link>.</label>
+          <div className="mt-7">
+            <div className="flex items-start gap-2.5">
+              <input type="checkbox" id="terms" required checked={agreedToTerms} aria-invalid={Boolean(fieldErrors.terms)} aria-describedby={fieldErrors.terms ? "terms-error" : undefined} onChange={(e) => { setAgreedToTerms(e.target.checked); if (e.target.checked) clearFieldError("terms"); }} onFocus={trackFormStart} className="mt-0.5 h-[18px] w-[18px] shrink-0 accent-[#8B1E1E]" />
+              <label htmlFor="terms" className="text-sm leading-6 text-[#4B5563]">I verify the details are accurate. I agree to <Link href="/terms-and-conditions" className="font-semibold text-[#8B1E1E]">Terms</Link>.</label>
             </div>
             <FieldError field="terms" message={fieldErrors.terms} />
           </div>
 
-          {paymentError && <p role="alert" className="rounded-xl border border-[#A32424]/30 bg-[#FFF5F3] px-4 py-3 text-sm font-medium text-[#8B1E1E]">{paymentError}</p>}
-
-          <div className="mt-6 rounded-2xl border border-[#E8D8B8] bg-gradient-to-b from-white to-[#FFFAF1] p-3.5 shadow-[0_8px_24px_rgba(61,22,0,0.06)] sm:p-5">
-            <button type="submit" disabled={loading} aria-busy={loading} className="flex min-h-[58px] w-full items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-[#8B1E1E] to-[#651717] px-4 py-3.5 text-base font-bold text-white shadow-[0_5px_14px_rgba(101,23,23,0.24)] transition-[transform,box-shadow,opacity] duration-200 hover:shadow-[0_7px_18px_rgba(101,23,23,0.3)] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B1E1E] focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-75 sm:text-lg">
-              {loading ? (
-                <>
-                  <svg aria-hidden="true" className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.35" strokeWidth="3" />
-                    <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-                  </svg>
-                  <span>Opening secure payment…</span>
-                </>
-              ) : (
-                <>
-                  <svg aria-hidden="true" className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="10" fill="white" />
-                    <path d="m7.8 12.2 2.7 2.7 5.8-6" stroke="#7A1B1B" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  <span>Pay securely</span>
-                  <span className="tabular-nums">₹{finalAmount}</span>
-                </>
-              )}
-            </button>
-
-            <div className="mt-3 flex items-center justify-center gap-5 sm:gap-7" aria-label="Security certifications">
-              <img
-                src="https://d3ldyx3r2ad3ic.cloudfront.net/templates/template-assets/images/store-checkout-2/mcafe.png"
-                alt="McAfee SECURE"
-                width={120}
-                height={40}
-                loading="lazy"
-                className="h-8 w-auto max-w-[42%] object-contain"
-              />
-              <img
-                src="https://d3ldyx3r2ad3ic.cloudfront.net/templates/template-assets/images/store-checkout-2/norton.png"
-                alt="Norton Secured"
-                width={120}
-                height={40}
-                loading="lazy"
-                className="h-8 w-auto max-w-[42%] object-contain"
-              />
+          <div className="mt-5 grid grid-cols-1 gap-2 rounded-xl bg-[#F8F2E8] px-3 py-3 sm:grid-cols-3 sm:gap-0 sm:px-4" aria-label="Checkout assurances">
+            <div className="flex items-center gap-2.5 px-1 py-1.5 sm:border-r sm:border-[#D9C8AA] sm:px-3 sm:first:pl-0">
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-7 w-7 shrink-0 text-[#8B1E1E]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3 20 6v5c0 5.2-3.4 8.5-8 10-4.6-1.5-8-4.8-8-10V6l8-3Z"/><path d="m8.5 12 2.3 2.3 4.8-4.8"/></svg>
+              <span><strong className="block text-xs font-medium leading-4 text-[#2A1400]">Secure Checkout</strong><span className="block text-[10px] leading-4 text-[#6B7280]">Payment through Razorpay</span></span>
             </div>
-
-            <div className="mx-auto mt-3 grid max-w-2xl grid-cols-1 gap-2 text-center text-xs font-medium leading-5 text-[#3D5E4B] sm:grid-cols-2 sm:gap-3">
-              <div className="flex items-center justify-center gap-2 rounded-lg px-2 py-1.5">
-                <svg aria-hidden="true" className="h-4 w-4 shrink-0 text-[#00A88F]" viewBox="0 0 20 20" fill="currentColor">
-                  <circle cx="10" cy="10" r="10" />
-                  <path d="m5.6 10.2 2.8 2.7 6-6" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <span>Verified checkout protection</span>
-              </div>
-              <div className="flex items-center justify-center gap-2 rounded-lg px-2 py-1.5">
-                <svg aria-hidden="true" className="h-4 w-4 shrink-0 text-[#00A88F]" viewBox="0 0 20 20" fill="currentColor">
-                  <circle cx="10" cy="10" r="10" />
-                  <path d="m5.6 10.2 2.8 2.7 6-6" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <span>Secure online payments</span>
-              </div>
+            <div className="flex items-center gap-2.5 px-1 py-1.5 sm:border-r sm:border-[#D9C8AA] sm:px-3">
+              <FieldIcon name="lock" className="h-7 w-7 shrink-0 text-[#8B1E1E]" />
+              <span><strong className="block text-xs font-medium leading-4 text-[#2A1400]">Private &amp; Confidential</strong><span className="block text-[10px] leading-4 text-[#6B7280]">Your information is handled securely</span></span>
             </div>
+            <div className="flex items-center gap-2.5 px-1 py-1.5 sm:px-3 sm:last:pr-0">
+              <FieldIcon name="clock" className="h-7 w-7 shrink-0 text-[#8B1E1E]" />
+              <span><strong className="block text-xs font-medium leading-4 text-[#2A1400]">Delivered within timeline</strong><span className="block text-[10px] leading-4 text-[#6B7280]">On WhatsApp + Email</span></span>
+            </div>
+          </div>
+          <div className="mt-3 flex items-center justify-center gap-4" aria-label="McAfee and Norton security badges">
+            <img
+              src="https://d3ldyx3r2ad3ic.cloudfront.net/templates/template-assets/images/store-checkout-2/mcafe.png"
+              alt="McAfee SECURE"
+              width={82}
+              height={30}
+              loading="lazy"
+              decoding="async"
+              className="h-[30px] w-auto object-contain"
+            />
+            <img
+              src="https://d3ldyx3r2ad3ic.cloudfront.net/templates/template-assets/images/store-checkout-2/norton.png"
+              alt="Norton SECURED"
+              width={82}
+              height={30}
+              loading="lazy"
+              decoding="async"
+              className="h-[30px] w-auto object-contain"
+            />
           </div>
         </form>
       </div>
     </div>
+
+    <div className="fixed inset-x-0 bottom-0 z-[60] border-t border-[#E8D8B8] bg-white/95 px-3 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_rgba(61,22,0,0.12)] backdrop-blur-sm sm:px-6">
+      <div className="mx-auto max-w-2xl">
+        {paymentError && <p role="alert" className="mb-2 rounded-xl border border-[#A32424]/30 bg-[#FFF5F3] px-4 py-2.5 text-sm font-medium text-[#8B1E1E]">{paymentError}</p>}
+        <button form="checkout-form" type="submit" disabled={loading} aria-busy={loading} className="checkout-pay-button relative isolate flex min-h-[62px] w-full items-center justify-center gap-2.5 overflow-hidden rounded-xl bg-gradient-to-r from-[#8B1E1E] to-[#651717] px-4 py-3.5 text-lg font-medium text-white shadow-[0_5px_14px_rgba(101,23,23,0.24)] transition-[transform,box-shadow,opacity] duration-200 hover:shadow-[0_7px_18px_rgba(101,23,23,0.3)] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B1E1E] focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-75 sm:text-xl">
+          {loading ? (
+            <>
+              <svg aria-hidden="true" className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.35" strokeWidth="3" />
+                <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+              </svg>
+              <span>Opening secure payment…</span>
+            </>
+          ) : (
+            <>
+              <span>Pay securely</span>
+              <span className="tabular-nums">₹{finalAmount}</span>
+              <span aria-hidden="true" className="ml-0.5 inline-flex shrink-0 items-center pl-1.5">
+                {(["googlepay", "phonepe", "popclubapp", "paytm"] as const).map((app) => (
+                  <span key={app} className="relative -ml-1.5 flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border border-[#2A1400]/10 bg-white shadow-sm">
+                    <img
+                      src={`https://cdn.razorpay.com/app/${app}.svg`}
+                      alt=""
+                      width={12}
+                      height={12}
+                      className="h-3 w-3 object-contain"
+                    />
+                  </span>
+                ))}
+              </span>
+              <span className="sr-only">UPI payment apps: Google Pay, PhonePe, POP Club, and Paytm.</span>
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+    </>
   );
 }
 
 export default function CheckoutPage() {
   return (
-    <div className="min-h-screen bg-[#FCF7EE] font-sans text-[#2A1400] pb-20">
-      <header className="bg-white border-b border-[#E8D8B8] py-5 px-4 mb-8 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+    <div className="checkout-page min-h-screen bg-[#FCF7EE] font-sans text-[#2A1400] pb-32">
+      <header className="sticky top-0 z-50 border-b border-[#E8D8B8] bg-white px-4 py-1">
+        <div className="mx-auto flex max-w-[1320px] items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <img src="/logo.svg" alt="Logo" className="h-14 w-auto" />
-            <div className="hidden sm:block text-[1.15rem] font-bold">Surbhi Gupta</div>
+            <img src="/surbhi-astrology-logo.png" alt="Surbhi Astrology — Celebrity Astrologer Surbhi Gupta" className="h-12 w-auto object-contain md:h-16" />
           </Link>
-          <div className="text-[#1B4D30] font-bold text-xs uppercase bg-[#E6F5EE] px-3 py-1.5 rounded-full">Secure Checkout</div>
+          <a href="https://wa.me/919251151330" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp" className="flex min-h-10 items-center gap-2.5 rounded-xl border border-[#E8D8B8] bg-white px-2.5 py-1.5 text-[#168A55] shadow-[0_2px_8px_rgba(61,22,0,0.04)] transition-colors hover:bg-[#F5FBF7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#168A55] focus-visible:ring-offset-2 sm:px-3.5">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E6F5EE]">
+              <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.52 3.48A11.79 11.79 0 0 0 12.13 0C5.58 0 .25 5.33.25 11.88c0 2.1.55 4.16 1.59 5.98L.15 24l6.29-1.65a11.9 11.9 0 0 0 5.69 1.45h.01c6.55 0 11.88-5.33 11.88-11.88 0-3.17-1.24-6.15-3.5-8.44ZM12.14 21.8h-.01a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.73.98 1-3.64-.24-.37a9.88 9.88 0 1 1 8.38 4.62Zm5.42-7.4c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.27-.47-2.42-1.5-.9-.8-1.51-1.78-1.68-2.08-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.49 0 1.47 1.07 2.89 1.22 3.09.15.2 2.1 3.2 5.1 4.49.71.3 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.42.25-.7.25-1.3.17-1.42-.07-.13-.27-.2-.57-.35Z" />
+              </svg>
+            </span>
+            <span className="hidden text-left leading-tight sm:block"><span className="block text-[11px] font-medium text-[#475569]">Need Help?</span><span className="block text-xs font-semibold">Chat on WhatsApp →</span></span>
+          </a>
         </div>
       </header>
       <Suspense fallback={<div className="flex justify-center items-center h-[50vh]"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B1E1E]"></div></div>}>

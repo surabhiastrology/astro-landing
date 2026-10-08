@@ -16,9 +16,9 @@ export default function TermsAndConditions() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <a href="/" className="flex-shrink-0 flex items-center">
             <img 
-              src="/logo.svg" 
+              src="/surbhi-astrology-logo.png"
               alt="Celebrity Astrologer Surbhi Gupta" 
-              className="h-14 sm:h-16 lg:h-16 w-auto object-cover"
+              className="h-14 sm:h-16 lg:h-16 w-auto object-contain"
               
             />
             <div className="hidden fraunces text-[1.15rem] sm:text-[1.35rem] font-bold">

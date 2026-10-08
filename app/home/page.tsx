@@ -712,9 +712,9 @@ const time = useCountdown();
       <nav className="sticky top-0 z-[99] flex items-center justify-between px-4 lg:px-8 h-[70px] border-b backdrop-blur-xl" style={{ background: "rgba(252,247,238,0.9)", borderColor: C.iv2 }}>
         <Link href="/" className="flex-shrink-0 flex items-center">
           <img 
-            src="/logo.svg" 
+            src="/surbhi-astrology-logo.png"
             alt="celebrity astrologer Surbhi Gupta" 
-            className="h-14 sm:h-16 lg:h-16 w-auto object-cover"
+            className="h-14 sm:h-16 lg:h-16 w-auto object-contain"
             onError={(e) => {
               // Fallback to text if the SVG is missing or fails to load
               e.currentTarget.style.display = 'none';
