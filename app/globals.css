@@ -109,8 +109,65 @@ body::before {
   animation: checkout-button-shimmer 4.5s ease-in-out infinite;
 }
 
+@property --checkout-question-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes checkout-question-orbit {
+  to { --checkout-question-angle: 360deg; }
+}
+
+@keyframes checkout-question-badge-shimmer {
+  0%, 62% { transform: translateX(0) skewX(-18deg); }
+  100% { transform: translateX(550%) skewX(-18deg); }
+}
+
+.checkout-featured-question {
+  --checkout-question-angle: 0deg;
+  padding: 2.5px;
+  border-radius: 0.65rem;
+  background: conic-gradient(
+    from var(--checkout-question-angle),
+    #8B1E1E 0deg,
+    #C8A84B 90deg,
+    #8B1E1E 180deg,
+    #C8A84B 270deg,
+    #8B1E1E 360deg
+  );
+  animation: checkout-question-orbit 5.5s linear infinite;
+  transition: box-shadow 180ms ease;
+}
+
+.checkout-featured-question:focus-within {
+  box-shadow: 0 0 0 3px rgba(139, 30, 30, 0.1), 0 7px 20px rgba(61, 22, 0, 0.08);
+}
+
+.checkout-question-badge {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #8B1E1E;
+  color: #FFFCF6;
+  box-shadow: 0 2px 8px rgba(139, 30, 30, 0.18);
+}
+
+.checkout-question-badge::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: -20% auto -20% -45%;
+  width: 32%;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(200, 168, 75, 0.85), transparent);
+  animation: checkout-question-badge-shimmer 3.8s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .checkout-pay-button::after { animation: none; }
+  .checkout-featured-question,
+  .checkout-question-badge::after { animation: none; }
 }
 
 /* Pulsating gold dot */

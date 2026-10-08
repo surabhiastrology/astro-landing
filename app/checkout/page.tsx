@@ -1126,19 +1126,54 @@ function CheckoutContent() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {showQuestionDropdown && !isMatchmaking && (
+              <div className="sm:col-span-2">
+                <label id="challenge-label" htmlFor="challenge" className="mb-1.5 flex items-center justify-between gap-3 text-sm font-semibold leading-5 text-black">
+                  <span className="flex min-w-0 items-center gap-1.5">Select Your 1 Primary Question <RequiredMark /></span>
+                  <span className="checkout-question-badge shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none"><span className="relative z-[1]">1 question included</span></span>
+                </label>
+                <div className="checkout-featured-question">
+                  <StyledSelectField
+                    id="challenge"
+                    labelId="challenge-label"
+                    name="challenge"
+                    value={form.challenge}
+                    leadingIcon="message"
+                    placeholder="Choose your question"
+                    ariaLabel="Your primary question"
+                    required
+                    error={Boolean(fieldErrors.challenge)}
+                    errorId={fieldErrors.challenge ? "challenge-error" : undefined}
+                    onChange={(value) => handleSelectValueChange("challenge", value)}
+                    onFocus={trackFormStart}
+                  >
+                    {Object.entries(QUESTION_DATA).flatMap(([key, group]) => [
+                      <ListSubheader key={`group-${key}`} sx={{ color: "#8B1E1E", fontWeight: 700, lineHeight: "40px" }}>
+                        {form.language === "hindi" ? group.label.hindi : group.label.english}
+                      </ListSubheader>,
+                      ...group.questions.map((question, index) => {
+                        const text = form.language === "hindi" ? question.hi : question.en;
+                        return <MenuItem key={`${key}-${index}`} value={text} sx={{ minHeight: 48, whiteSpace: "normal", py: 1.25 }}>{text}</MenuItem>;
+                      }),
+                    ])}
+                  </StyledSelectField>
+                </div>
+                <FieldError field="challenge" message={fieldErrors.challenge} />
+              </div>
+            )}
             <div>
               <Label htmlFor="reportType" required={false}>Selected Package</Label>
               <div className="relative">
-              <FieldInput
-                leadingIcon="package"
-                id="reportType"
-                name="reportType" 
-                value={form.reportType} 
-                title={form.reportType}
-                readOnly 
-                className={`${inputClass} pr-10 bg-[#FCF7EE] text-[#6B4423] cursor-not-allowed text-ellipsis overflow-hidden`}
-              />
-              <SelectChevron className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#8B1E1E]" />
+                <FieldInput
+                  leadingIcon="package"
+                  id="reportType"
+                  name="reportType"
+                  value={form.reportType}
+                  title={form.reportType}
+                  readOnly
+                  className={`${inputClass} pr-10 bg-[#FCF7EE] text-[#6B4423] cursor-not-allowed text-ellipsis overflow-hidden`}
+                />
+                <SelectChevron className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#8B1E1E]" />
               </div>
             </div>
             <div>
@@ -1181,10 +1216,35 @@ function CheckoutContent() {
               <span className="h-px flex-1 bg-[#E8D8B8]" />
             </h4>
             <div className={isMatchmaking ? "grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4" : "space-y-4"}>
+              <div className={isMatchmaking ? "contents" : "grid grid-cols-1 sm:grid-cols-2 gap-5"}>
               <div>
                 <Label htmlFor="name">Full Name</Label>
                 {isMatchmaking ? <input id="name" name="name" autoComplete="name" required aria-invalid={Boolean(fieldErrors.name)} aria-describedby={fieldErrors.name ? "name-error" : undefined} placeholder="Enter your full name" className={matchmakingInputClass} onChange={handleChange} onFocus={trackFormStart} /> : <FieldInput leadingIcon="person" id="name" name="name" autoComplete="name" required aria-invalid={Boolean(fieldErrors.name)} aria-describedby={fieldErrors.name ? "name-error" : undefined} placeholder="Enter your full name" className={inputClass} onChange={handleChange} onFocus={trackFormStart} />}
                 <FieldError field="name" message={fieldErrors.name} />
+              </div>
+              {!isMatchmaking && (
+                <div>
+                  <Label id="gender-label" htmlFor="gender">Gender</Label>
+                  <StyledSelectField
+                    id="gender"
+                    labelId="gender-label"
+                    name="gender"
+                    value={form.gender}
+                    leadingIcon="person"
+                    placeholder="Select"
+                    ariaLabel="Gender"
+                    required
+                    error={Boolean(fieldErrors.gender)}
+                    errorId={fieldErrors.gender ? "gender-error" : undefined}
+                    onChange={(value) => handleSelectValueChange("gender", value)}
+                    onFocus={trackFormStart}
+                  >
+                    <MenuItem value="male" sx={{ minHeight: 44 }}>Male</MenuItem>
+                    <MenuItem value="female" sx={{ minHeight: 44 }}>Female</MenuItem>
+                  </StyledSelectField>
+                  <FieldError field="gender" message={fieldErrors.gender} />
+                </div>
+              )}
               </div>
               
               <div className={isMatchmaking ? "block" : "grid grid-cols-1 min-[1280px]:grid-cols-2 gap-4 sm:gap-5"}>
@@ -1345,102 +1405,20 @@ function CheckoutContent() {
             </div>
           )}
 
-          {/* FIXED: Dropdown now appears for ANY plan that includes a question */}
-          {!isMatchmaking && !showQuestionDropdown && (
-            <div>
-              <Label id="gender-label" htmlFor="gender">Gender</Label>
-              <StyledSelectField
-                id="gender"
-                labelId="gender-label"
-                name="gender"
-                value={form.gender}
-                leadingIcon="person"
-                placeholder="Select"
-                ariaLabel="Gender"
-                required
-                error={Boolean(fieldErrors.gender)}
-                errorId={fieldErrors.gender ? "gender-error" : undefined}
-                onChange={(value) => handleSelectValueChange("gender", value)}
-                onFocus={trackFormStart}
-              >
-                <MenuItem value="male" sx={{ minHeight: 44 }}>Male</MenuItem>
-                <MenuItem value="female" sx={{ minHeight: 44 }}>Female</MenuItem>
-              </StyledSelectField>
-              <FieldError field="gender" message={fieldErrors.gender} />
-            </div>
-          )}
-
-          {showQuestionDropdown && (
-            <div className={isMatchmaking ? "pt-2" : "grid grid-cols-1 gap-5 pt-2 sm:grid-cols-2"}>
-              {!isMatchmaking && (
-                <div>
-                  <Label id="gender-label" htmlFor="gender">Gender</Label>
-                  <StyledSelectField
-                    id="gender"
-                    labelId="gender-label"
-                    name="gender"
-                    value={form.gender}
-                    leadingIcon="person"
-                    placeholder="Select"
-                    ariaLabel="Gender"
-                    required
-                    error={Boolean(fieldErrors.gender)}
-                    errorId={fieldErrors.gender ? "gender-error" : undefined}
-                    onChange={(value) => handleSelectValueChange("gender", value)}
-                    onFocus={trackFormStart}
-                  >
-                    <MenuItem value="male" sx={{ minHeight: 44 }}>Male</MenuItem>
-                    <MenuItem value="female" sx={{ minHeight: 44 }}>Female</MenuItem>
-                  </StyledSelectField>
-                  <FieldError field="gender" message={fieldErrors.gender} />
-                </div>
-              )}
-              <div>
-                {isMatchmaking ? (
-                  <>
-                    <Label htmlFor="challenge">Select Your 1 Primary Question</Label>
-                    <select id="challenge" name="challenge" required aria-invalid={Boolean(fieldErrors.challenge)} aria-describedby={fieldErrors.challenge ? "challenge-error" : undefined} className={`${inputClass} border-2 border-[#C8A84B]/30`} onChange={handleChange} onFocus={trackFormStart} value={form.challenge}>
-                      <option value="">-- Choose your question --</option>
-                      {Object.entries(QUESTION_DATA).map(([key, group]) => (
-                        <optgroup key={key} label={form.language === "hindi" ? group.label.hindi : group.label.english}>
-                          {group.questions.map((question, index) => (
-                            <option key={index} value={form.language === "hindi" ? question.hi : question.en}>{form.language === "hindi" ? question.hi : question.en}</option>
-                          ))}
-                        </optgroup>
-                      ))}
-                    </select>
-                  </>
-                ) : (
-                  <>
-                    <Label id="challenge-label" htmlFor="challenge">Select Your 1 Primary Question</Label>
-                    <StyledSelectField
-                      id="challenge"
-                      labelId="challenge-label"
-                      name="challenge"
-                      value={form.challenge}
-                      leadingIcon="message"
-                      placeholder="Choose your question"
-                      ariaLabel="Your primary question"
-                      required
-                      error={Boolean(fieldErrors.challenge)}
-                      errorId={fieldErrors.challenge ? "challenge-error" : undefined}
-                      onChange={(value) => handleSelectValueChange("challenge", value)}
-                      onFocus={trackFormStart}
-                    >
-                      {Object.entries(QUESTION_DATA).flatMap(([key, group]) => [
-                        <ListSubheader key={`group-${key}`} sx={{ color: "#8B1E1E", fontWeight: 700, lineHeight: "40px" }}>
-                          {form.language === "hindi" ? group.label.hindi : group.label.english}
-                        </ListSubheader>,
-                        ...group.questions.map((question, index) => {
-                          const text = form.language === "hindi" ? question.hi : question.en;
-                          return <MenuItem key={`${key}-${index}`} value={text} sx={{ minHeight: 48, whiteSpace: "normal", py: 1.25 }}>{text}</MenuItem>;
-                        }),
-                      ])}
-                    </StyledSelectField>
-                  </>
-                )}
-                <FieldError field="challenge" message={fieldErrors.challenge} />
-              </div>
+          {showQuestionDropdown && isMatchmaking && (
+            <div className="pt-2">
+              <Label htmlFor="challenge">Select Your 1 Primary Question</Label>
+              <select id="challenge" name="challenge" required aria-invalid={Boolean(fieldErrors.challenge)} aria-describedby={fieldErrors.challenge ? "challenge-error" : undefined} className={`${inputClass} border-2 border-[#C8A84B]/30`} onChange={handleChange} onFocus={trackFormStart} value={form.challenge}>
+                <option value="">-- Choose your question --</option>
+                {Object.entries(QUESTION_DATA).map(([key, group]) => (
+                  <optgroup key={key} label={form.language === "hindi" ? group.label.hindi : group.label.english}>
+                    {group.questions.map((question, index) => (
+                      <option key={index} value={form.language === "hindi" ? question.hi : question.en}>{form.language === "hindi" ? question.hi : question.en}</option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+              <FieldError field="challenge" message={fieldErrors.challenge} />
             </div>
           )}
 
