@@ -1126,41 +1126,6 @@ function CheckoutContent() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {showQuestionDropdown && !isMatchmaking && (
-              <div className="sm:col-span-2">
-                <label id="challenge-label" htmlFor="challenge" className="mb-1.5 flex items-center justify-between gap-3 text-sm font-semibold leading-5 text-black">
-                  <span className="flex min-w-0 items-center gap-1.5">Select Your 1 Primary Question <RequiredMark /></span>
-                  <span className="checkout-question-badge shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none"><span className="relative z-[1]">1 question included</span></span>
-                </label>
-                <div className="checkout-featured-question">
-                  <StyledSelectField
-                    id="challenge"
-                    labelId="challenge-label"
-                    name="challenge"
-                    value={form.challenge}
-                    leadingIcon="message"
-                    placeholder="Choose your question"
-                    ariaLabel="Your primary question"
-                    required
-                    error={Boolean(fieldErrors.challenge)}
-                    errorId={fieldErrors.challenge ? "challenge-error" : undefined}
-                    onChange={(value) => handleSelectValueChange("challenge", value)}
-                    onFocus={trackFormStart}
-                  >
-                    {Object.entries(QUESTION_DATA).flatMap(([key, group]) => [
-                      <ListSubheader key={`group-${key}`} sx={{ color: "#8B1E1E", fontWeight: 700, lineHeight: "40px" }}>
-                        {form.language === "hindi" ? group.label.hindi : group.label.english}
-                      </ListSubheader>,
-                      ...group.questions.map((question, index) => {
-                        const text = form.language === "hindi" ? question.hi : question.en;
-                        return <MenuItem key={`${key}-${index}`} value={text} sx={{ minHeight: 48, whiteSpace: "normal", py: 1.25 }}>{text}</MenuItem>;
-                      }),
-                    ])}
-                  </StyledSelectField>
-                </div>
-                <FieldError field="challenge" message={fieldErrors.challenge} />
-              </div>
-            )}
             <div>
               <Label htmlFor="reportType" required={false}>Selected Package</Label>
               <div className="relative">
@@ -1207,6 +1172,41 @@ function CheckoutContent() {
                 </>
               )}
             </div>
+            {showQuestionDropdown && !isMatchmaking && (
+              <div className="sm:col-span-2">
+                <label id="challenge-label" htmlFor="challenge" className="mb-1.5 flex items-center justify-between gap-3 text-sm font-semibold leading-5 text-black">
+                  <span className="flex min-w-0 items-center gap-1.5">Select Your 1 Primary Question <RequiredMark /></span>
+                  <span className="checkout-question-badge shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none"><span className="relative z-[1]">1 question included</span></span>
+                </label>
+                <div className="checkout-featured-question">
+                  <StyledSelectField
+                    id="challenge"
+                    labelId="challenge-label"
+                    name="challenge"
+                    value={form.challenge}
+                    leadingIcon="message"
+                    placeholder="Choose your question"
+                    ariaLabel="Your primary question"
+                    required
+                    error={Boolean(fieldErrors.challenge)}
+                    errorId={fieldErrors.challenge ? "challenge-error" : undefined}
+                    onChange={(value) => handleSelectValueChange("challenge", value)}
+                    onFocus={trackFormStart}
+                  >
+                    {Object.entries(QUESTION_DATA).flatMap(([key, group]) => [
+                      <ListSubheader key={`group-${key}`} sx={{ color: "#8B1E1E", fontWeight: 700, lineHeight: "40px" }}>
+                        {form.language === "hindi" ? group.label.hindi : group.label.english}
+                      </ListSubheader>,
+                      ...group.questions.map((question, index) => {
+                        const text = form.language === "hindi" ? question.hi : question.en;
+                        return <MenuItem key={`${key}-${index}`} value={text} sx={{ minHeight: 48, whiteSpace: "normal", py: 1.25 }}>{text}</MenuItem>;
+                      }),
+                    ])}
+                  </StyledSelectField>
+                </div>
+                <FieldError field="challenge" message={fieldErrors.challenge} />
+              </div>
+            )}
           </div>
 
             <div className="space-y-5 pt-4">
