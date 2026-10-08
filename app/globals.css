@@ -92,9 +92,12 @@ body::before {
 }
 
 @media (max-width: 767px) {
+  .checkout-page {
+    background-color: #fff;
+  }
+
   .checkout-page::before {
-    background-position: center 4rem;
-    background-size: auto 72vh;
+    display: none;
   }
 }
 

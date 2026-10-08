@@ -141,13 +141,13 @@ export default function SuccessPage() {
         <div className="bg-white lg:overflow-hidden lg:rounded-[26px] lg:border lg:border-[#DCC9A8] lg:bg-[#FFFEFB] lg:shadow-[0_18px_54px_rgba(68,39,17,0.08)]">
           <div className="grid lg:grid-cols-[0.92fr_1.08fr]">
             <section aria-label="Order receipt" className="order-2 bg-white lg:order-1 lg:border-r lg:border-[#E8D8B8] lg:bg-[#FCF8F0]">
-              <div className="p-5 sm:p-7 lg:p-8">
-                <div className="relative mb-7 hidden aspect-[16/9] overflow-hidden rounded-2xl bg-[#F2E7D4] md:block">
+              <div className="px-0 py-5 lg:p-8">
+                <div className="relative mb-7 hidden aspect-[16/9] overflow-hidden rounded-2xl bg-[#F2E7D4] lg:block">
                   <Image
                     src="/surbhi-kundali-report-mobile-banner.png"
                     alt="Surbhi Kundali report prepared by Surabhi Astrology"
                     fill
-                    sizes="(max-width: 1023px) 50vw, 42vw"
+                    sizes="(min-width: 1024px) 42vw, 0px"
                     className="object-cover"
                   />
                 </div>
@@ -205,7 +205,16 @@ export default function SuccessPage() {
               </div>
             </section>
 
-            <section aria-label="Payment confirmation" aria-live="polite" className="order-1 bg-white px-5 py-7 sm:px-8 sm:py-9 lg:order-2 lg:px-10 lg:py-10">
+            <section aria-label="Payment confirmation" aria-live="polite" className="order-1 bg-white px-0 py-7 lg:order-2 lg:px-10 lg:py-10">
+              <div className="relative mb-6 aspect-[16/9] overflow-hidden rounded-2xl bg-[#F2E7D4] lg:hidden">
+                <Image
+                  src="/surbhi-kundali-report-mobile-banner.png"
+                  alt="Surbhi Kundali report prepared by Surabhi Astrology"
+                  fill
+                  sizes="(max-width: 1023px) calc(100vw - 32px), 0px"
+                  className="object-cover"
+                />
+              </div>
               <div className="mb-7 flex items-start gap-4 sm:mb-8">
                 <span className={`mt-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${isPaid ? "bg-[#19965A] text-white" : "bg-[#F4EADF] text-[#8B1E1E]"}`}>
                   {isPaid ? <Check size={25} strokeWidth={2.5} aria-hidden="true" /> : isChecking || state === "pending" ? <Clock3 size={23} aria-hidden="true" /> : <ShieldCheck size={23} aria-hidden="true" />}

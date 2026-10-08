@@ -1032,7 +1032,7 @@ function CheckoutContent() {
         </ul>
         <div className="my-5 h-px bg-[#E8D8B8]" />
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span className="font-serif text-[34px] font-bold leading-none text-[#8B1E1E]">₹{finalAmount.toLocaleString("en-IN")}</span>
+          <span className="font-sans text-[34px] font-bold leading-none text-[#8B1E1E]">₹{finalAmount.toLocaleString("en-IN")}</span>
           {basePrice === 999 && (
             <>
               <del className="text-lg font-medium text-[#9CA3AF]">₹2,999</del>
