@@ -1009,7 +1009,7 @@ function CheckoutContent() {
       <div className="lg:sticky lg:top-8">
       <div className="rounded-none border-0 bg-white p-5 shadow-none sm:rounded-3xl sm:border sm:border-[#E8D8B8]/50 sm:shadow-[0_15px_40px_rgba(61,22,0,0.06)] lg:p-6 xl:p-7">
         <div className="relative mb-5 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-2xl bg-[#FCF7EE] sm:mb-6">
-          <Image src="/surbhi-kundali-report-mobile-banner.png" alt="Premium Surbhi Kundali Report" className="object-contain" fill priority unoptimized sizes="(max-width: 1023px) 100vw, 40vw" />
+          <Image src="/premium-kundali-report-astrology-banner.webp" alt="Premium Surbhi Kundali Report" className="object-contain" fill priority sizes="(max-width: 1023px) 100vw, 40vw" />
         </div>
         <div className="mb-3 inline-block rounded-md bg-[#8B1E1E]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#8B1E1E]">Order Summary</div>
         <h2 className="mb-2 font-serif text-2xl font-bold text-[#2A1400] lg:text-[30px]">{serviceName}</h2>

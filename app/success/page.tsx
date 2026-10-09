@@ -144,7 +144,7 @@ export default function SuccessPage() {
               <div className="px-0 py-5 lg:p-8">
                 <div className="relative mb-7 hidden aspect-[16/9] overflow-hidden rounded-2xl bg-[#F2E7D4] lg:block">
                   <Image
-                    src="/surbhi-kundali-report-mobile-banner.png"
+                    src="/premium-kundali-report-astrology-banner.webp"
                     alt="Surbhi Kundali report prepared by Surabhi Astrology"
                     fill
                     sizes="(min-width: 1024px) 42vw, 0px"
@@ -208,7 +208,7 @@ export default function SuccessPage() {
             <section aria-label="Payment confirmation" aria-live="polite" className="order-1 bg-white px-0 py-7 lg:order-2 lg:px-10 lg:py-10">
               <div className="relative mb-6 aspect-[16/9] overflow-hidden rounded-2xl bg-[#F2E7D4] lg:hidden">
                 <Image
-                  src="/surbhi-kundali-report-mobile-banner.png"
+                  src="/premium-kundali-report-astrology-banner.webp"
                   alt="Surbhi Kundali report prepared by Surabhi Astrology"
                   fill
                   sizes="(max-width: 1023px) calc(100vw - 32px), 0px"
