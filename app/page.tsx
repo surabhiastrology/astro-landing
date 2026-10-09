@@ -12,7 +12,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { FaWhatsapp } from 'react-icons/fa6'
-import { ArrowRight, Crown, FileText, Gift, Play, Star, Users } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, BriefcaseBusiness, Coins, FileText, Gift, GraduationCap, Heart, HeartPulse, Pause, Play, ShieldCheck, Star, Users, Volume2, VolumeX } from 'lucide-react';
 import Image from 'next/image';
 // import TestimonialsSection from "@/components/Testimonials";
 
@@ -48,6 +48,18 @@ const C = {
   td4: "rgba(252,247,238,0.30)",
 };
 
+const heroReportTopics = [
+  { label: "Love & relationships", Icon: Heart },
+  { label: "Marriage", Icon: Gift },
+  { label: "Career growth", Icon: BriefcaseBusiness },
+  { label: "Wealth & finance", Icon: Coins },
+  { label: "Health", Icon: HeartPulse },
+  { label: "Education", Icon: GraduationCap },
+  { label: "Business", Icon: FileText },
+];
+
+const kundaliCheckoutHref = "/checkout?service=Surbhi%20Kundali&plan=10-Yr%20Report%20%2B%201Question%20(%E2%82%B9999)";
+
 /* ─── GLOBAL KEYFRAME STYLES ─── */
 const GlobalStyles = () => (
   <style>{`
@@ -77,6 +89,23 @@ const GlobalStyles = () => (
     @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     @keyframes spin-slow-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
     @keyframes auto-shine { 0% { transform: translateX(-150%) skewX(-20deg); } 100% { transform: translateX(200%) skewX(-20deg); } }
+    @keyframes hero-word-rise {
+      0% { opacity: 0; transform: translateY(65%); }
+      2.5%, 14.167% { opacity: 1; transform: translateY(0); }
+      16.667%, 100% { opacity: 0; transform: translateY(-65%); }
+    }
+
+    .hero-rotating-word { display: inline-grid; overflow: hidden; vertical-align: baseline; white-space: nowrap; }
+    .hero-rotating-word > span { grid-area: 1 / 1; opacity: 0; text-align: left; animation: hero-word-rise 18s ease-in-out infinite; }
+    .hero-rotating-word > span:nth-child(2) { animation-delay: 3s; }
+    .hero-rotating-word > span:nth-child(3) { animation-delay: 6s; }
+    .hero-rotating-word > span:nth-child(4) { animation-delay: 9s; }
+    .hero-rotating-word > span:nth-child(5) { animation-delay: 12s; }
+    .hero-rotating-word > span:nth-child(6) { animation-delay: 15s; }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-rotating-word > span { animation: none; }
+      .hero-rotating-word > span:first-child { opacity: 1; }
+    }
 
     .animate-float { animation: float 6s ease-in-out infinite; }
     .animate-float-slow { animation: float-slow 8s ease-in-out infinite; }
@@ -255,19 +284,46 @@ function useReveal() {
 export default function NewLandingPage() {
   useReveal();
   const [stickyVisible, setStickyVisible] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [isVideoMuted, setIsVideoMuted] = useState(true);
   const heroVideoRef = useRef<HTMLVideoElement>(null);
+  const heroSectionRef = useRef<HTMLElement>(null);
 const [reportImgError, setReportImgError] = useState(false);
 const time = useCountdown();
   const playHeroVideo = () => {
     const video = heroVideoRef.current;
     if (!video) return;
-    setShowVideo(true);
-    video.scrollIntoView({ behavior: "smooth", block: "center" });
-    void video.play().catch(() => {});
+    void video.play().then(() => setIsVideoPlaying(true)).catch(() => setIsVideoPlaying(false));
+  };
+  const toggleHeroVideo = () => {
+    const video = heroVideoRef.current;
+    if (!video) return;
+    if (video.paused) playHeroVideo();
+    else video.pause();
+  };
+  const toggleHeroMute = () => {
+    const video = heroVideoRef.current;
+    if (!video) return;
+    video.muted = !video.muted;
+    setIsVideoMuted(video.muted);
+  };
+  const playHeroMessage = () => {
+    const video = heroVideoRef.current;
+    if (!video) return;
+    video.muted = false;
+    setIsVideoMuted(false);
+    playHeroVideo();
   };
   useEffect(() => {
-    const onScroll = () => setStickyVisible(window.scrollY > 600);
+    const video = heroVideoRef.current;
+    if (!video) return;
+    video.defaultMuted = true;
+    video.muted = true;
+    void video.play().then(() => setIsVideoPlaying(true)).catch(() => setIsVideoPlaying(false));
+  }, []);
+  useEffect(() => {
+    const onScroll = () => setStickyVisible((heroSectionRef.current?.getBoundingClientRect().bottom ?? 600) < 0);
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -311,7 +367,7 @@ const time = useCountdown();
           ANNOUNCEMENT BAR — PREMIUM RED
       ════════════════════════════════ */}
       <div 
-        className="relative z-[100] flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 border-b px-3 py-2 text-center text-[0.65rem] font-semibold sm:gap-x-3 sm:py-2.5 sm:text-[0.75rem]"
+        className="relative z-[100] flex flex-nowrap items-center justify-center gap-2 border-b px-3 py-2 text-center text-sm font-medium lg:py-2.5 lg:text-base"
         style={{ 
           background: C.red,
           borderColor: "rgba(255,255,255,.15)", // Subtle white border
@@ -319,43 +375,33 @@ const time = useCountdown();
           boxShadow: "0 2px 12px rgba(42,14,0,.16)",
         }}
       >
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <span aria-hidden="true">✦</span>
-          <span className="announcement-text-shimmer">Premium Surbhi Kundali — ₹999</span>
-        </div>
-        
-        <span className="hidden sm:inline" aria-hidden="true">|</span>
-        <span className="announcement-text-shimmer">
-          Includes 1 free WhatsApp question
-        </span>
+        <Gift aria-hidden="true" className="h-4 w-4 shrink-0 text-[#F5D98A] lg:h-5 lg:w-5" strokeWidth={1.8} />
+        <span className="announcement-text-shimmer whitespace-nowrap lg:hidden">Premium Kundali ₹999 + FREE Question</span>
+        <span className="announcement-text-shimmer hidden whitespace-nowrap lg:inline">Premium Surbhi Kundali — ₹999 | Includes 1 FREE WhatsApp question</span>
       </div>
       {/* ════════════════════════════════
           NAVBAR
       ════════════════════════════════ */}
-      <nav className="sticky top-0 z-[99] flex items-center justify-between gap-3 px-4 lg:px-8 h-[68px] sm:h-[78px] border-b backdrop-blur-xl" style={{ background: "rgba(252,247,238,0.94)", borderColor: C.iv2 }}>
+      <nav className="sticky top-0 z-[99] flex h-20 items-center justify-between gap-3 border-b px-3 backdrop-blur-xl sm:h-24 sm:px-4 lg:px-8" style={{ background: "rgba(252,247,238,0.94)", borderColor: C.iv2 }}>
         <Link href="/" className="flex flex-shrink-0 items-center" aria-label="Surabhi Astrology home">
           <Image
             src="/surbhi-astrology-logo.png"
             alt="Surabhi Astrology — Celebrity Astrologer Surbhi Gupta"
             width={280}
             height={94}
-            sizes="(max-width: 640px) 132px, 230px"
-            className="h-10 w-auto object-contain sm:h-[3.65rem]"
+            sizes="(max-width: 640px) 195px, 270px"
+            className="h-[clamp(3.5rem,16vw,4rem)] w-auto object-contain sm:h-[5.25rem]"
             priority
           />
         </Link>
         
-        <div className="hidden md:flex items-center gap-2 text-sm font-medium" style={{ color: C.t2 }}>
-          <span className="text-[#C8A000] tracking-widest text-lg" aria-label="5 stars">★★★★★</span>
-          <span><strong className="text-[#2A1400]">4.9/5</strong><br /><span className="text-xs">1,50,000+ Happy Clients</span></span>
-        </div>
-        
         <div className="flex items-center gap-4">
-          <a href="#offer" className="rounded-full font-semibold px-3.5 py-2.5 text-xs sm:px-6 sm:text-sm shadow-md transition-transform hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#8B1E1E]"
+          <Link href={kundaliCheckoutHref} className="inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-3.5 text-xs font-semibold shadow-md transition-transform hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#8B1E1E] sm:gap-2 sm:px-6 sm:text-sm"
              style={{ background: C.red, color: C.iv }}>
-            <span className="sm:hidden">Get Report →</span>
-            <span className="hidden sm:inline">Get Premium Surbhi Kundali →</span>
-          </a>
+            <span className="whitespace-nowrap sm:hidden">Get Report</span>
+            <span className="hidden sm:inline">Get Premium Surbhi Kundali</span>
+            <ArrowUpRight aria-hidden="true" className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" strokeWidth={1.8} />
+          </Link>
         </div>
       </nav>
 
@@ -364,74 +410,117 @@ const time = useCountdown();
         {/* ════════════════════════════════
           KUNDALI HERO
       ════════════════════════════════ */}
-      <section className="relative isolate overflow-hidden bg-[#FCF7EE]">
+      <section ref={heroSectionRef} className="relative isolate overflow-hidden bg-[#FCF7EE]">
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/kundali-hero-background.png')" }}
+          className="absolute inset-0 hidden bg-cover bg-right lg:block"
+          style={{ backgroundImage: "url('/premium-astrology-hero-background-wide.png')" }}
         />
-        <div aria-hidden="true" className="absolute inset-0 bg-white/45 lg:bg-white/10" />
-        <div className="relative mx-auto grid w-full max-w-[1440px] items-center gap-8 px-5 py-8 sm:px-8 sm:py-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-6 lg:px-14 lg:py-9">
-          <div className="max-w-[750px] text-left">
-            <p className="mb-4 inline-flex items-center gap-2.5 rounded-full border border-[#D8B988] bg-white/65 px-4 py-2 text-[0.65rem] font-bold uppercase tracking-[0.17em] text-[#794315] sm:text-xs">
-              <Crown aria-hidden="true" className="h-4 w-4 text-[#AA691C]" strokeWidth={1.8} />
-              Trusted Vedic astrology guidance
-            </p>
-
-            <h1 className="font-serif text-[clamp(2.8rem,5vw,4.8rem)] font-semibold leading-[1.02] tracking-[-0.035em] text-[#111629]">
-              <span className="block">Find clarity in</span>
-              <span className="mt-1 block text-[#9A5318]">love, career &amp; wealth.</span>
+        <div aria-hidden="true" className="absolute inset-0 hidden bg-gradient-to-r from-[#FCF7EE]/85 via-[#FCF7EE]/35 to-transparent lg:block" />
+        <div className="relative mx-auto flex w-full max-w-[1560px] flex-col px-5 pb-8 pt-8 sm:px-8 lg:grid lg:min-h-[750px] lg:grid-cols-[minmax(0,1.07fr)_minmax(0,0.93fr)] lg:items-center lg:gap-0 lg:px-14 lg:py-8">
+          <div className="relative z-20 max-w-[780px] text-center lg:text-left">
+            <h1 className="font-serif text-[clamp(2.45rem,10vw,3.1rem)] font-semibold leading-[1.02] tracking-[-0.042em] text-[#111629] lg:text-[clamp(2.8rem,5.2vw,5.15rem)]">
+              Discover What Your Kundali <span className="text-[#8B1E1E]">Reveals About Your </span>
+              <span className="hero-rotating-word text-[#8B1E1E]" aria-hidden="true">
+                <span>Life</span>
+                <span>Career</span>
+                <span>Love</span>
+                <span>Wealth</span>
+                <span>Marriage</span>
+                <span>Future</span>
+              </span>
+              <span className="sr-only">Life, Career, Love, Wealth, Marriage, and Future</span>
             </h1>
 
-            <p className="mt-5 max-w-[630px] text-[1.05rem] leading-[1.5] text-[#4B4052] sm:text-[1.125rem]">
-              Get a personalized Kundali report by Surbhi Gupta with practical guidance based on your birth chart.
+            <p className="mx-auto mt-4 max-w-[650px] text-[1.02rem] leading-[1.5] text-[#33314B] sm:text-[1.15rem] lg:mx-0">
+              <span className="lg:hidden">Get personalized kundali guidance by celebrity astrologer Surbhi Gupta.</span>
+              <span className="hidden lg:inline">Get a personalized Kundali report created by celebrity astrologer Surbhi Gupta, with guidance for your birth chart, life questions, and next steps.</span>
             </p>
 
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
               <a
-                href="#offer"
-                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-[#8B1E1E] px-7 py-3.5 text-center text-base font-semibold text-white shadow-[0_12px_26px_rgba(91,20,20,0.22)] transition hover:bg-[#741919] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#8B1E1E] sm:text-lg"
+                href={kundaliCheckoutHref}
+                className="hero-cta-shimmer relative inline-flex min-h-14 items-center justify-center gap-1 overflow-hidden rounded-full bg-[#8B1E1E] px-2.5 py-3.5 text-center text-base font-semibold text-white shadow-[0_12px_26px_rgba(91,20,20,0.22)] transition hover:bg-[#741919] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#8B1E1E] sm:gap-2 sm:px-7 sm:text-lg"
               >
-                Get Your Kundali Report
-                <ArrowRight aria-hidden="true" className="h-5 w-5 shrink-0" strokeWidth={1.8} />
+                <span className="relative z-10 whitespace-nowrap"><span className="min-[360px]:hidden">Get Surbhi Kundali ₹999</span><span className="hidden min-[360px]:inline">Get Premium Surbhi Kundali ₹999</span></span>
+                <ArrowUpRight aria-hidden="true" className="relative z-10 h-5 w-5 shrink-0" strokeWidth={1.8} />
               </a>
             </div>
 
-            <div className="mt-4 inline-flex max-w-full items-center gap-2.5 rounded-xl border border-[#E8D8B8] bg-[#FCF7EE]/85 px-4 py-3 text-sm text-[#2A1400] sm:text-base">
-              <FaWhatsapp aria-hidden="true" className="h-6 w-6 shrink-0 text-[#25D366]" />
-              <Gift aria-hidden="true" className="h-5 w-5 shrink-0 text-[#9A5318]" strokeWidth={1.8} />
-              <span>Includes <strong>1 free WhatsApp question</strong></span>
+            <div className="hero-topic-marquee mt-5 max-w-[690px] overflow-hidden" aria-label="Report topics">
+              <div className="hero-topic-track flex w-max">
+                {[false, true].map((duplicate) => (
+                  <div key={String(duplicate)} className="hero-topic-group flex shrink-0 gap-2 pr-2" aria-hidden={duplicate || undefined} role={duplicate ? undefined : "list"}>
+                    {heroReportTopics.map(({ label, Icon }) => (
+                      <span key={label} role={duplicate ? undefined : "listitem"} className="inline-flex min-h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border border-[#E8D8B8] bg-white/85 px-3 py-2 text-xs leading-tight text-[#2A1400] shadow-sm">
+                        <Icon aria-hidden="true" className="h-4 w-4 shrink-0 text-[#A3631D]" strokeWidth={1.8} />
+                        {label}
+                      </span>
+                    ))}
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="mt-6 grid max-w-[690px] grid-cols-3 divide-x divide-[#D8C49A] border-t border-[#D8C49A] pt-4">
-              <div className="min-w-0 pr-2 sm:pr-5">
-                <Users aria-hidden="true" className="mb-2 h-5 w-5 text-[#A3631D] sm:h-6 sm:w-6" strokeWidth={1.7} />
-                <strong className="block text-sm leading-tight text-[#2A1400] sm:text-xl">1,50,000+</strong>
-                <span className="mt-1 block text-[0.58rem] uppercase tracking-[0.07em] text-[#765D49] sm:text-xs">Reports delivered</span>
+            <div className="mt-4 hidden max-w-[690px] items-center gap-3 rounded-[1.4rem] border-2 border-[#C8A84B] bg-[#FCF7EE]/90 px-3 py-3 shadow-[0_7px_28px_rgba(80,35,0,0.08)] lg:flex lg:px-4">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_3px_12px_rgba(37,211,102,0.24)]"><FaWhatsapp aria-hidden="true" className="h-8 w-8" /></span>
+              <div className="min-w-0 flex-1">
+                <p className="text-lg font-semibold leading-tight text-[#8B1E1E] lg:text-xl">Includes <strong className="font-extrabold">1 FREE WhatsApp Question</strong></p>
+                <p className="mt-0.5 text-xs leading-snug text-[#4A2E10] sm:text-sm">Personally answered by Surbhi Gupta via voice note after reviewing your kundali.</p>
               </div>
-              <div className="min-w-0 px-2 sm:px-5">
-                <Star aria-hidden="true" className="mb-2 h-5 w-5 text-[#A3631D] sm:h-6 sm:w-6" strokeWidth={1.7} />
-                <strong className="block text-sm leading-tight text-[#2A1400] sm:text-xl">4.9/5</strong>
-                <span className="mt-1 block text-[0.58rem] uppercase tracking-[0.07em] text-[#765D49] sm:text-xs">Average rating</span>
+              <button type="button" onClick={playHeroMessage} aria-label="Play Surbhi Gupta’s video message with sound" className="hidden min-h-12 shrink-0 items-center gap-2 rounded-full bg-white/80 py-1.5 pl-2 pr-1.5 transition hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8B1E1E] sm:flex">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#8B1E1E] text-white"><Play aria-hidden="true" className="ml-0.5 h-4 w-4 fill-current" /></span>
+                <span aria-hidden="true" className="flex items-center gap-0.5">
+                  {[8, 14, 21, 11, 24, 17, 9, 18, 12, 22, 10].map((height, index) => <span key={index} className="w-[2px] rounded-full bg-[#8B1E1E]" style={{ height }} />)}
+                </span>
+                <Image src="/surbhi-gupta-new.JPG" alt="" width={38} height={38} className="ml-1 h-9 w-9 rounded-full object-cover object-[50%_28%]" />
+              </button>
+            </div>
+
+            <div className="mt-5 hidden max-w-[760px] grid-cols-4 divide-x divide-[#D8C49A] border-t border-[#D8C49A] pt-4 lg:grid">
+              <div className="flex min-w-0 items-center gap-2 pr-2 sm:pr-3">
+                <Users aria-hidden="true" className="h-7 w-7 shrink-0 text-[#A3631D]" strokeWidth={1.7} />
+                <div><strong className="block text-sm leading-tight text-[#8B1E1E] sm:text-base">1,50,000+</strong>
+                <span className="mt-0.5 block text-[0.58rem] leading-tight text-[#4A2E10] sm:text-[0.67rem]">Reports delivered</span></div>
               </div>
-              <div className="min-w-0 pl-2 sm:pl-5">
-                <FileText aria-hidden="true" className="mb-2 h-5 w-5 text-[#A3631D] sm:h-6 sm:w-6" strokeWidth={1.7} />
-                <strong className="block text-sm leading-tight text-[#2A1400] sm:text-xl">Personalized</strong>
-                <span className="mt-1 block text-[0.58rem] uppercase tracking-[0.07em] text-[#765D49] sm:text-xs">Report analysis</span>
+              <div className="flex min-w-0 items-center gap-2 px-2 sm:px-3">
+                <Star aria-hidden="true" className="h-7 w-7 shrink-0 text-[#A3631D]" strokeWidth={1.7} />
+                <div><strong className="block text-sm leading-tight text-[#8B1E1E] sm:text-base">4.9/5</strong>
+                <span className="mt-0.5 block text-[0.58rem] leading-tight text-[#4A2E10] sm:text-[0.67rem]">Average rating</span></div>
+              </div>
+              <div className="flex min-w-0 items-center gap-2 pr-2 sm:px-3">
+                <ShieldCheck aria-hidden="true" className="h-7 w-7 shrink-0 text-[#A3631D]" strokeWidth={1.7} />
+                <div><strong className="block text-sm leading-tight text-[#8B1E1E] sm:text-base">Personally prepared</strong>
+                <span className="mt-0.5 block text-[0.58rem] leading-tight text-[#4A2E10] sm:text-[0.67rem]">By Surbhi Gupta</span></div>
+              </div>
+              <div className="flex min-w-0 items-center gap-2 pl-2 sm:pl-3">
+                <FaWhatsapp aria-hidden="true" className="h-7 w-7 shrink-0 text-[#A3631D]" />
+                <div><strong className="block text-sm leading-tight text-[#8B1E1E] sm:text-base">Personal answer</strong>
+                <span className="mt-0.5 block text-[0.58rem] leading-tight text-[#4A2E10] sm:text-[0.67rem]">1 free WhatsApp question</span></div>
               </div>
             </div>
           </div>
 
-          <div className="relative flex justify-center lg:justify-end">
-            <div className="relative w-[min(72vw,300px)] lg:w-[300px]">
+          <div className="relative z-10 -mx-5 mt-3 flex h-[590px] w-[calc(100%+2.5rem)] items-center justify-start bg-[url('/premium-astrology-hero-background-mobile.png')] bg-cover bg-center pl-[12%] sm:-mx-8 sm:w-[calc(100%+4rem)] lg:mx-0 lg:mt-0 lg:h-full lg:w-auto lg:bg-none lg:pb-0 lg:pl-[14%] lg:pt-0">
+            <div className="absolute right-2 top-[17%] z-20 flex items-center gap-2 rounded-2xl border border-[#E8D8B8] bg-white/95 px-2.5 py-2 shadow-[0_8px_20px_rgba(42,20,0,0.15)] lg:hidden xl:right-4 xl:top-[11%] xl:flex xl:px-4 xl:py-3">
+              <Users aria-hidden="true" className="h-7 w-7 shrink-0 text-[#A3631D] lg:h-8 lg:w-8" strokeWidth={1.8} />
+              <span className="text-[0.62rem] leading-tight text-[#2A1400] lg:text-xs">Trusted by<br /><strong className="text-sm leading-tight text-[#8B1E1E] lg:text-base">1.5 Lakh+</strong><br />Happy clients</span>
+            </div>
+            <div className="relative w-[min(59vw,265px)] rotate-[5deg] lg:w-[300px]">
               <div aria-hidden="true" className="pointer-events-none absolute -inset-6 rounded-full bg-[#C8A84B]/20 blur-3xl" />
-              <div className="relative aspect-[9/16.7] rounded-[3rem] border-[7px] border-[#49301A] bg-[#1A0A00] p-[5px] shadow-[0_28px_60px_rgba(42,20,0,0.35)] ring-2 ring-[#CCA568]">
+              <div className="relative aspect-[9/16.7] rounded-[3rem] border-[7px] border-[#49301A] bg-[#1A0A00] p-[5px] shadow-[18px_30px_42px_rgba(42,20,0,0.35)] ring-2 ring-[#CCA568]">
                 <div className="relative h-full w-full overflow-hidden rounded-[2.4rem] bg-[#1A0A00]">
                   <video
                     ref={heroVideoRef}
-                    controls={showVideo}
-                    onPlay={() => setShowVideo(true)}
+                    autoPlay
+                    muted={isVideoMuted}
+                    loop
                     playsInline
+                    disablePictureInPicture
+                    onPlay={() => setIsVideoPlaying(true)}
+                    onPlaying={() => setIsVideoPlaying(true)}
+                    onPause={() => setIsVideoPlaying(false)}
+                    onVolumeChange={(event) => setIsVideoMuted(event.currentTarget.muted)}
                     preload="metadata"
                     poster="/surbhi-gupta-portrait.jpg"
                     className="h-full w-full object-contain"
@@ -440,21 +529,54 @@ const time = useCountdown();
                     <source src="/videos/surbhi-gupta-premium-kundali-report-introduction.mp4" type="video/mp4" />
                     Your browser does not support this video.
                   </video>
-                  {!showVideo && (
+                  {!isVideoPlaying && (
                     <button
                       type="button"
                       onClick={playHeroVideo}
                       aria-label="Play Surbhi Gupta’s message"
                       className="absolute inset-0 flex items-center justify-center bg-black/10 transition hover:bg-black/20 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-[-8px] focus-visible:outline-white"
                     >
-                      <span aria-hidden="true" className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-[#8B1E1E] shadow-xl">
+                      <span aria-hidden="true" className="flex h-16 w-16 items-center justify-center rounded-full border border-white/40 bg-black/35 text-white shadow-md backdrop-blur-sm">
                         <Play className="ml-1 h-7 w-7 fill-current" />
                       </span>
                     </button>
                   )}
+                  <div className="absolute bottom-4 right-3 z-10 flex flex-col gap-2">
+                    <button type="button" onClick={toggleHeroVideo} aria-label={isVideoPlaying ? "Pause video" : "Play video"} className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-black/30 text-white/85 backdrop-blur-sm transition hover:bg-black/50 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                      {isVideoPlaying ? <Pause aria-hidden="true" className="h-5 w-5 fill-current" /> : <Play aria-hidden="true" className="ml-0.5 h-5 w-5 fill-current" />}
+                    </button>
+                    <button type="button" onClick={toggleHeroMute} aria-label={isVideoMuted ? "Unmute video" : "Mute video"} className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-black/30 text-white/85 backdrop-blur-sm transition hover:bg-black/50 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                      {isVideoMuted ? <VolumeX aria-hidden="true" className="h-5 w-5" /> : <Volume2 aria-hidden="true" className="h-5 w-5" />}
+                    </button>
+                  </div>
                 </div>
                 <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-[10px] h-4 w-24 -translate-x-1/2 rounded-full bg-[#1A0A00]" />
               </div>
+            </div>
+          </div>
+          <div className="relative z-20 -mt-1 flex items-center gap-2 rounded-[1.25rem] border-2 border-[#C8A84B] bg-[#FCF7EE]/95 px-2.5 py-3 shadow-[0_7px_28px_rgba(80,35,0,0.08)] lg:hidden">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white"><FaWhatsapp aria-hidden="true" className="h-7 w-7" /></span>
+            <div className="min-w-0 flex-1 text-left">
+              <p className="text-base font-semibold leading-tight text-[#8B1E1E]">Includes <strong className="font-extrabold">1 FREE WhatsApp Question</strong></p>
+              <p className="mt-1 text-[0.66rem] leading-tight text-[#4A2E10]">Personally answered by Surbhi Gupta via voice note after reviewing your kundali.</p>
+            </div>
+            <button type="button" onClick={playHeroMessage} aria-label="Play Surbhi Gupta’s video message with sound" className="flex h-11 shrink-0 items-center gap-1 rounded-full bg-white px-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#8B1E1E]">
+              <span aria-hidden="true" className="flex items-center gap-[1px]">{[8, 14, 19, 11, 21, 12, 7, 16].map((height, index) => <span key={index} className="w-[2px] rounded-full bg-[#8B1E1E]" style={{ height }} />)}</span>
+              <Image src="/surbhi-gupta-new.JPG" alt="" width={32} height={32} className="h-8 w-8 rounded-full object-cover object-[50%_28%]" />
+            </button>
+          </div>
+          <div className="relative z-20 mt-6 grid grid-cols-3 divide-x divide-[#D8C49A] lg:hidden">
+            <div className="flex min-w-0 items-center gap-1 pr-1">
+              <FileText aria-hidden="true" className="h-6 w-6 shrink-0 text-[#A3631D]" strokeWidth={1.7} />
+              <div><strong className="block text-xs text-[#8B1E1E]">1,50,000+</strong><span className="block text-[0.55rem] leading-tight text-[#4A2E10]">Reports delivered</span></div>
+            </div>
+            <div className="flex min-w-0 items-center gap-1 px-1.5">
+              <Star aria-hidden="true" className="h-6 w-6 shrink-0 text-[#A3631D]" strokeWidth={1.7} />
+              <div><strong className="block text-xs text-[#8B1E1E]">4.9/5</strong><span className="block text-[0.55rem] leading-tight text-[#4A2E10]">Average rating</span></div>
+            </div>
+            <div className="flex min-w-0 items-center gap-1 pl-1.5">
+              <ShieldCheck aria-hidden="true" className="h-6 w-6 shrink-0 text-[#A3631D]" strokeWidth={1.7} />
+              <div><strong className="block text-[0.68rem] leading-tight text-[#8B1E1E]">Personally prepared</strong><span className="block text-[0.55rem] leading-tight text-[#4A2E10]">By Surbhi Gupta</span></div>
             </div>
           </div>
         </div>
@@ -692,7 +814,7 @@ const time = useCountdown();
           </div>
           
           <div className="mt-10 md:mt-20 text-center reveal">
-            <a href="#offer" className="btn-auto-shine inline-block bg-gradient-to-r from-[#DEB85D] to-[#EFCF7A] text-[#2A0E00] px-12 py-5 rounded-2xl font-medium text-xl shadow-[0_15px_30px_rgba(200,168,75,0.3)] hover:-translate-y-2 transition-transform duration-300">
+            <a href={kundaliCheckoutHref} className="btn-auto-shine inline-block bg-gradient-to-r from-[#DEB85D] to-[#EFCF7A] text-[#2A0E00] px-12 py-5 rounded-2xl font-medium text-xl shadow-[0_15px_30px_rgba(200,168,75,0.3)] hover:-translate-y-2 transition-transform duration-300">
               Fix Your Problems with Premium  Surbhi Kundali NOW!
             </a>
           </div>
@@ -869,7 +991,7 @@ const time = useCountdown();
             </div>
             
             <div className="mt-8 md:mt-12 reveal">
-              <a href="#offer" className="btn-auto-shine inline-block bg-gradient-to-r from-[#DEB85D] to-[#EFCF7A] text-[#2A0E00] px-10 py-4 rounded-xl font-medium text-lg shadow-[0_10px_20px_rgba(200,168,75,0.3)] hover:-translate-y-1 transition-transform">
+              <a href={kundaliCheckoutHref} className="btn-auto-shine inline-block bg-gradient-to-r from-[#DEB85D] to-[#EFCF7A] text-[#2A0E00] px-10 py-4 rounded-xl font-medium text-lg shadow-[0_10px_20px_rgba(200,168,75,0.3)] hover:-translate-y-1 transition-transform">
                 Order My Surbhi Kundali Now
               </a>
             </div>
@@ -1102,7 +1224,7 @@ Our Premium Surbhi Kundali Report helps you understand your planetary positions,
                 </div>
               </div>
               
-              <a href="#offer" className="btn-auto-shine block w-full sm:w-auto bg-gradient-to-r from-[#DEB85D] to-[#EFCF7A] text-[#2A0E00] px-8 sm:px-10 py-3.5 sm:py-5 rounded-full sm:rounded-2xl font-bold text-base sm:text-lg hover:shadow-[0_0_40px_rgba(239,207,122,0.4)] hover:-translate-y-1 transition-all text-center">
+              <a href={kundaliCheckoutHref} className="btn-auto-shine block w-full sm:w-auto bg-gradient-to-r from-[#DEB85D] to-[#EFCF7A] text-[#2A0E00] px-8 sm:px-10 py-3.5 sm:py-5 rounded-full sm:rounded-2xl font-bold text-base sm:text-lg hover:shadow-[0_0_40px_rgba(239,207,122,0.4)] hover:-translate-y-1 transition-all text-center">
                 Get My Surbhi Kundali Now
               </a>
             </div>
@@ -1306,7 +1428,7 @@ Our Premium Surbhi Kundali Report helps you understand your planetary positions,
 
           {/* Full width button on mobile */}
           <div className="mt-8 lg:mt-12 text-center reveal">
-             <a href="#offer" className="btn-auto-shine block w-full sm:inline-block sm:w-auto bg-gradient-to-br from-[#200404] via-[#3d0808] to-[#200404] text-white px-6 py-4 lg:px-12 lg:py-5 rounded-xl lg:rounded-2xl font-medium text-base sm:text-lg lg:text-xl shadow-xl hover:scale-105 transition-transform">
+             <a href={kundaliCheckoutHref} className="btn-auto-shine block w-full sm:inline-block sm:w-auto bg-gradient-to-br from-[#200404] via-[#3d0808] to-[#200404] text-white px-6 py-4 lg:px-12 lg:py-5 rounded-xl lg:rounded-2xl font-medium text-base sm:text-lg lg:text-xl shadow-xl hover:scale-105 transition-transform">
                 Get Your Report From the Best!
              </a>
           </div>
@@ -1449,7 +1571,7 @@ Our Premium Surbhi Kundali Report helps you understand your planetary positions,
       </div>
 
       {/* Action Button */}
-      <a href="#offer" className="flex items-center justify-center bg-gradient-to-r from-[#DEB85D] to-[#EFCF7A] text-[#2A0E00] px-5 py-2 sm:px-8 sm:py-3 rounded-full font-bold text-[13px] sm:text-base shadow-lg whitespace-nowrap btn-auto-shine hover:scale-105 active:scale-95 transition-transform">
+      <a href={kundaliCheckoutHref} className="flex items-center justify-center bg-gradient-to-r from-[#DEB85D] to-[#EFCF7A] text-[#2A0E00] px-5 py-2 sm:px-8 sm:py-3 rounded-full font-bold text-[13px] sm:text-base shadow-lg whitespace-nowrap btn-auto-shine hover:scale-105 active:scale-95 transition-transform">
         Get Now
       </a>
       

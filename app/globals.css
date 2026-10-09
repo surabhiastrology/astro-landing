@@ -61,7 +61,7 @@ body::before {
   55%, 100% { background-position: 0 50%; }
 }
 .announcement-text-shimmer {
-  background: linear-gradient(105deg, #FCF7EE 35%, #F5D98A 50%, #FCF7EE 65%);
+  background: linear-gradient(105deg, #FCF7EE 44%, #C8A84B 50%, #FCF7EE 56%);
   background-size: 250% 100%;
   background-clip: text;
   -webkit-background-clip: text;
@@ -197,4 +197,52 @@ body::before {
   width:7px; height:7px; background:#C8A84B; 
   border-radius:50%; flex-shrink:0; 
   animation: gold-pd 1.5s ease-in-out infinite; 
+}
+
+@keyframes hero-topic-scroll {
+  to { transform: translateX(-50%); }
+}
+
+@keyframes hero-cta-sheen {
+  0%, 72% { transform: translateX(-180%) skewX(-20deg); }
+  100% { transform: translateX(380%) skewX(-20deg); }
+}
+
+.hero-cta-shimmer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 28%;
+  background: linear-gradient(90deg, transparent, rgba(252, 247, 238, 0.22), transparent);
+  animation: hero-cta-sheen 5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.hero-topic-track {
+  animation: hero-topic-scroll 38s linear infinite;
+  will-change: transform;
+}
+
+.hero-topic-marquee:hover .hero-topic-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-cta-shimmer::before {
+    animation: none;
+    display: none;
+  }
+
+  .hero-topic-marquee {
+    overflow-x: auto;
+  }
+
+  .hero-topic-track {
+    animation: none;
+    will-change: auto;
+  }
+
+  .hero-topic-group[aria-hidden="true"] {
+    display: none;
+  }
 }
