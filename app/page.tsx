@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { FaWhatsapp } from 'react-icons/fa6'
+import { ArrowRight, Crown, FileText, Gift, Play, Star, Users } from 'lucide-react';
 import Image from 'next/image';
 // import TestimonialsSection from "@/components/Testimonials";
 
@@ -182,21 +183,6 @@ function useCountdown() {
   return time;
 }
 
-/* ─── LIVE COUNTER ─── */
-function useLiveCounter() {
-  const [spots, setSpots] = useState(273);
-  useEffect(() => {
-    let s = 273;
-    const dec = () => {
-      if (s > 8) { s -= Math.ceil(Math.random() * 2); setSpots(s); }
-      setTimeout(dec, 52000 + Math.random() * 88000);
-    };
-    const id = setTimeout(dec, 65000);
-    return () => clearTimeout(id);
-  }, []);
-  return spots;
-}
-
 /* ─── FAQ ITEM ─── */
 function FaqItem({ q, a, delay = "" }: { q: string; a: string; delay?: string }) {
   const [open, setOpen] = useState(false);
@@ -270,10 +256,16 @@ export default function NewLandingPage() {
   useReveal();
   const [stickyVisible, setStickyVisible] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
 const [reportImgError, setReportImgError] = useState(false);
-const countdown = useCountdown();
 const time = useCountdown();
-  const spots = useLiveCounter();
+  const playHeroVideo = () => {
+    const video = heroVideoRef.current;
+    if (!video) return;
+    setShowVideo(true);
+    video.scrollIntoView({ behavior: "smooth", block: "center" });
+    void video.play().catch(() => {});
+  };
   useEffect(() => {
     const onScroll = () => setStickyVisible(window.scrollY > 600);
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -291,6 +283,8 @@ const time = useCountdown();
   target="_blank" 
   rel="noopener noreferrer"
   className="wa-float"
+  aria-hidden={!stickyVisible}
+  tabIndex={stickyVisible ? 0 : -1}
   style={{
     position: "fixed", 
     right: 22, 
@@ -305,6 +299,9 @@ const time = useCountdown();
     justifyContent: "center",
     fontSize: "1.4rem", 
     textDecoration: "none",
+    opacity: stickyVisible ? 1 : 0,
+    pointerEvents: stickyVisible ? "auto" : "none",
+    transition: "opacity .2s ease",
   }}
 >
   <FaWhatsapp className="text-white w-8 h-8" />
@@ -314,70 +311,50 @@ const time = useCountdown();
           ANNOUNCEMENT BAR — PREMIUM RED
       ════════════════════════════════ */}
       <div 
-        className="ann-bar-shimmer relative z-[100] flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 px-4 py-2.5 text-[0.65rem] sm:text-[0.75rem] font-semibold text-center border-b"
+        className="relative z-[100] flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 border-b px-3 py-2 text-center text-[0.65rem] font-semibold sm:gap-x-3 sm:py-2.5 sm:text-[0.75rem]"
         style={{ 
-          background: C.red, // Premium red base
+          background: C.red,
           borderColor: "rgba(255,255,255,.15)", // Subtle white border
           color: C.iv, // White/Cream text
-          boxShadow: "0 2px 12px rgba(168,32,32,.3)",
+          boxShadow: "0 2px 12px rgba(42,14,0,.16)",
         }}
       >
         <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Use the new ann-dot-gold class for gold pulse */}
-          <div className="ann-dot-gold" />
-          <span>🔥 Launch:&nbsp;<strong style={{ color: C.g3 }}>Don't Miss Out! Only 56 Spots Left </strong></span>
+          <span aria-hidden="true">✦</span>
+          <span className="announcement-text-shimmer">Premium Surbhi Kundali — ₹999</span>
         </div>
         
-        <span className="hidden sm:inline">&nbsp;— Get Your Premium  Surbhi Kundali  for  ₹999 <del className='text-white/65'>₹2999</del>&nbsp; </span>
-         
-        {/* Switched to gold accent for '1 FREE Question' for better premium feel against red */}
-        <span style={{ color: C.g3, fontWeight: 700 }}>
-          <span className="sm:hidden">+ </span>+ 1 FREE <span className="hidden sm:inline">WhatsApp Question →</span>
+        <span className="hidden sm:inline" aria-hidden="true">|</span>
+        <span className="announcement-text-shimmer">
+          Includes 1 free WhatsApp question
         </span>
-        
-        <a 
-          href="#offer" 
-          // Reusing the btn-auto-shine class for a continuous gold gleam on the CTA button
-          className="btn-auto-shine ml-1 sm:ml-0 px-3 py-1 sm:px-[13px] sm:py-[4px] rounded-full font-medium no-underline whitespace-nowrap tracking-[0.04em] text-[0.6rem] sm:text-[0.68rem]"
-          style={{ background: C.g, color: C.dk }} // Gold button, dark text
-        >
-          Claim Yours →
-        </a>
       </div>
       {/* ════════════════════════════════
           NAVBAR
       ════════════════════════════════ */}
-      <nav className="sticky top-0 z-[99] flex items-center justify-between px-4 lg:px-8 h-[70px] border-b backdrop-blur-xl" style={{ background: "rgba(252,247,238,0.9)", borderColor: C.iv2 }}>
-        <Link href="/" className="flex-shrink-0 flex items-center">
-  <Image 
-    src="https://www.surabhiastrology.com/assets/surbhi-logo-7E9_g-Rh.png" 
-    alt="Celebrity Astrologer Surbhi Gupta" 
-    // 1. Provide the maximum desktop dimensions here
-    width={250} 
-    height={64}
-    // 2. Add 'sizes' to tell Next.js to serve a smaller physical file for mobile
-    sizes="(max-width: 768px) 150px, 250px"
-    // 3. Use Tailwind to control the visible height on different screens
-    className="h-10 sm:h-14 lg:h-16 w-auto object-contain"
-    // 4. Critical for LCP and mobile score
-    priority
-    quality={50}
-    fetchPriority="high"
-  />
-  {/* Fallback text */}
-  <div className="hidden Georgia text-[1.15rem] sm:text-[1.35rem] font-bold" style={{ color: C.t1 }}>
-    Celebrity Astrologer Surbhi <em style={{ fontStyle: "italic", color: C.g }}>Gupta</em>
-  </div>
-</Link>
+      <nav className="sticky top-0 z-[99] flex items-center justify-between gap-3 px-4 lg:px-8 h-[68px] sm:h-[78px] border-b backdrop-blur-xl" style={{ background: "rgba(252,247,238,0.94)", borderColor: C.iv2 }}>
+        <Link href="/" className="flex flex-shrink-0 items-center" aria-label="Surabhi Astrology home">
+          <Image
+            src="/surbhi-astrology-logo.png"
+            alt="Surabhi Astrology — Celebrity Astrologer Surbhi Gupta"
+            width={280}
+            height={94}
+            sizes="(max-width: 640px) 132px, 230px"
+            className="h-10 w-auto object-contain sm:h-[3.65rem]"
+            priority
+          />
+        </Link>
         
         <div className="hidden md:flex items-center gap-2 text-sm font-medium" style={{ color: C.t2 }}>
-          <span className="text-[#C8A000] tracking-widest text-lg">★★★★★</span> 4.9/5 • 1,50,000+ Reports
+          <span className="text-[#C8A000] tracking-widest text-lg" aria-label="5 stars">★★★★★</span>
+          <span><strong className="text-[#2A1400]">4.9/5</strong><br /><span className="text-xs">1,50,000+ Happy Clients</span></span>
         </div>
         
         <div className="flex items-center gap-4">
-          <a href="#offer" className="btn-auto-shine rounded-full font-medium px-6 py-2.5 text-sm shadow-md transition-transform hover:scale-105"
-             style={{ background: C.dk2, color: C.g3 }}>
-            Get Premium Surbhi Kundali <span className="hidden sm:inline">— ₹999</span>
+          <a href="#offer" className="rounded-full font-semibold px-3.5 py-2.5 text-xs sm:px-6 sm:text-sm shadow-md transition-transform hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#8B1E1E]"
+             style={{ background: C.red, color: C.iv }}>
+            <span className="sm:hidden">Get Report →</span>
+            <span className="hidden sm:inline">Get Premium Surbhi Kundali →</span>
           </a>
         </div>
       </nav>
@@ -385,151 +362,103 @@ const time = useCountdown();
       
       
         {/* ════════════════════════════════
-          HERO SECTION (Warm Gold Aesthetic)
+          KUNDALI HERO
       ════════════════════════════════ */}
-      <section 
-  className="relative min-h-[85vh] flex items-center justify-center overflow-hidden py-2 sm:py-10 lg:py-10" 
-  style={{ background: `linear-gradient(160deg, #FFFFFF 0%, #FDF7EC 55%, #F3E8D6 100%)` }}
->
-  <div className="max-w-7xl mx-auto px-4 sm:px-5 w-full relative z-10 grid lg:grid-cols-2 gap-2 sm:gap-8 lg:gap-12 items-center">
-    
-    {/* ========================================================
-        LEFT TEXT 
-        ======================================================== */}
-    <div className="text-center lg:text-left">
-      <div className="inline-flex items-center gap-2 text-[9px] sm:text-xs font-bold tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-3 lg:mb-6 shadow-sm border border-[#C5A880]/40 bg-white/60 text-[#84623F] backdrop-blur-sm">
-        ✦ India's Most Trusted Vedic Astrologer
-      </div>
-      
-      <h1 className="font-serif text-4xl sm:text-5xl lg:text-[3.6rem] leading-[1.15] font-semibold text-[#2D1B11] mb-4 lg:mb-6 tracking-tight">
-        Accurate <em className="italic font-medium text-[#e78523]">Predictions</em> For<br />
-        <em className="font-semibold italic text-[#ab6015] lg:text-5xl drop-shadow-sm">Love, Career & Wealth!</em>
-      </h1>
-      
-      <p className="text-sm sm:text-lg text-[#5A4538] font-medium max-w-lg mx-auto lg:mx-0 mb-6 lg:mb-8 leading-relaxed px-2 lg:px-0">
-        Feeling stuck in life or lost about your future? Celebrity Astrologer Surbhi Gupta's Accurate Vedic Surbhi Kundali Report reveals the answers hidden in your birth chart and exact timing for success.
-      </p>
+      <section className="relative isolate overflow-hidden bg-[#FCF7EE]">
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('/kundali-hero-background.png')" }}
+        />
+        <div aria-hidden="true" className="absolute inset-0 bg-white/45 lg:bg-white/10" />
+        <div className="relative mx-auto grid w-full max-w-[1440px] items-center gap-8 px-5 py-8 sm:px-8 sm:py-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-6 lg:px-14 lg:py-9">
+          <div className="max-w-[750px] text-left">
+            <p className="mb-4 inline-flex items-center gap-2.5 rounded-full border border-[#D8B988] bg-white/65 px-4 py-2 text-[0.65rem] font-bold uppercase tracking-[0.17em] text-[#794315] sm:text-xs">
+              <Crown aria-hidden="true" className="h-4 w-4 text-[#AA691C]" strokeWidth={1.8} />
+              Trusted Vedic astrology guidance
+            </p>
 
-      <div className="hidden lg:block">
-        <div className="flex flex-col sm:flex-row items-center justify-start gap-5">
-          <a 
-            href="#offer" 
-            className="btn-auto-shine w-auto px-8 py-4 rounded-full font-semibold text-lg text-[#FDF7EC] shadow-[0_15px_30px_rgba(89,28,28,0.3)] hover:shadow-[0_20px_40px_rgba(89,28,28,0.5)] hover:scale-105 transition-all duration-300 border border-[#7A2A2A]"
-            style={{ background: 'linear-gradient(135deg, #7A1F1F 0%, #4A0D0D 100%)' }}
-          >
-            Get Premium Surbhi Kundali
-          </a>
-          <div className="flex items-center gap-3 text-[#2D1B11] font-bold text-sm bg-white/40 px-4 py-2 rounded-xl border border-white/50 shadow-sm">
-            <span className="text-2xl drop-shadow-md">🎁</span> 
-            <span className="text-left leading-tight">Includes 1 Free<br/><span className="text-[#128C7E]">WhatsApp</span> Question</span>
-          </div>
-        </div>
+            <h1 className="font-serif text-[clamp(2.8rem,5vw,4.8rem)] font-semibold leading-[1.02] tracking-[-0.035em] text-[#111629]">
+              <span className="block">Find clarity in</span>
+              <span className="mt-1 block text-[#9A5318]">love, career &amp; wealth.</span>
+            </h1>
 
-        <div className="grid grid-cols-3 gap-4 mt-12 border-t border-[#C5A880]/30 pt-8 max-w-lg mx-0">
-          {[
-            ["1,50,000+", "Reports Delivered"],
-            ["4.9/5 ★", "Average Rating"],
-            ["100% Custom", "Deep Analysis"]
-          ].map(([top, bot], i) => (
-            <div key={i} className="text-left">
-              <div className="font-georia text-xl lg:text-xl font-bold text-[#2D1B11]">{top}</div>
-              <div className="text-[10px] lg:text-xs text-[#8B6B52] font-semibold uppercase tracking-widest mt-1">{bot}</div>
+            <p className="mt-5 max-w-[630px] text-[1.05rem] leading-[1.5] text-[#4B4052] sm:text-[1.125rem]">
+              Get a personalized Kundali report by Surbhi Gupta with practical guidance based on your birth chart.
+            </p>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <a
+                href="#offer"
+                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-[#8B1E1E] px-7 py-3.5 text-center text-base font-semibold text-white shadow-[0_12px_26px_rgba(91,20,20,0.22)] transition hover:bg-[#741919] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#8B1E1E] sm:text-lg"
+              >
+                Get Your Kundali Report
+                <ArrowRight aria-hidden="true" className="h-5 w-5 shrink-0" strokeWidth={1.8} />
+              </a>
             </div>
-          ))}
-        </div>
-      </div>
-    </div>
 
-   {/* ========================================================
-    RIGHT VISUAL: YouTube Video Facade + Bottom-Left Floating Book
-    ======================================================== */}
-    <div className="relative flex justify-center lg:justify-end items-center h-[460px] sm:h-[540px] lg:h-[720px] mt-6 lg:mt-0 w-full z-10">
-      
-      {/* 1. MAIN CONTAINER WRAPPER */}
-      <div className="relative w-[320px] sm:w-[420px] lg:w-[520px] aspect-[4/5]">
-        
-        {/* MAIN BIG YOUTUBE SHORT (Optimized Facade Pattern for PageSpeed) */}
-        <div 
-          className="relative w-full h-full rounded-[2.5rem] overflow-hidden shadow-[0_30px_70px_rgba(45,27,17,0.45),0_10px_20px_rgba(0,0,0,0.15)] hover:scale-[1.02] hover:-translate-y-2 transition-all duration-500 ease-out group cursor-pointer bg-[#2A0E00]"
-          onClick={() => setShowVideo(true)}
-        >
-          {!showVideo ? (
-            <>
-              {/* High-Res YouTube Thumbnail (Loaded unoptimized to bypass next.config.js restrictions) */}
-              <Image
-                src="/thumbnail.png" 
-                alt="Surbhi Gupta Astrological Insights"
-                width={1280}
-                height={720}
-                className="object-contain object-bottom scale-[1.01] opacity-90 group-hover:opacity-100 transition-opacity"
-                priority
-              />
-              
-              {/* Premium Play Button Overlay */}
-              <div className="absolute top-40 inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-all duration-300">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.3)] group-hover:bg-white/30 group-hover:scale-110 group-hover:shadow-[0_8px_40px_rgba(0,0,0,0.4)] transition-all duration-300 border-2 border-white/50">
-  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-white translate-x-1 drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M8 5v14l11-7z"/>
-  </svg>
-</div>
+            <div className="mt-4 inline-flex max-w-full items-center gap-2.5 rounded-xl border border-[#E8D8B8] bg-[#FCF7EE]/85 px-4 py-3 text-sm text-[#2A1400] sm:text-base">
+              <FaWhatsapp aria-hidden="true" className="h-6 w-6 shrink-0 text-[#25D366]" />
+              <Gift aria-hidden="true" className="h-5 w-5 shrink-0 text-[#9A5318]" strokeWidth={1.8} />
+              <span>Includes <strong>1 free WhatsApp question</strong></span>
+            </div>
+
+            <div className="mt-6 grid max-w-[690px] grid-cols-3 divide-x divide-[#D8C49A] border-t border-[#D8C49A] pt-4">
+              <div className="min-w-0 pr-2 sm:pr-5">
+                <Users aria-hidden="true" className="mb-2 h-5 w-5 text-[#A3631D] sm:h-6 sm:w-6" strokeWidth={1.7} />
+                <strong className="block text-sm leading-tight text-[#2A1400] sm:text-xl">1,50,000+</strong>
+                <span className="mt-1 block text-[0.58rem] uppercase tracking-[0.07em] text-[#765D49] sm:text-xs">Reports delivered</span>
               </div>
-            </>
-          ) : (
-            <iframe
-              width="100%"
-              height="100%"
-              src="https://www.youtube.com/embed/OgVIfcZQ8CM?autoplay=1&rel=0&modestbranding=1&playsinline=1"
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              className="absolute inset-0 w-full h-full rounded-[2.5rem]"
-            ></iframe>
-          )}
+              <div className="min-w-0 px-2 sm:px-5">
+                <Star aria-hidden="true" className="mb-2 h-5 w-5 text-[#A3631D] sm:h-6 sm:w-6" strokeWidth={1.7} />
+                <strong className="block text-sm leading-tight text-[#2A1400] sm:text-xl">4.9/5</strong>
+                <span className="mt-1 block text-[0.58rem] uppercase tracking-[0.07em] text-[#765D49] sm:text-xs">Average rating</span>
+              </div>
+              <div className="min-w-0 pl-2 sm:pl-5">
+                <FileText aria-hidden="true" className="mb-2 h-5 w-5 text-[#A3631D] sm:h-6 sm:w-6" strokeWidth={1.7} />
+                <strong className="block text-sm leading-tight text-[#2A1400] sm:text-xl">Personalized</strong>
+                <span className="mt-1 block text-[0.58rem] uppercase tracking-[0.07em] text-[#765D49] sm:text-xs">Report analysis</span>
+              </div>
+            </div>
+          </div>
 
-          {/* Soft internal edge lighting overlay (Remains active even over the iframe) */}
-          <div className="absolute inset-0 rounded-[2.5rem] ring-1 ring-black/10 pointer-events-none mix-blend-overlay shadow-[inset_0_0_40px_rgba(0,0,0,0.3)]" />
-        </div>
-
-        {/* Floating Badge (Trusted By) */}
-        <div className="absolute top-4 -right-6 sm:top-8 sm:-right-8 lg:-top-5 lg:-right-6 bg-white rounded-lg lg:rounded-xl py-1.5 px-3 lg:py-2 lg:px-5 shadow-[0_10px_20px_rgba(0,0,0,0.2)] flex items-center gap-1.5 lg:gap-2 border border-[#E8D8B8] z-30 animate-[float_5s_ease-in-out_infinite_0.5s] pointer-events-none">
-          <div className="text-sm lg:text-xl drop-shadow-sm">⭐</div>
-          <div className="text-left">
-            <div className="text-[#4A2E10] text-[7px] lg:text-[10px] font-bold uppercase tracking-widest leading-none">Trusted by</div>
-            <div className="text-[#2A1400] text-[10px] sm:text-xs lg:text-sm font-extrabold mt-0.5">1.5 Lakh+</div>
+          <div className="relative flex justify-center lg:justify-end">
+            <div className="relative w-[min(72vw,300px)] lg:w-[300px]">
+              <div aria-hidden="true" className="pointer-events-none absolute -inset-6 rounded-full bg-[#C8A84B]/20 blur-3xl" />
+              <div className="relative aspect-[9/16.7] rounded-[3rem] border-[7px] border-[#49301A] bg-[#1A0A00] p-[5px] shadow-[0_28px_60px_rgba(42,20,0,0.35)] ring-2 ring-[#CCA568]">
+                <div className="relative h-full w-full overflow-hidden rounded-[2.4rem] bg-[#1A0A00]">
+                  <video
+                    ref={heroVideoRef}
+                    controls={showVideo}
+                    onPlay={() => setShowVideo(true)}
+                    playsInline
+                    preload="metadata"
+                    poster="/surbhi-gupta-portrait.jpg"
+                    className="h-full w-full object-contain"
+                    aria-label="Surbhi Gupta introduces the Premium Surbhi Kundali report"
+                  >
+                    <source src="/videos/surbhi-gupta-premium-kundali-report-introduction.mp4" type="video/mp4" />
+                    Your browser does not support this video.
+                  </video>
+                  {!showVideo && (
+                    <button
+                      type="button"
+                      onClick={playHeroVideo}
+                      aria-label="Play Surbhi Gupta’s message"
+                      className="absolute inset-0 flex items-center justify-center bg-black/10 transition hover:bg-black/20 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-[-8px] focus-visible:outline-white"
+                    >
+                      <span aria-hidden="true" className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-[#8B1E1E] shadow-xl">
+                        <Play className="ml-1 h-7 w-7 fill-current" />
+                      </span>
+                    </button>
+                  )}
+                </div>
+                <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-[10px] h-4 w-24 -translate-x-1/2 rounded-full bg-[#1A0A00]" />
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* 2. FLOATING SMALL BOOK (report-book.png) - Anchored perfectly to the Bottom-Left */}
-        <div className="absolute top-60 md:top-96 -left-12 sm:-bottom-8 sm:-left-16 lg:-bottom-12 lg:-left-24 z-20 animate-float transition-all duration-700 w-[140px] sm:w-[180px] lg:w-[200px] aspect-[1/1.4] drop-shadow-[25px_30px_50px_rgba(26,15,10,0.5)] pointer-events-none">
-          <Image
-            src="/report-book.png"
-            alt="Floating Premium Kundali Report"
-            width={280}
-            height={300}
-            className="w-full object-cover"
-          />
-        </div>
-
-        {/* Floating "Spots Left" Notification */}
-        <div className="absolute -top-6 -left-4 sm:-top-8 sm:-left-4 lg:-top-10 lg:-left-12 z-30 animate-[float_4s_ease-in-out_infinite_1s] pointer-events-none">
-          <div className="bg-gradient-to-r from-[#A82020] to-[#8B1E1E] text-white text-[8px] sm:text-[10px] lg:text-xs font-bold tracking-widest px-3 py-1.5 lg:px-5 lg:py-2.5 rounded-full shadow-[0_10px_20px_rgba(168,32,32,0.4)] border border-[#FF8080]/30 flex items-center gap-1.5 lg:gap-2 whitespace-nowrap">
-            <span className="animate-pulse">🔥</span> ONLY 56 SPOTS LEFT
-          </div>
-        </div>
-      </div>
-    </div>
-
-    {/* Mobile CTA */}
-    <div className="block lg:hidden w-full pt-6 sm:pt-8 relative z-20">
-      <div className="flex flex-col items-center justify-center gap-4">
-        <a href="#offer" className="btn-auto-shine w-full sm:w-auto px-6 sm:px-8 py-4 rounded-full font-semibold text-base sm:text-lg text-[#FDF7EC] shadow-[0_12px_24px_rgba(89,28,28,0.4)] active:scale-95 transition-transform text-center border border-[#7A2A2A]" style={{ background: 'linear-gradient(135deg, #7A1F1F 0%, #4A0D0D 100%)' }}>
-          Get Your Premium Surbhi Kundali
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
+      </section>
 
 
 {/* CELEBRITY TESTIMONIALS section to the second part after hero changes after client discussions */}

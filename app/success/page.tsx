@@ -83,7 +83,7 @@ export default function SuccessPage() {
   const supportText = orderId
     ? `Hi, I completed checkout but need help confirming my payment. Order reference: ${orderId}`
     : "Hi, I need help confirming my checkout payment.";
-  const whatsappUrl = `https://wa.me/919251151330?text=${encodeURIComponent(supportText)}`;
+  const whatsappUrl = `https://wa.me/919828551330?text=${encodeURIComponent(supportText)}`;
   const emailUrl = `mailto:info@surabhiastrology.com?subject=${encodeURIComponent("Help confirming my payment")}&body=${encodeURIComponent(supportText)}`;
 
   const copy = {
@@ -103,15 +103,15 @@ export default function SuccessPage() {
     paymentReference: "Payment reference",
     next: "What happens next",
     stepOne: "Your payment is recorded. You don’t need to submit it again.",
-    stepTwo: "Our team will review your details and prepare your report.",
-    stepThree: "When it’s ready, we’ll send it on WhatsApp and by email if you provided an email address.",
+    stepTwo: "Surbhi Gupta will personally prepare your report and answer your question.",
+    stepThree: "When it’s ready, we’ll send it to you on WhatsApp.",
     pendingHelp: "Our support team can check the order reference. Please don’t make another payment while confirmation is pending.",
     checkAgain: "Check again",
     checkingButton: "Checking…",
     whatsapp: "WhatsApp support",
     email: "Email support",
     returnHome: "Return to Surabhi Astrology",
-    brandLine: "Your birth details, prepared with personal care by our team.",
+    brandLine: "Your Kundali, personally prepared by Surbhi Gupta.",
   };
 
   const title = isPaid ? copy.paid : isChecking ? copy.checking : state === "pending" ? copy.pending : copy.unavailable;
@@ -236,8 +236,8 @@ export default function SuccessPage() {
                   <ol className="relative space-y-5 before:absolute before:bottom-5 before:left-[15px] before:top-5 before:border-l-2 before:border-dashed before:border-[#D9B681]">
                     {[
                       { title: "Payment received", detail: copy.stepOne },
-                      { title: "Our team prepares your report", detail: "Our team will review your details and prepare your personalized Surbhi Kundali report." },
-                      { title: "Report delivered to you", detail: "When it’s ready, we’ll send it on WhatsApp and by email if you provided an email address." },
+                      { title: "Surbhi prepares your report", detail: copy.stepTwo },
+                      { title: "Report delivered to you", detail: copy.stepThree },
                     ].map((step, index) => (
                       <li key={step.title} className="relative flex gap-3.5 sm:gap-4">
                         <span className="z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#E6C9A4] bg-[#F9EAE2] text-xs font-semibold text-[#8B1E1E]">0{index + 1}</span>

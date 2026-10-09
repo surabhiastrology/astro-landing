@@ -56,6 +56,21 @@ body::before {
 }
 
 /* Continuous slow gold shimmer */
+@keyframes announcement-text-shimmer {
+  0%, 20% { background-position: 100% 50%; }
+  55%, 100% { background-position: 0 50%; }
+}
+.announcement-text-shimmer {
+  background: linear-gradient(105deg, #FCF7EE 35%, #F5D98A 50%, #FCF7EE 65%);
+  background-size: 250% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: announcement-text-shimmer 5s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .announcement-text-shimmer { animation: none; color: #FCF7EE; }
+}
 @keyframes bar-shimmer {
   0% { transform: translateX(-150%) skewX(-20deg); }
   30% { transform: translateX(200%) skewX(-20deg); }

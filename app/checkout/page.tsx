@@ -1018,7 +1018,7 @@ function CheckoutContent() {
           {[
             "Authentic Vedic Analysis",
             "100% Confidential",
-            "Personal Guidance by Surbhi's Team",
+            "Personally prepared by Surbhi Gupta",
           ].map((benefit) => (
             <li key={benefit} className="flex items-center gap-2.5 font-medium">
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#C8A84B] text-white">
@@ -1047,14 +1047,14 @@ function CheckoutContent() {
             </svg>
           </span>
           <div>
-            <p className="text-sm font-semibold text-[#2A1400]">Delivered on WhatsApp + Email</p>
+            <p className="text-sm font-semibold text-[#2A1400]">Delivered on WhatsApp</p>
             <p className="mt-0.5 text-xs leading-4 text-[#6B7280]">Your report will be sent to you once it is ready.</p>
           </div>
         </div>
       </div>
       <blockquote className="hidden items-start gap-3 px-8 pt-7 lg:flex">
         <span className="font-serif text-5xl leading-none text-[#C8A84B]/60" aria-hidden="true">“</span>
-        <p className="max-w-[290px] font-serif text-[22px] italic leading-tight text-[#6B4423]">Answers to your life’s biggest questions through Vedic wisdom.</p>
+        <p className="max-w-[290px] font-serif text-[22px] leading-tight text-[#6B4423]">Surbhi personally prepares your Kundali and answers the question that matters most to you.</p>
       </blockquote>
       </div>
 
@@ -1461,7 +1461,7 @@ function CheckoutContent() {
             </div>
             <div className="flex items-center gap-2.5 px-1 py-1.5 sm:px-3 sm:last:pr-0">
               <FieldIcon name="clock" className="h-7 w-7 shrink-0 text-[#8B1E1E]" />
-              <span><strong className="block text-xs font-medium leading-4 text-[#2A1400]">Delivered within timeline</strong><span className="block text-[10px] leading-4 text-[#6B7280]">On WhatsApp + Email</span></span>
+              <span><strong className="block text-xs font-medium leading-4 text-[#2A1400]">Delivered within timeline</strong><span className="block text-[10px] leading-4 text-[#6B7280]">On WhatsApp</span></span>
             </div>
           </div>
           <div className="mt-3 flex items-center justify-center gap-4" aria-label="McAfee and Norton security badges">
@@ -1535,7 +1535,7 @@ export default function CheckoutPage() {
           <Link href="/" className="flex items-center gap-2">
             <img src="/surbhi-astrology-logo.png" alt="Surbhi Astrology — Celebrity Astrologer Surbhi Gupta" className="h-12 w-auto object-contain md:h-16" />
           </Link>
-          <a href="https://wa.me/919251151330" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp" className="flex min-h-10 items-center gap-2.5 rounded-xl border border-[#E8D8B8] bg-white px-2.5 py-1.5 text-[#168A55] shadow-[0_2px_8px_rgba(61,22,0,0.04)] transition-colors hover:bg-[#F5FBF7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#168A55] focus-visible:ring-offset-2 sm:px-3.5">
+          <a href="https://wa.me/919828551330" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp" className="flex min-h-10 items-center gap-2.5 rounded-xl border border-[#E8D8B8] bg-white px-2.5 py-1.5 text-[#168A55] shadow-[0_2px_8px_rgba(61,22,0,0.04)] transition-colors hover:bg-[#F5FBF7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#168A55] focus-visible:ring-offset-2 sm:px-3.5">
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E6F5EE]">
               <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M20.52 3.48A11.79 11.79 0 0 0 12.13 0C5.58 0 .25 5.33.25 11.88c0 2.1.55 4.16 1.59 5.98L.15 24l6.29-1.65a11.9 11.9 0 0 0 5.69 1.45h.01c6.55 0 11.88-5.33 11.88-11.88 0-3.17-1.24-6.15-3.5-8.44ZM12.14 21.8h-.01a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.73.98 1-3.64-.24-.37a9.88 9.88 0 1 1 8.38 4.62Zm5.42-7.4c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.27-.47-2.42-1.5-.9-.8-1.51-1.78-1.68-2.08-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.49 0 1.47 1.07 2.89 1.22 3.09.15.2 2.1 3.2 5.1 4.49.71.3 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.42.25-.7.25-1.3.17-1.42-.07-.13-.27-.2-.57-.35Z" />
