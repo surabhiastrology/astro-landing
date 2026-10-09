@@ -208,6 +208,17 @@ body::before {
   100% { transform: translateX(380%) skewX(-20deg); }
 }
 
+.nav-cta-shimmer::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 28%;
+  background: linear-gradient(90deg, transparent, rgba(252, 247, 238, 0.7), transparent);
+  animation: hero-cta-sheen 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
 .hero-cta-shimmer::before {
   content: "";
   position: absolute;
@@ -228,6 +239,7 @@ body::before {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .nav-cta-shimmer::before,
   .hero-cta-shimmer::before {
     animation: none;
     display: none;

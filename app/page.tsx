@@ -390,17 +390,16 @@ const time = useCountdown();
             width={280}
             height={94}
             sizes="(max-width: 640px) 195px, 270px"
-            className="h-[clamp(3.5rem,16vw,4rem)] w-auto object-contain sm:h-[5.25rem]"
+            className="h-[clamp(3.5rem,16vw,4rem)] w-auto object-contain max-[359px]:h-[3.1rem] sm:h-[5.25rem]"
             priority
           />
         </Link>
         
         <div className="flex items-center gap-4">
-          <Link href={kundaliCheckoutHref} className="inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-3.5 text-xs font-semibold shadow-md transition-transform hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#8B1E1E] sm:gap-2 sm:px-6 sm:text-sm"
-             style={{ background: C.red, color: C.iv }}>
-            <span className="whitespace-nowrap sm:hidden">Get Report</span>
-            <span className="hidden sm:inline">Get Premium Surbhi Kundali</span>
-            <ArrowUpRight aria-hidden="true" className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" strokeWidth={1.8} />
+          <Link href={kundaliCheckoutHref} className="nav-cta-shimmer relative isolate inline-flex shrink-0 items-center gap-1 overflow-hidden rounded-full px-2.5 py-3.5 text-xs font-semibold shadow-md transition-transform hover:scale-[1.02] hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#8B1E1E] sm:gap-2 sm:px-6 sm:text-sm"
+             style={{ background: C.g, color: C.dk }}>
+            <span className="relative z-10 whitespace-nowrap">Unlock My Kundli</span>
+            <ArrowUpRight aria-hidden="true" className="relative z-10 h-4 w-4 shrink-0 sm:h-5 sm:w-5" strokeWidth={1.8} />
           </Link>
         </div>
       </nav>
@@ -420,7 +419,7 @@ const time = useCountdown();
         <div className="relative mx-auto flex w-full max-w-[1560px] flex-col px-5 pb-8 pt-8 sm:px-8 lg:grid lg:min-h-[750px] lg:grid-cols-[minmax(0,1.07fr)_minmax(0,0.93fr)] lg:items-center lg:gap-0 lg:px-14 lg:py-8">
           <div className="relative z-20 max-w-[780px] text-center lg:text-left">
             <h1 className="font-serif text-[clamp(2.45rem,10vw,3.1rem)] font-semibold leading-[1.02] tracking-[-0.042em] text-[#111629] lg:text-[clamp(2.8rem,5.2vw,5.15rem)]">
-              Discover What Your Kundali <span className="text-[#8B1E1E]">Reveals About Your </span>
+              Discover What Your Kundali <span className="text-[#AB500F]">Reveals About</span> <span className="text-[#8B1E1E]">Your </span>
               <span className="hero-rotating-word text-[#8B1E1E]" aria-hidden="true">
                 <span>Life</span>
                 <span>Career</span>
@@ -554,7 +553,7 @@ const time = useCountdown();
               </div>
             </div>
           </div>
-          <div className="relative z-20 -mt-1 flex items-center gap-2 rounded-[1.25rem] border-2 border-[#C8A84B] bg-[#FCF7EE]/95 px-2.5 py-3 shadow-[0_7px_28px_rgba(80,35,0,0.08)] lg:hidden">
+          <div className="relative z-20 -mt-8 flex items-center gap-2 rounded-[1.25rem] border-2 border-[#C8A84B] bg-[#FCF7EE]/95 px-2.5 py-3 shadow-[0_7px_28px_rgba(80,35,0,0.08)] lg:hidden">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white"><FaWhatsapp aria-hidden="true" className="h-7 w-7" /></span>
             <div className="min-w-0 flex-1 text-left">
               <p className="text-base font-semibold leading-tight text-[#8B1E1E]">Includes <strong className="font-extrabold">1 FREE WhatsApp Question</strong></p>
