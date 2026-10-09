@@ -500,7 +500,7 @@ const time = useCountdown();
             </div>
           </div>
 
-          <div className="relative z-10 -mx-5 mt-3 flex h-[590px] w-[calc(100%+2.5rem)] items-center justify-start bg-[url('/premium-astrology-hero-background-mobile.png')] bg-cover bg-center pl-[12%] sm:-mx-8 sm:w-[calc(100%+4rem)] lg:mx-0 lg:mt-0 lg:h-full lg:w-auto lg:bg-none lg:pb-0 lg:pl-[14%] lg:pt-0">
+          <div className="relative z-10 -mx-5 mt-3 flex h-[590px] w-[calc(100%+2.5rem)] items-center justify-start bg-[url('/premium-astrology-hero-background-mobile.webp')] bg-cover bg-center pl-[12%] sm:-mx-8 sm:w-[calc(100%+4rem)] lg:mx-0 lg:mt-0 lg:h-full lg:w-auto lg:bg-none lg:pb-0 lg:pl-[14%] lg:pt-0">
             <div className="absolute right-2 top-[17%] z-20 flex items-center gap-2 rounded-2xl border border-[#E8D8B8] bg-white/95 px-2.5 py-2 shadow-[0_8px_20px_rgba(42,20,0,0.15)] lg:hidden xl:right-4 xl:top-[11%] xl:flex xl:px-4 xl:py-3">
               <Users aria-hidden="true" className="h-7 w-7 shrink-0 text-[#A3631D] lg:h-8 lg:w-8" strokeWidth={1.8} />
               <span className="text-[0.62rem] leading-tight text-[#2A1400] lg:text-xs">Trusted by<br /><strong className="text-sm leading-tight text-[#8B1E1E] lg:text-base">1.5 Lakh+</strong><br />Happy clients</span>
@@ -521,7 +521,7 @@ const time = useCountdown();
                     onPause={() => setIsVideoPlaying(false)}
                     onVolumeChange={(event) => setIsVideoMuted(event.currentTarget.muted)}
                     preload="metadata"
-                    poster="/surbhi-gupta-portrait.jpg"
+                    poster="/thumbnail.jpeg"
                     className="h-full w-full object-contain"
                     aria-label="Surbhi Gupta introduces the Premium Surbhi Kundali report"
                   >
