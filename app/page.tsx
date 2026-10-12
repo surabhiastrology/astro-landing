@@ -12,7 +12,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { FaWhatsapp } from 'react-icons/fa6'
-import { ArrowRight, ArrowUpRight, BriefcaseBusiness, Coins, FileText, Gift, GraduationCap, Heart, HeartPulse, Pause, Play, ShieldCheck, Star, Users, Volume2, VolumeX } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, BriefcaseBusiness, Coins, FileText, Gift, GraduationCap, Heart, HeartHandshake, HeartPulse, Pause, Play, ShieldCheck, Star, Users, Volume2, VolumeX } from 'lucide-react';
 import Image from 'next/image';
 // import TestimonialsSection from "@/components/Testimonials";
 
@@ -144,52 +144,6 @@ const GlobalStyles = () => (
   `}</style>
 );
 
-
-/* ─── STAR CANVAS ─── */
-function StarCanvas({ id, style }: { id: string; style?: React.CSSProperties }) {
-  const ref = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const c = ref.current;
-    if (!c) return;
-    const parent = c.parentElement!;
-    const ctx = c.getContext("2d")!;
-    type Star = { x: number; y: number; r: number; o: number; s: number };
-    let stars: Star[] = [], W = 0, H = 0, frame = 0, raf = 0;
-    const resize = () => {
-      W = c.width = parent.offsetWidth;
-      H = c.height = parent.offsetHeight;
-      stars = Array.from({ length: Math.floor((W * H) / 5500) }, () => ({
-        x: Math.random() * W, y: Math.random() * H,
-        r: Math.random() * 1.2 + 0.25,
-        o: Math.random() * 0.5 + 0.15,
-        s: Math.random() * 0.4 + 0.08,
-      }));
-    };
-    const draw = () => {
-      ctx.clearRect(0, 0, W, H);
-      frame++;
-      stars.forEach((s, i) => {
-        const fl = 0.5 + 0.5 * Math.sin(frame * s.s + i * 1.4);
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(200,168,75,${s.o * fl})`;
-        ctx.fill();
-      });
-      raf = requestAnimationFrame(draw);
-    };
-    resize();
-    draw();
-    window.addEventListener("resize", resize, { passive: true });
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); };
-  }, []);
-  return (
-    <canvas
-      ref={ref}
-      id={id}
-      style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0, opacity: 0.55, ...style }}
-    />
-  );
-}
 
 /* ─── COUNTDOWN ─── */
 function useCountdown() {
@@ -584,11 +538,7 @@ const time = useCountdown();
 
 {/* CELEBRITY TESTIMONIALS section to the second part after hero changes after client discussions */}
 
-<section className="relative overflow-hidden py-16 lg:py-24 bg-gradient-to-b from-[#b8560f] to-[#e8871e]">
-  <StarCanvas id="proofC" style={{ opacity: .5 }} />
-  {/* Hide large floating symbols on mobile to prevent overflow/distraction */}
-  <div className="hidden lg:block absolute right-[-30px] top-[20%] text-[24rem] opacity-[0.025] pointer-events-none leading-none font-serif" style={{ color: C.g }}>♀</div>
-  <div className="hidden lg:block absolute left-[-20px] bottom-[25%] text-[18rem] opacity-[0.025] pointer-events-none leading-none font-serif" style={{ color: C.g }}>♂</div>
+<section className="relative overflow-hidden border-t border-[#E8D8B8] bg-gradient-to-b from-[#FCF7EE] to-[#F4EAD6] py-14 lg:py-20">
 
   {/* Global style injection for marquee sliding tracks */}
   <style dangerouslySetInnerHTML={{ __html: `
@@ -605,35 +555,35 @@ const time = useCountdown();
     .animate-infinite-slide:hover {
       animation-play-state: paused;
     }
+    @media (prefers-reduced-motion: reduce) {
+      .animate-infinite-slide { animation: none; }
+      .proof-marquee { overflow-x: auto; mask-image: none !important; -webkit-mask-image: none !important; }
+    }
   ` }} />
 
   {/* MAIN TEXT CONTAINER */}
- <div className="reveal text-center mb-6 lg:mb-12">
-  <div className="inline-flex items-center gap-1.5 lg:gap-[7px] text-[10px] lg:text-[0.67rem] font-medium tracking-[0.2em] uppercase px-3.5 py-1.5 rounded-full mb-6" style={{ color: C.g3, background: "rgba(200,168,75,.12)", border: "1px solid rgba(200,168,75,.3)" }}>
-    ✦ Real People. Real Shifts.
+ <div className="mx-auto mb-9 max-w-6xl px-5 text-center lg:mb-14">
+  <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#E8D8B8] bg-white/80 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.16em] text-[#8B1E1E] sm:text-xs">
+    <span aria-hidden="true" className="text-[#C8A84B]">✦</span> Real People. Real Shifts.
   </div>
   
-  {/* CHANGED: leading-relaxed to leading-[1.9] for extra vertical spacing between lines */}
-  <h2 className="Georgia text-2xl sm:text-4xl lg:text-[clamp(2.2rem,4vw,3.4rem)] font-medium leading-[1.2] md:leading-[1.2] tracking-[-0.02em]" style={{ color: C.td1 }}>
-    Trusted by <em className="font-sans" >1,50,000+</em> Individuals for <br/> 
-    <em className="block mt-0 md:mt-4" style={{ fontStyle: "italic", color: C.g2 }}>Accurate Premium  Surbhi Kundali  Reports</em>
+  <h2 className="section-title text-[#2A1400]">
+    Trusted by <span className="text-[#8B1E1E]">1,50,000+</span> individuals for
+    <span className="mt-2 block text-[#A3631D]">accurate Surbhi Kundali reports</span>
   </h2>
 </div>
 
   {/* CELEBRITY CAROUSEL (NOW AUTO-SCROLLING MARQUEE) */}
-  <div className="reveal d1 mb-8 md:mb-12 lg:mb-[60px] relative w-full overflow-hidden">
-    <div className="flex items-center gap-3 lg:gap-4 mb-10 max-w-[800px] mx-auto px-5">
-      <div className="h-[1px] flex-1" style={{ background: "linear-gradient(90deg, transparent, rgba(200,168,75,0.3))" }} />
-      <div className="text-[0.65rem] lg:text-[0.8rem] font-medium tracking-[0.2em] uppercase text-center whitespace-nowrap" style={{ color: C.g2 }}>Celebrity Consultations</div>
-      <div className="h-[1px] flex-1" style={{ background: "linear-gradient(270deg, transparent, rgba(200,168,75,0.3))" }} />
+  <div className="relative mb-12 w-full lg:mb-16">
+    <div className="mx-auto mb-7 flex max-w-[800px] items-center gap-3 px-5 lg:gap-4">
+      <div className="h-px flex-1 bg-[#D8C49A]" />
+      <div className="whitespace-nowrap text-center text-xs font-medium uppercase tracking-[0.16em] text-[#6B4423] sm:text-sm">Celebrity Consultations</div>
+      <div className="h-px flex-1 bg-[#D8C49A]" />
     </div>
 
-    {/* Side Mask Fades for the Celebrity Marquee */}
-    <div className="absolute inset-y-0 left-0 w-12 sm:w-24 lg:w-40 z-30 pointer-events-none" style={{ background: `linear-gradient(90deg, #ab500f, #E85D1F), transparent)` }} />
-    <div className="absolute inset-y-0 right-0 w-12 sm:w-24 lg:w-40 z-30 pointer-events-none" style={{ background: `linear-gradient(90deg, #ab500f, #E85D1F), transparent)` }} />
-
     {/* Continuous Sliding Track */}
-    <div className="flex w-max animate-infinite-slide gap-4 lg:gap-6 px-4">
+    <div className="proof-marquee overflow-hidden" style={{ maskImage: "linear-gradient(to right, transparent, black 7%, black 93%, transparent)" }}>
+    <div className="flex w-max animate-infinite-slide gap-4 px-4 lg:gap-6">
       {[
         { name: "Leading Politician", img: "/celebs/4.jpeg" },
         { name: "Leading Politician", img: "/celebs/7.jpeg" },
@@ -665,7 +615,7 @@ const time = useCountdown();
         { name: "Global CEO", img: "/celebs/2.jpeg" },
         { name: "Global CEO", img: "/celebs/3.jpeg" },
       ].map((celeb, i) => (
-        <div key={i} className="relative shrink-0 w-[140px] sm:w-[180px] lg:w-[220px] aspect-[3/4] rounded-2xl lg:rounded-[24px] overflow-hidden group transition-transform duration-300 hover:-translate-y-2" style={{ border: "1px solid rgba(200,168,75,.3)", background: C.dk2, boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
+        <div key={i} className="group relative aspect-[3/4] w-[140px] shrink-0 overflow-hidden rounded-2xl border border-[#D8C49A] bg-[#2A0E00] shadow-[0_12px_28px_rgba(61,22,0,0.14)] transition-transform duration-300 hover:-translate-y-1 sm:w-[180px] lg:w-[220px] lg:rounded-[24px]">
           <div className="absolute inset-0 bg-[#3D1600] flex items-center justify-center text-4xl opacity-20 z-0">👤</div>
           <Image 
             src={celeb.img} 
@@ -674,31 +624,30 @@ const time = useCountdown();
             width={220} 
             height={293} 
             sizes="(max-width: 640px) 140px, (max-width: 1024px) 180px, 220px"
-            className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500 z-0"
+            className="absolute inset-0 z-0 h-full w-full object-cover opacity-90 transition-opacity duration-500 group-hover:opacity-100"
             priority={false}
           />
           <div className="absolute inset-x-0 bottom-0 p-3 lg:p-5 z-20" style={{ background: "linear-gradient(to top, rgba(20,5,0,0.95) 0%, rgba(20,5,0,0.6) 60%, transparent 100%)" }} />
         </div>
       ))}
     </div>
+    </div>
   </div>
   
   {/* PRESS HEADER */}
-  <div className="max-w-[1100px] mx-auto px-5 lg:px-7 relative z-10 text-center mb-6 lg:mb-12">
-  <div className="inline-flex items-center gap-1.5 lg:gap-[7px] text-[10px] lg:text-[0.67rem] font-medium tracking-[0.2em] uppercase px-3.5 py-1.5 rounded-full mb-0 md:mb-4" style={{ color: C.g3, background: "rgba(200,168,75,.12)", border: "1px solid rgba(200,168,75,.3)" }}>
-    ✦ As Featured In
+  <div className="relative z-10 mx-auto mb-8 max-w-[1100px] px-5 text-center lg:mb-10 lg:px-7">
+  <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#E8D8B8] bg-white/80 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.16em] text-[#8B1E1E] sm:text-xs">
+    <span aria-hidden="true" className="text-[#C8A84B]">✦</span> As Featured In
   </div>
   
-  <h2 className="Georgia text-3xl sm:text-4xl lg:text-[clamp(2.2rem,4vw,3.4rem)] font-medium leading-[1.2] tracking-[-0.02em]" style={{ color: C.td1 }}>
-    Making Headlines.<br />
-    <em className="block mt-0 md:mt-4" style={{ fontStyle: "italic", color: C.g2 }}>Trusted by the Press.</em>
+  <h2 className="section-title text-[#2A1400]">
+    Making headlines.
+    <span className="mt-2 block text-[#A3631D]">Trusted by the press.</span>
   </h2>
 </div> 
 
  
-   <div className="relative w-full overflow-hidden pb-6 pt-2">
-    <div className="absolute inset-y-0 left-0 w-8 sm:w-16 lg:w-32 z-40 pointer-events-none" style={{ background: `linear-gradient(90deg, #ab500f, #E85D1F), transparent)` }} />
-    <div className="absolute inset-y-0 right-0 w-8 sm:w-16 lg:w-32 z-40 pointer-events-none" style={{ background: `linear-gradient(90deg, #ab500f, #E85D1F), transparent)` }} />
+   <div className="proof-marquee w-full overflow-hidden pb-3 pt-2" style={{ maskImage: "linear-gradient(to right, transparent, black 7%, black 93%, transparent)" }}>
 
     <div className="flex w-max animate-infinite-slide gap-4 lg:gap-6 px-4">
       {[
@@ -748,74 +697,48 @@ const time = useCountdown();
   </div>
 </section>
      {/* ════════════════════════════════
-          WHAT CAN IT SOLVE? (Interactive 3D Hover Cards)
+          LIFE AREAS — THE REPORT'S PRACTICAL GUIDANCE
       ════════════════════════════════ */}
-      <section className=" py-8 md:py-14  bg-[#FCF7EE]">
-        <div className="max-w-7xl mx-auto px-5">
-          <div className="text-center mb-16 reveal">
-            <h2 className="Georgia text-4xl lg:text-5xl font-medium text-[#2A1400] mb-4">What Can Premium Surbhi Kundali Solve for You?</h2>
-            <p className="text-lg text-[#4A2E10] max-w-2xl mx-auto">Discover what your birth chart reveals and receive personalized guidance to make confident decisions in every area of life.</p>
+      <section className="relative isolate overflow-hidden border-t border-[#E8D8B8]/70 bg-gradient-to-b from-[#FFFBF4] via-[#FCF7EE] to-[#F7EEDD] py-14 sm:py-16 lg:py-20">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-center bg-no-repeat opacity-[0.08]" style={{ backgroundImage: "url('/checkout-zodiac-wheels.png')", backgroundSize: "min(1500px, 100vw) auto" }} />
+        <div className="relative z-10 mx-auto max-w-[1420px] px-5 sm:px-7 lg:px-10">
+          <div className="mx-auto mb-9 max-w-4xl text-center sm:mb-11">
+            <div aria-hidden="true" className="mx-auto mb-5 flex max-w-[220px] items-center gap-4 text-[#C8A84B]"><span className="h-px flex-1 bg-[#C8A84B]/65" /><span className="font-serif text-3xl leading-none">✦</span><span className="h-px flex-1 bg-[#C8A84B]/65" /></div>
+            <h2 className="section-title text-[#2A1400]">What Can Premium Surbhi Kundali <span className="block text-[#A3631D]">Help You With?</span></h2>
+            <p className="mx-auto mt-4 max-w-[690px] text-base leading-relaxed text-[#4A2E10] sm:text-lg">Discover what your birth chart reveals and receive practical guidance for the areas of life that matter most.</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+          <div className="grid gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
             {[
-              { title: "Struggling in Business?", desc: "Manifest Success – Amplify remedies that actually WORK for success.", img: "https://i.pinimg.com/736x/c4/cf/2b/c4cf2b4327960aa0b380fbbe43719da1.jpg" },
-              { title: "Relationship Conflicts?", desc: "Peace & Harmony – Align your life with cosmic energies for stronger bonds.", img: "https://i.pinimg.com/1200x/af/be/eb/afbeebf69dd7f2c87ce1f4b34e34443f.jpg" },
-              { title: "Financial Struggle?", desc: "Obstacle Removal – Align your energies for prosperity & stability.", img: "https://i.pinimg.com/736x/f2/40/ca/f240ca19fad2cf25c39ea3ca5fff74f7.jpg" },
-              { title: "Health Issues?", desc: "Fix dosh – Identify planetary imbalances & remedies for well-being.", img: "https://i.pinimg.com/1200x/01/0b/31/010b3193289bf097bba2062c943734a5.jpg" },
-              { title: "Kundali Matchmaking?", desc: "Beyond Compatibility – We don't just match; we provide solutions to any mismatch!", img: "https://i.pinimg.com/736x/1f/00/89/1f00892745e611a85baecaa72ae3a895.jpg" },
-              { title: "Enlighten Baby Future?", desc: "Give Direction – Align your child's life towards ultimate success.", img: "https://i.pinimg.com/736x/65/90/d7/6590d77c14d037afde320222419247b6.jpg" },
-            ].map((item, i) => (
-              <div 
-                key={i} 
-                className={`reveal d${(i % 3) + 1} group relative w-full aspect-[2/1] md:aspect-[4/5] rounded-[2rem] overflow-hidden cursor-pointer bg-[#2A0E00] shadow-xl hover:shadow-[0_30px_60px_rgba(200,168,75,0.25)] transition-all duration-500 hover:-translate-y-3`}
-              >
-                {/* 1. Background Image with 3D Zoom Effect */}
-                <Image 
-  src={item.img} 
-  alt={item.title} 
-  fill
-  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-  // ADD THIS:
-  quality={50} 
-  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 opacity-90 group-hover:opacity-100" 
-/>
-
-                {/* 2. Premium Dark Gradient Overlay (Protects Text Legibility) */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#1A0A00] via-[#1A0A00]/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500"></div>
-                {/* 3. Text Content Container (Positioned at Bottom) */}
-                <div className="absolute inset-x-0 bottom-0 p-8 lg:p-10 flex flex-col justify-end">
-                  
-                  {/* Title */}
-                  <h3 className="Georgia text-2xl lg:text-3xl font-medium text-[#F5D98A] transform transition-transform duration-500 ease-out group-hover:-translate-y-2">
-                    {item.title}
-                  </h3>
-                  
-                  {/* Decorative Line that expands on hover */}
-                  <div className="w-10 h-1 bg-[#C8A84B] mt-4 mb-2 transition-all duration-500 ease-out group-hover:w-full opacity-50 group-hover:opacity-100 rounded-full"></div>
-
-                  {/* Hidden Description (Slides up using CSS Grid hack for smooth auto-height animation) */}
-                  <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
-                    <div className="overflow-hidden">
-                      <p className="text-white/90 leading-relaxed text-sm lg:text-base pt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
-                        {item.desc}
-                      </p>
-                    </div>
+              { title: "Love & Relationships", desc: "Understand your relationship patterns and gain clarity on timing and next steps.", img: "/section-guidance/love-relationships.webp", Icon: Heart, iconColor: "text-[#8B1E1E]", iconBg: "bg-[#F7E8E3]" },
+              { title: "Career & Business Growth", desc: "Discover your strengths, right opportunities and the best time for growth.", img: "/section-guidance/career-business.webp", Icon: BriefcaseBusiness, iconColor: "text-[#A3631D]", iconBg: "bg-[#F8EAD4]" },
+              { title: "Wealth & Financial Stability", desc: "Get insights on income, investments and long-term financial security.", img: "/section-guidance/wealth-finance.webp", Icon: Coins, iconColor: "text-[#6C7C4E]", iconBg: "bg-[#EFF2E4]" },
+              { title: "Health & Well-being", desc: "Understand health tendencies and simple remedies for a more balanced life.", img: "/section-guidance/health-wellbeing.webp", Icon: HeartPulse, iconColor: "text-[#6C7C4E]", iconBg: "bg-[#EFF2E4]" },
+              { title: "Marriage & Kundali Matchmaking", desc: "Check compatibility and gain clarity on delays, timing and a harmonious future.", img: "/section-guidance/marriage-matchmaking.webp", Icon: HeartHandshake, iconColor: "text-[#8B1E1E]", iconBg: "bg-[#F7E8E3]" },
+              { title: "Child Future & Family Guidance", desc: "Explore your child's potential and get guidance for education, career and well-being.", img: "/section-guidance/child-family.webp", Icon: Users, iconColor: "text-[#84623F]", iconBg: "bg-[#F1EAF1]" },
+            ].map(({ title, desc, img, Icon, iconColor, iconBg }) => (
+              <Link key={title} href={kundaliCheckoutHref} className="group block overflow-hidden rounded-[24px] border border-[#E8D8B8] bg-[#FFFBF5] shadow-[0_14px_30px_rgba(74,46,16,0.09)] transition-all duration-300 hover:-translate-y-1 hover:border-[#C8A84B] hover:shadow-[0_20px_38px_rgba(74,46,16,0.14)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#8B1E1E]">
+                <div className="relative h-[260px] overflow-hidden sm:h-[285px] lg:h-[305px] xl:h-[325px]">
+                  <Image src={img} alt="" fill sizes="(max-width: 640px) calc(100vw - 40px), (max-width: 1024px) 50vw, 33vw" quality={80} className="object-cover object-center transition-transform duration-500 group-hover:scale-[1.04]" />
+                </div>
+                <div className="relative -mt-5 min-h-[158px] rounded-t-[22px] bg-[#FFFBF5]/95 px-5 pb-6 pt-8 backdrop-blur-[4px] sm:px-6">
+                  <span aria-hidden="true" className={`absolute -top-8 left-5 inline-flex h-14 w-14 items-center justify-center rounded-full border-4 border-[#FFFBF5] shadow-sm ${iconBg} ${iconColor}`}><Icon className="h-6 w-6" strokeWidth={1.65} /></span>
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="font-serif text-[1.7rem] font-medium leading-[1.05] tracking-[-0.02em] text-[#2A1400] sm:text-[1.8rem]">{title}</h3>
+                    <span aria-hidden="true" className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#D8C49A] text-[#8B1E1E] transition-colors group-hover:bg-[#8B1E1E] group-hover:text-white"><ArrowUpRight className="h-4 w-4" strokeWidth={2} /></span>
                   </div>
+                  <p className="mt-2 max-w-[33ch] text-sm leading-[1.45] text-[#4A2E10] sm:text-[15px]">{desc}</p>
                 </div>
-                {/* 4. Optional Top-Right Icon (Adds to the 3D interactive feel) */}
-                <div className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white opacity-0 transform translate-x-4 -translate-y-4 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 transition-all duration-500">
-                  ↗
-                </div>
-
-              </div>
+              </Link>
             ))}
           </div>
-          
-          <div className="mt-10 md:mt-20 text-center reveal">
-            <a href={kundaliCheckoutHref} className="btn-auto-shine inline-block bg-gradient-to-r from-[#DEB85D] to-[#EFCF7A] text-[#2A0E00] px-12 py-5 rounded-2xl font-medium text-xl shadow-[0_15px_30px_rgba(200,168,75,0.3)] hover:-translate-y-2 transition-transform duration-300">
-              Fix Your Problems with Premium  Surbhi Kundali NOW!
-            </a>
+
+          <div className="mt-11 flex flex-col items-center gap-3 text-center sm:mt-12">
+            <Link href={kundaliCheckoutHref} className="hero-cta-shimmer relative inline-flex min-h-[60px] w-full max-w-[510px] items-center justify-center gap-4 overflow-hidden rounded-full border-2 border-[#C8A84B] bg-gradient-to-r from-[#6F1119] via-[#8B1E1E] to-[#6F1119] px-5 py-3 text-lg font-medium text-[#FCF7EE] shadow-[0_14px_28px_rgba(91,20,20,0.2)] transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#8B1E1E] sm:px-8 sm:text-xl">
+              <span className="relative z-10"><span className="sm:hidden">Get My Surbhi Kundali</span><span className="hidden sm:inline">Get Your Premium Surbhi Kundali</span></span>
+              <span aria-hidden="true" className="relative z-10 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#EFCF7A] text-[#4A2E10]"><ArrowUpRight className="h-5 w-5" strokeWidth={2} /></span>
+            </Link>
+            <p className="inline-flex items-center gap-2 text-sm text-[#4A2E10]"><FaWhatsapp aria-hidden="true" className="h-4 w-4 text-[#16843D]" /> Includes 1 FREE WhatsApp Question</p>
           </div>
         </div>
       </section>
@@ -832,8 +755,8 @@ const time = useCountdown();
           <div className="inline-block bg-white/40 text-[#cc831c] text-[10px] sm:text-xs font-medium tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-6 border border-[#E2C06A]/30">
             The Transformation
           </div>
-          <h2 className="Georgia text-4xl lg:text-5xl font-medium text-black/80 mb-6">
-            Life Before vs  After Your <span className="italic text-[#e89b1f]">Surbhi Kundali Report</span>
+          <h2 className="section-title mb-6 text-black/80">
+            Life Before vs  After Your <span className="text-[#e89b1f]">Surbhi Kundali Report</span>
           </h2>
           <p className="text-black/80 max-w-2xl mx-auto text-base sm:text-lg">
             Drag the slider to see the difference cosmic alignment makes. Don't let confusion hold you back from the life you were destined to live.
@@ -911,7 +834,7 @@ const time = useCountdown();
               </div>
               
               {/* Title */}
-              <h2 className="Georgia text-[28px] leading-none sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#E2C06A] mb-1 sm:mb-2 drop-shadow-md uppercase tracking-wide">
+              <h2 className="section-title mb-1 text-[#E2C06A] drop-shadow-md sm:mb-2">
                 Narendra Modi
               </h2>
               
@@ -964,7 +887,7 @@ const time = useCountdown();
 
           {/* Timeline content */}
           <div className="reveal order-1 lg:order-2">
-            <h2 className="Georgia text-3xl lg:text-5xl font-medium text-[#2A1400] mb-4">Who Should Get a<br/> Premium Surbhi Kundali Report ?</h2>
+            <h2 className="section-title mb-4 text-[#2A1400]">Who Should Get a<br/> Premium Surbhi Kundali Report ?</h2>
             <p className="text-[#4A2E10] text-lg mb-12 leading-relaxed">
               Anyone facing a dilemma in life can have your Surbhi Kundali  guide your next steps. It helps you understand the right timing, make better decisions, and move forward with confidence.
             </p>
@@ -1013,7 +936,7 @@ const time = useCountdown();
               </span>
               <div className="w-12 h-[1px] bg-[#C8A84B]"></div>
             </div>
-            <h2 className="Georgia text-3xl lg:text-5xl font-medium text-[#2A1400]">
+            <h2 className="section-title text-[#2A1400]">
               What's Inside Your Premium  Surbhi Kundali
             </h2>
           </div>
@@ -1185,7 +1108,7 @@ const time = useCountdown();
             </div>
             
             {/* Cinematic Gradient Title */}
-            <h2 className="Georgia text-[2.2rem] leading-tight sm:text-5xl lg:text-6xl font-medium mb-4 sm:mb-6 bg-gradient-to-br from-white via-[#F5D98A] to-[#C8A84B] bg-clip-text text-transparent drop-shadow-sm">
+            <h2 className="section-title mb-4 bg-gradient-to-br from-white via-[#F5D98A] to-[#C8A84B] bg-clip-text text-transparent drop-shadow-sm sm:mb-6">
               Get Your Premium <br className="hidden sm:block"/> Surbhi Kundali Report 
             </h2>
             
@@ -1310,9 +1233,9 @@ Our Premium Surbhi Kundali Report helps you understand your planetary positions,
                 New Arrival Special
               </div>
               
-              <h2 className="Georgia text-3xl sm:text-4xl lg:text-[2.75rem] leading-[1.2] font-medium text-[#2A1400] mb-5 tracking-tight">
+              <h2 className="section-title mb-5 text-[#2A1400]">
                 Secure Your Child's <br />
-                <em className="text-[#C8A84B] italic">Cosmic Destiny.</em>
+                <span className="text-[#C8A84B]">Cosmic Destiny.</span>
               </h2>
               
               <p className="text-[#6B4423] text-sm sm:text-base leading-relaxed mb-8">
@@ -1368,7 +1291,7 @@ Our Premium Surbhi Kundali Report helps you understand your planetary positions,
             
             {/* Text Side */}
             <div className="p-6 sm:p-10 lg:p-16 flex flex-col justify-center">
-              <h2 className="Georgia text-2xl sm:text-3xl lg:text-4xl font-medium text-[#2A1400] mb-1.5 lg:mb-2">Trust the Best —</h2>
+              <h2 className="section-title mb-1.5 text-[#2A1400] lg:mb-2">Trust the Best —</h2>
               <div className="bg-white inline-block px-3 py-1.5 lg:px-4 lg:py-2 mb-4 lg:mb-6 rounded-md lg:rounded-none w-fit">
                 <h3 className="Georgia text-xl sm:text-2xl lg:text-3xl font-medium text-[#8B1E1E] italic">Celebrity Astrologer Surbhi Gupta!</h3>
               </div>
@@ -1461,7 +1384,7 @@ Our Premium Surbhi Kundali Report helps you understand your planetary positions,
               <div className="text-[#E8D8B8] text-xs font-medium tracking-[0.2em] uppercase mb-2">
                 Premium Surbhi Kundali
               </div>
-              <h2 className="Georgia text-3xl sm:text-4xl font-medium text-white">
+              <h2 className="section-title text-white">
                 Your Complete Life Blueprint
               </h2>
             </div>

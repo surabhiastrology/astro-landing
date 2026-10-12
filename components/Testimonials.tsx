@@ -103,9 +103,9 @@ export default function TestimonialsSection() {
             <div className="inline-flex items-center gap-2 text-[9px] sm:text-xs font-bold tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-4 sm:mb-6 shadow-sm border border-[#C5A880]/40 bg-white/60 text-[#84623F] backdrop-blur-sm mx-auto md:mx-0">
               ✦ Client Success Stories
             </div>
-            <h2 className="font-serif text-4xl sm:text-5xl lg:text-[3.6rem] font-medium text-[#2D1B11] leading-[1.15] tracking-tight">
+            <h2 className="section-title text-[#2D1B11]">
               Real People. <br className="hidden md:block" />
-              <em className="italic text-[#84623F]">Real Transformations.</em>
+              <span className="text-[#84623F]">Real Transformations.</span>
             </h2>
           </div>
 

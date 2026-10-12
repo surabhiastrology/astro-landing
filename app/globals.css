@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Shared homepage section heading: the hero remains the larger display tier. */
+.section-title {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  font-weight: 500;
+  font-style: normal;
+  line-height: 1.14;
+  letter-spacing: -0.025em;
+}
+
 /* ❌ REMOVED: @import url('https://fonts.googleapis.com/...'); 
   This was blocking your mobile render for 3+ seconds.
   Fonts are now handled via next/font in layout.tsx.

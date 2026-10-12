@@ -58,8 +58,8 @@ export default function HowItWorksSection() {
             </span>
             <div className="w-8 h-[1px] bg-[#C8A84B]"></div>
           </div>
-          <h2 className="Georgia text-3xl md:text-4xl lg:text-5xl font-medium text-white leading-tight">
-            Your Surbhi Kundali in <span className="italic text-[#f4e9de] block sm:inline"> <em className="font-mono" >5</em> Simple Steps</span>
+          <h2 className="section-title text-white">
+            Your Surbhi Kundali in <span className="block text-[#f4e9de] sm:inline"> 5 Simple Steps</span>
           </h2>
         </div>
 
