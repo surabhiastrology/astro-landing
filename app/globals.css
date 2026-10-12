@@ -234,9 +234,13 @@ body::before {
   position: absolute;
   inset: 0;
   width: 28%;
-  background: linear-gradient(90deg, transparent, rgba(252, 247, 238, 0.22), transparent);
+  background: linear-gradient(90deg, transparent, rgba(252, 247, 238, 0.32), transparent);
   animation: hero-cta-sheen 5s ease-in-out infinite;
   pointer-events: none;
+}
+
+.steps-cta-shimmer::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
 }
 
 .hero-topic-track {

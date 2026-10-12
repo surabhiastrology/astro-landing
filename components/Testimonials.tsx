@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import SectionEyebrow from "./SectionEyebrow";
 
 export default function TestimonialsSection() {
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -100,9 +101,7 @@ export default function TestimonialsSection() {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 sm:mb-16">
           
           <div className="text-center md:text-left">
-            <div className="inline-flex items-center gap-2 text-[9px] sm:text-xs font-bold tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-4 sm:mb-6 shadow-sm border border-[#C5A880]/40 bg-white/60 text-[#84623F] backdrop-blur-sm mx-auto md:mx-0">
-              ✦ Client Success Stories
-            </div>
+            <SectionEyebrow className="mb-4 sm:mb-6">Client Success Stories</SectionEyebrow>
             <h2 className="section-title text-[#2D1B11]">
               Real People. <br className="hidden md:block" />
               <span className="text-[#84623F]">Real Transformations.</span>

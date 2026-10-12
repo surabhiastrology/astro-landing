@@ -7,6 +7,9 @@ const ComparisonSlider2 = dynamic(() => import("@/components/Comparisonslider2")
   loading: () => <div className="h-[500px] bg-ivory animate-pulse" /> // Placeholder
 });
 import HowItWorksSection from "@/components/Simplesteps";
+import SectionEyebrow from "@/components/SectionEyebrow";
+import TrustSurbhiSection from "@/components/TrustSurbhiSection";
+import WhoIsItForSection from "@/components/WhoIsItForSection";
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -563,9 +566,7 @@ const time = useCountdown();
 
   {/* MAIN TEXT CONTAINER */}
  <div className="mx-auto mb-9 max-w-6xl px-5 text-center lg:mb-14">
-  <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#E8D8B8] bg-white/80 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.16em] text-[#8B1E1E] sm:text-xs">
-    <span aria-hidden="true" className="text-[#C8A84B]">✦</span> Real People. Real Shifts.
-  </div>
+  <SectionEyebrow className="mb-5">Real People. Real Shifts.</SectionEyebrow>
   
   <h2 className="section-title text-[#2A1400]">
     Trusted by <span className="text-[#8B1E1E]">1,50,000+</span> individuals for
@@ -575,10 +576,8 @@ const time = useCountdown();
 
   {/* CELEBRITY CAROUSEL (NOW AUTO-SCROLLING MARQUEE) */}
   <div className="relative mb-12 w-full lg:mb-16">
-    <div className="mx-auto mb-7 flex max-w-[800px] items-center gap-3 px-5 lg:gap-4">
-      <div className="h-px flex-1 bg-[#D8C49A]" />
-      <div className="whitespace-nowrap text-center text-xs font-medium uppercase tracking-[0.16em] text-[#6B4423] sm:text-sm">Celebrity Consultations</div>
-      <div className="h-px flex-1 bg-[#D8C49A]" />
+    <div className="mx-auto mb-7 flex justify-center px-5">
+      <SectionEyebrow>Celebrity Consultations</SectionEyebrow>
     </div>
 
     {/* Continuous Sliding Track */}
@@ -636,9 +635,7 @@ const time = useCountdown();
   
   {/* PRESS HEADER */}
   <div className="relative z-10 mx-auto mb-8 max-w-[1100px] px-5 text-center lg:mb-10 lg:px-7">
-  <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#E8D8B8] bg-white/80 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.16em] text-[#8B1E1E] sm:text-xs">
-    <span aria-hidden="true" className="text-[#C8A84B]">✦</span> As Featured In
-  </div>
+  <SectionEyebrow className="mb-5">As Featured In</SectionEyebrow>
   
   <h2 className="section-title text-[#2A1400]">
     Making headlines.
@@ -703,7 +700,7 @@ const time = useCountdown();
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-center bg-no-repeat opacity-[0.08]" style={{ backgroundImage: "url('/checkout-zodiac-wheels.png')", backgroundSize: "min(1500px, 100vw) auto" }} />
         <div className="relative z-10 mx-auto max-w-[1420px] px-5 sm:px-7 lg:px-10">
           <div className="mx-auto mb-9 max-w-4xl text-center sm:mb-11">
-            <div aria-hidden="true" className="mx-auto mb-5 flex max-w-[220px] items-center gap-4 text-[#C8A84B]"><span className="h-px flex-1 bg-[#C8A84B]/65" /><span className="font-serif text-3xl leading-none">✦</span><span className="h-px flex-1 bg-[#C8A84B]/65" /></div>
+            <SectionEyebrow className="mb-5">Guidance for Every Part of Life</SectionEyebrow>
             <h2 className="section-title text-[#2A1400]">What Can Premium Surbhi Kundali <span className="block text-[#A3631D]">Help You With?</span></h2>
             <p className="mx-auto mt-4 max-w-[690px] text-base leading-relaxed text-[#4A2E10] sm:text-lg">Discover what your birth chart reveals and receive practical guidance for the areas of life that matter most.</p>
           </div>
@@ -752,9 +749,7 @@ const time = useCountdown();
     <section className=" py-8 md:py-14 bg-gradient-to-b from-[#fae8dc] to-[#e4c0c0]">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-5">
         <div className="text-center mb-12 reveal">
-          <div className="inline-block bg-white/40 text-[#cc831c] text-[10px] sm:text-xs font-medium tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-6 border border-[#E2C06A]/30">
-            The Transformation
-          </div>
+          <SectionEyebrow className="mb-6">The Transformation</SectionEyebrow>
           <h2 className="section-title mb-6 text-black/80">
             Life Before vs  After Your <span className="text-[#e89b1f]">Surbhi Kundali Report</span>
           </h2>
@@ -860,66 +855,7 @@ const time = useCountdown();
       {/* ════════════════════════════════
           WHO IS THIS FOR? (Split Layout with Image)
       ════════════════════════════════ */}
-      <section className=" py-8 md:py-14  bg-white relative overflow-hidden">
-        {/* Subtle background astrolabe */}
-        <div className="absolute -right-[20%] top-[20%] text-[40rem] text-[#F5D98A] opacity-5 pointer-events-none select-none font-serif leading-none">☸</div>
-
-        <div className="max-w-7xl mx-auto px-5 grid lg:grid-cols-2 gap-16 items-center">
-          
-          {/* Big Author Image */}
-          <div className="reveal order-2 lg:order-1 relative">
-            <div className="absolute inset-0 bg-[#E8D8B8] rounded-[2rem] transform translate-x-4 translate-y-4"></div>
-            <Image 
-  src="/smart-kundli.png" 
-  alt="Celebrity Astrologer Surbhi Gupta" 
-  width={600}           // Provide the maximum expected width
-  height={750}          // Matches your aspect-[4/5] ratio
-  quality={50}         // Balance quality and performance
-  className="relative z-10 w-full h-auto rounded-[2rem] shadow-2xl object-cover"
-  // No need for 'priority' here since it's further down the page
-  sizes="(max-width: 768px) 100vw, 50vw" // Helps browser choose the right size
-/>
-            <div className="absolute bottom-10 left-[-20px] z-20 bg-white p-6 rounded-2xl shadow-xl border border-[#E8D8B8] reveal d3">
-              <div className="Georgia text-2xl font-medium text-[#2A1400]">35+ Years</div>
-              <div className="text-sm font-semibold text-[#C8A84B] uppercase tracking-wider">Mastering the Stars</div>
-            </div>
-          </div> 
-
-          {/* Timeline content */}
-          <div className="reveal order-1 lg:order-2">
-            <h2 className="section-title mb-4 text-[#2A1400]">Who Should Get a<br/> Premium Surbhi Kundali Report ?</h2>
-            <p className="text-[#4A2E10] text-lg mb-12 leading-relaxed">
-              Anyone facing a dilemma in life can have your Surbhi Kundali  guide your next steps. It helps you understand the right timing, make better decisions, and move forward with confidence.
-            </p>
-
-            <div className="relative timeline-line">
-              {[
-                { step: 1, title: "Students", desc: "Who want clarity on their strengths, academic path, and future career direction." },
-                { step: 2, title: "Job Seekers", desc: "Who are struggling to find the right opportunity or succeed in competitive exams." },
-                { step: 3, title: "Business Owners", desc: "Who are facing losses, uncertain decisions, or confusion about timing to act." },
-                { step: 4, title: "Couples", desc: "Who are dealing with relationship challenges or delays in marriage." },
-                { step: 5, title: "Parents", desc: "Who want clarity on their child's future, strengths, and right direction." },
-              ].map((item, i) => (
-                <div key={i} className="relative flex items-start gap-6 lg:gap-8 mb-8 last:mb-0 reveal" style={{ transitionDelay: `${i * 0.1}s` }}>
-                  <div className="relative z-10 w-12 h-12 rounded-full bg-[#C8A84B] text-white flex items-center justify-center font-medium text-xl flex-shrink-0 shadow-md">
-                    {item.step}
-                  </div>
-                  <div className="pt-1.5">
-                    <h3 className="Georgia text-xl font-medium text-[#2A1400] mb-1">{item.title}</h3>
-                    <p className="text-[#4A2E10] text-sm leading-relaxed">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <div className="mt-8 md:mt-12 reveal">
-              <a href={kundaliCheckoutHref} className="btn-auto-shine inline-block bg-gradient-to-r from-[#DEB85D] to-[#EFCF7A] text-[#2A0E00] px-10 py-4 rounded-xl font-medium text-lg shadow-[0_10px_20px_rgba(200,168,75,0.3)] hover:-translate-y-1 transition-transform">
-                Order My Surbhi Kundali Now
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
+      <WhoIsItForSection checkoutHref={kundaliCheckoutHref} />
 
       {/* ════════════════════════════════
           WHAT'S INSIDE (Premium Features Grid)
@@ -929,13 +865,7 @@ const time = useCountdown();
           
           
           <div className="text-center mb-8 md:mb-12 reveal">
-            <div className="flex items-center justify-center gap-4 mb-4">
-              <div className="w-12 h-[1px] bg-[#C8A84B]"></div>
-              <span className="text-[#C8A84B] text-xs sm:text-sm font-medium tracking-[0.2em] uppercase">
-                Everything Included
-              </span>
-              <div className="w-12 h-[1px] bg-[#C8A84B]"></div>
-            </div>
+            <SectionEyebrow className="mb-4">Everything Included</SectionEyebrow>
             <h2 className="section-title text-[#2A1400]">
               What's Inside Your Premium  Surbhi Kundali
             </h2>
@@ -1281,81 +1211,8 @@ Our Premium Surbhi Kundali Report helps you understand your planetary positions,
       </section>
 
       
-      {/* ════════════════════════════════
-          AUTHORITY (Acharya Style)
-      ════════════════════════════════ */}
-      <section className="py-8 md:py-14 bg-[#FCF7EE]">
-        <div className="max-w-full mx-auto px-4 sm:px-0">
-          {/* Changed to flex-col-reverse for mobile so the image shows at the top, switches to grid on desktop */}
-          <div className="bg-[#F5D98A] overflow-hidden shadow-2xl flex flex-col-reverse lg:grid lg:grid-cols-2">
-            
-            {/* Text Side */}
-            <div className="p-6 sm:p-10 lg:p-16 flex flex-col justify-center">
-              <h2 className="section-title mb-1.5 text-[#2A1400] lg:mb-2">Trust the Best —</h2>
-              <div className="bg-white inline-block px-3 py-1.5 lg:px-4 lg:py-2 mb-4 lg:mb-6 rounded-md lg:rounded-none w-fit">
-                <h3 className="Georgia text-xl sm:text-2xl lg:text-3xl font-medium text-[#8B1E1E] italic">Celebrity Astrologer Surbhi Gupta!</h3>
-              </div>
-              <p className="text-[#4A2E10] mb-5 lg:mb-8 leading-snug lg:leading-relaxed text-sm sm:text-base lg:text-lg">
-                Celebrity Astrologer Surbhi Gupta, proudly recognized as the Pride of Bharat, is one of India’s most trusted astrology experts. She specializes in Astrology, Vastu, and Numerology, helping people find clarity and practical guidance for life’s challenges. Her accurate insights and personalized consultations have earned the trust of celebrities, business leaders, and thousands of satisfied clients across India.
-              </p>
-              <p className="text-[#2A1400] font-medium italic text-base sm:text-lg lg:text-xl mb-6 lg:mb-10">
-                Your destiny is precious. Don't leave it to guesswork.
-              </p>
-
-              {/* Stats Row - Compact for Mobile */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
-                {[
-                  { i: "✡", t: "35+ Years in Occult Science" },
-                  { i: "👥", t: "Trusted by 1,50,000+ Worldwide" },
-                  { i: "📖", t: "Author & Thought Leader" },
-                  { i: "🎯", t: "Solution Driven Approach" }
-                ].map((stat, i) => (
-                  <div key={i} className="bg-white p-2.5 sm:p-3 lg:p-4 rounded-xl text-center shadow-sm hover:-translate-y-1 transition-transform flex flex-col items-center justify-center">
-                    <div className="w-8 h-8 lg:w-10 lg:h-10 bg-[#3D1600] text-[#E2C06A] rounded-lg flex items-center justify-center text-lg lg:text-xl mb-1.5 lg:mb-3">
-                      {stat.i}
-                    </div>
-                    <div className="text-[9px] sm:text-[10px] lg:text-xs font-medium text-[#4A2E10] leading-tight">
-                      {stat.t}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Image Side */}
-            <div className="bg-[#E8D8B8] relative min-h-[400px] sm:min-h-[400px] w-full">
-               <Image 
-  src="/surbhi-gupta-new.JPG" 
-  alt="Celebrity Astrologer Surbhi Gupta" 
-  fill 
-  loading="eager" // Tells the browser to download this sooner than a standard lazy image
-  placeholder="blur" // Instant visual feedback
-  blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAFCAYAAABirU39AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAMElEQVR4nGNgYGBoYmBgSGRgYChmYGBoYmBgSGVgYChmYGBoYmBgSGRgYChmYGBoYmBgAAYBAf7p9jEAAAAASUVORK5CYII=" 
-  sizes="(max-width: 1024px) 100vw, 50vw" 
-  className="object-cover object-[center_top] lg:object-center" 
-/>
-
-{/* svg */}
-
-
-               <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-[#F5D98A] to-transparent h-24 lg:h-32 flex items-end justify-center pb-4 lg:pb-6">
-                 {/* Hidden on mobile to save space since it's already in the text box below it */}
-                 <h3 className="hidden lg:block Georgia text-3xl font-medium text-[#2A1400] drop-shadow-md italic">
-                   Celebrity Astrologer Surbhi Gupta!
-                 </h3>
-               </div>
-            </div>
-            
-          </div>
-
-          {/* Full width button on mobile */}
-          <div className="mt-8 lg:mt-12 text-center reveal">
-             <a href={kundaliCheckoutHref} className="btn-auto-shine block w-full sm:inline-block sm:w-auto bg-gradient-to-br from-[#200404] via-[#3d0808] to-[#200404] text-white px-6 py-4 lg:px-12 lg:py-5 rounded-xl lg:rounded-2xl font-medium text-base sm:text-lg lg:text-xl shadow-xl hover:scale-105 transition-transform">
-                Get Your Report From the Best!
-             </a>
-          </div>
-        </div>
-      </section>
+      {/* Surbhi Gupta authority section */}
+      <TrustSurbhiSection />
 
 
 

@@ -1,0 +1,102 @@
+.section {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle at 6% 8%, #fffdf9, transparent 45%), #fcf7ee;
+  border-block: 1px solid #e8d8b8;
+}
+
+.section::before,
+.section::after {
+  position: absolute;
+  width: 430px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(200, 168, 75, .23);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.section::before { top: -240px; left: -170px; box-shadow: 0 0 0 28px rgba(200, 168, 75, .045), 0 0 0 65px rgba(200, 168, 75, .035); }
+.section::after { top: -125px; right: -270px; box-shadow: 0 0 0 35px rgba(200, 168, 75, .04), 0 0 0 75px rgba(200, 168, 75, .03); }
+
+.shell {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: clamp(36px, 5vw, 82px);
+  width: min(100%, 1510px);
+  margin: 0 auto;
+  padding: clamp(50px, 5vw, 78px) 32px;
+}
+
+.visual { position: relative; width: 100%; min-width: 0; max-width: 650px; margin-left: auto; padding: 0 18px 18px 0; }
+.visual::before { position: absolute; inset: 17px 0 0 18px; border: 1px solid #e8d8b8; border-radius: 32px; background: #f4e1b6; content: ""; }
+.imageFrame { position: relative; overflow: hidden; border: 2px solid #d4aa5e; border-radius: 32px; background: #f4e1b6 url('/surbhi-kundali-guidance.webp') center / cover no-repeat; box-shadow: 0 16px 42px rgba(74, 46, 16, .14); }
+.image { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; }
+.experience { position: absolute; top: 60px; left: -22px; display: flex; align-items: center; gap: 15px; min-width: 220px; padding: 17px 20px; border: 1px solid #e3bd76; border-radius: 20px; background: rgba(255, 253, 248, .97); box-shadow: 0 12px 32px rgba(74, 46, 16, .12); }
+.experienceStar { color: #c8a84b; font-size: 40px; line-height: 1; }
+.experience strong { display: block; color: #a3631d; font-family: var(--font-serif), Georgia, serif; font-size: 29px; font-weight: 600; line-height: 1.08; white-space: nowrap; }
+.experience small { display: block; margin-top: 5px; color: #8c561c; font-size: 10px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; }
+
+.content { min-width: 0; }
+.eyebrow { display: flex; margin-bottom: 15px; }
+.heading { max-width: 740px; margin: 0; color: #2a1400; }
+.heading span { display: block; color: #a3631d; }
+.intro { max-width: 680px; margin: 14px 0 25px; color: #4a2e10; font-size: clamp(16px, 1.25vw, 19px); line-height: 1.55; }
+.list { display: grid; gap: 11px; margin: 0; padding: 0; list-style: none; counter-reset: audience; }
+.audience { display: flex; min-height: 78px; align-items: center; gap: 17px; padding: 8px 17px 8px 0; border: 1px solid #e6d1a9; border-radius: 20px; background: rgba(255,255,255,.76); box-shadow: 0 7px 18px rgba(74, 46, 16, .04); color: inherit; transition: border-color 200ms ease, background-color 200ms ease, box-shadow 200ms ease; }
+.audience:hover { border-color: #c8a84b; background: #fffdfa; box-shadow: 0 10px 24px rgba(74, 46, 16, .1); }
+.audience:focus-visible, .cta:focus-visible { outline: 3px solid #8b1e1e; outline-offset: 4px; }
+.number { display: grid; width: 46px; height: 46px; flex: 0 0 auto; place-items: center; margin-left: -22px; border: 1px solid #c8a84b; border-radius: 50%; background: #80131d; color: #fff; font-family: var(--font-serif), Georgia, serif; font-size: 22px; }
+.icon { display: grid; width: 54px; height: 54px; flex: 0 0 auto; place-items: center; border-radius: 50%; background: #faecd2; color: #9c651d; }
+.audienceText { display: grid; min-width: 0; gap: 2px; }
+.audienceText strong { color: #2a1400; font-family: var(--font-serif), Georgia, serif; font-size: clamp(20px, 1.7vw, 26px); font-weight: 600; line-height: 1.15; }
+.audienceText > span { color: #5e4b3d; font-size: clamp(14px, 1vw, 16px); line-height: 1.35; }
+.chevron { flex: 0 0 auto; margin-left: auto; color: #af7627; }
+.cta { position: relative; isolation: isolate; display: inline-flex; min-height: 64px; align-items: center; justify-content: center; gap: 22px; margin: 20px 0 0 40px; padding: 8px 10px 8px 30px; overflow: hidden; border: 2px solid #c8a84b; border-radius: 999px; background: linear-gradient(100deg, #601017, #8b1e1e 55%, #601017); box-shadow: 0 12px 28px rgba(91, 20, 20, .18); color: #fcf7ee; font-family: var(--font-serif), Georgia, serif; font-size: clamp(19px, 1.6vw, 24px); font-weight: 500; line-height: 1.15; text-align: center; transition: transform 200ms ease, box-shadow 200ms ease; }
+.cta:hover { transform: translateY(-2px); box-shadow: 0 16px 32px rgba(91, 20, 20, .23); }
+.cta > span { position: relative; z-index: 1; }
+.ctaIcon { display: grid; width: 43px; height: 43px; flex: 0 0 auto; place-items: center; border-radius: 50%; background: #e7c06a; color: #5b1115; }
+
+@media (max-width: 1100px) {
+  .shell { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 38px; }
+  .audience { gap: 10px; }
+  .experience { left: -12px; min-width: 180px; padding: 12px; }
+  .experience strong { font-size: 23px; }
+}
+
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; gap: 32px; max-width: 720px; }
+  .content { grid-row: 1; }
+  .visual { grid-row: 2; width: min(100%, 540px); margin: 0 auto; }
+  .cta { margin-left: 0; }
+}
+
+@media (max-width: 600px) {
+  .shell { gap: 28px; padding: 46px 20px 52px; }
+  .eyebrow { justify-content: center; margin-bottom: 13px; }
+  .heading { text-align: center; }
+  .intro { margin: 15px 0 22px; font-size: 16px; text-align: center; }
+  .list { gap: 9px; padding-left: 12px; }
+  .audience { min-height: 88px; gap: 10px; padding: 8px 11px 8px 0; border-radius: 16px; }
+  .number { width: 36px; height: 36px; margin-left: -14px; font-size: 18px; }
+  .icon { width: 43px; height: 43px; }
+  .icon svg { width: 23px; height: 23px; }
+  .audienceText strong { font-size: 20px; }
+  .audienceText > span { font-size: 16px; }
+  .chevron { width: 17px; }
+  .cta { display: flex; width: 100%; min-height: 60px; gap: 10px; margin-top: 20px; padding: 7px 8px 7px 16px; font-size: 17px; }
+  .ctaIcon { width: 39px; height: 39px; }
+  .visual { padding: 0 12px 12px 0; }
+  .imageFrame, .visual::before { border-radius: 23px; }
+  .experience { top: 20px; left: -7px; gap: 8px; min-width: 0; padding: 9px 12px; border-radius: 14px; }
+  .experienceStar { font-size: 27px; }
+  .experience strong { font-size: 19px; }
+  .experience small { font-size: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .audience, .cta { transition: none; }
+}
