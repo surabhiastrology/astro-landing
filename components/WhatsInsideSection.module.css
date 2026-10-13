@@ -1,0 +1,239 @@
+.section {
+  background: #fcf7ee;
+  color: #2a1400;
+}
+
+.inner {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: clamp(3rem, 5vw, 5rem) clamp(1rem, 3vw, 3rem);
+}
+
+.intro {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.heading {
+  margin: 1rem 0 0;
+}
+
+.heading span {
+  color: #8b1e1e;
+}
+
+.coreGrid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.coreCard {
+  --card-background: #381515;
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 282px;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  padding: 0.9rem 0.85rem 1.15rem;
+  border: 1px solid #c3944b;
+  border-radius: 20px;
+  background: radial-gradient(circle at 50% 32%, rgba(218, 176, 100, 0.11), transparent 52%), var(--card-background);
+  box-shadow: 0 10px 20px rgba(55, 26, 5, 0.1);
+  color: #fffaf0;
+  text-align: center;
+}
+
+.coreCard::before,
+.coreCard::after {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border: 1px solid rgba(219, 179, 107, 0.18);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.coreCard::before {
+  top: -96px;
+  left: -85px;
+}
+
+.coreCard::after {
+  right: -86px;
+  bottom: -103px;
+}
+
+.maroon { --card-background: #421519; }
+.navy { --card-background: #102640; }
+.olive { --card-background: #1c3020; }
+.umber { --card-background: #473015; }
+.forest { --card-background: #12352e; }
+.plum { --card-background: #32203e; }
+
+.badge {
+  z-index: 1;
+  align-self: flex-end;
+  padding: 0.3rem 0.55rem;
+  border: 1px solid rgba(238, 205, 145, 0.65);
+  border-radius: 8px;
+  color: #f9dfac;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.iconHalo {
+  z-index: 1;
+  display: grid;
+  width: 78px;
+  height: 78px;
+  margin: 0.35rem auto 0.55rem;
+  place-items: center;
+  border: 1px solid rgba(225, 190, 122, 0.45);
+  border-radius: 50%;
+  box-shadow: 0 0 0 13px rgba(225, 190, 122, 0.05), inset 0 0 22px rgba(225, 190, 122, 0.08);
+  color: #f2cd85;
+}
+
+.iconHalo svg {
+  width: 43px;
+  height: 43px;
+}
+
+.coreCard h3 {
+  z-index: 1;
+  display: flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(1.15rem, 1.45vw, 1.45rem);
+  font-weight: 500;
+  line-height: 1.14;
+}
+
+.divider {
+  z-index: 1;
+  width: 72px;
+  margin: 0.45rem 0 0.4rem;
+  border-bottom: 1px solid rgba(236, 196, 126, 0.52);
+  color: #eac37e;
+  font-size: 0.7rem;
+  line-height: 0.4;
+}
+
+.coreCard p {
+  z-index: 1;
+  margin: 0;
+  color: #f2e7d8;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.extraGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-top: 1.2rem;
+}
+
+.extraCard {
+  min-width: 0;
+  min-height: 212px;
+  padding: 1.2rem;
+  border: 1px solid #e5cda7;
+  border-radius: 18px;
+  background: #fffdf9;
+  box-shadow: 0 8px 20px rgba(77, 39, 7, 0.04);
+}
+
+.whatsappCard {
+  background: linear-gradient(135deg, #fffdf9, #fff3ed);
+}
+
+.extraTop {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.extraIcon {
+  display: grid;
+  width: 49px;
+  height: 49px;
+  place-items: center;
+  border: 1px solid #e5cda7;
+  border-radius: 50%;
+  background: #faf0df;
+  color: #a3631d;
+}
+
+.whatsappCard .extraIcon {
+  border-color: #18a85b;
+  background: #25d366;
+  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2);
+  color: #fff;
+}
+
+.extraBadge {
+  padding: 0.3rem 0.7rem;
+  border-radius: 8px;
+  background: #f9e9e4;
+  color: #8b1e1e;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.extraCard h3 {
+  margin: 0 0 0.75rem;
+  color: #491c19;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(1.25rem, 1.5vw, 1.55rem);
+  font-weight: 500;
+  line-height: 1.18;
+}
+
+.extraCard p {
+  margin: 0;
+  color: #6b5142;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 1230px) {
+  .coreGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .coreCard { min-height: 250px; }
+  .extraGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 690px) {
+  .coreGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .coreCard { min-height: 260px; }
+  .extraGrid { grid-template-columns: 1fr; }
+  .extraCard { min-height: 0; }
+}
+
+@media (max-width: 440px) {
+  .coreGrid { grid-template-columns: 1fr; }
+  .coreCard {
+    min-height: 0;
+    align-items: flex-start;
+    padding: 1rem 1.1rem 1.2rem;
+    text-align: left;
+  }
+  .badge { position: absolute; top: 1rem; right: 1rem; }
+  .iconHalo { width: 68px; height: 68px; margin: 0 0 0.8rem; }
+  .iconHalo svg { width: 32px; height: 32px; }
+  .coreCard h3 { min-height: 0; justify-content: flex-start; }
+  .divider { margin-block: 0.75rem; }
+  .coreCard p { font-size: 0.9rem; }
+}
