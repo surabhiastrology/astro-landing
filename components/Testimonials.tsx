@@ -1,210 +1,194 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import { useRef, useState } from "react";
 import SectionEyebrow from "./SectionEyebrow";
+
+const reviews = [
+  {
+    src: "/customer-reviews/kundali-whatsapp-review-01.jpeg",
+    alt: "WhatsApp message thanking Surbhi after receiving a Kundali report and voice note",
+  },
+  {
+    src: "/customer-reviews/kundali-whatsapp-review-02.jpeg",
+    alt: "WhatsApp messages from a customer after receiving their Kundali report",
+  },
+  {
+    src: "/customer-reviews/kundali-whatsapp-review-03.jpeg",
+    alt: "WhatsApp message thanking Surbhi after receiving a Kundali report and voice note",
+  },
+  {
+    src: "/customer-reviews/kundali-whatsapp-review-04.jpeg",
+    alt: "WhatsApp message thanking Surbhi for sharing a Kundali report",
+  },
+];
 
 export default function TestimonialsSection() {
   const carouselRef = useRef<HTMLDivElement>(null);
-  const [isHovered, setIsHovered] = useState(false);
+  const dragRef = useRef({ active: false, startX: 0, startScrollLeft: 0, moved: false });
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [canScrollBack, setCanScrollBack] = useState(false);
+  const [canScrollForward, setCanScrollForward] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
 
-  const testimonials = [
-    {
-      name: "Nisha Sharma",
-      loc: "Mumbai, Maharashtra",
-      text: "I wasn't sure what to expect, but this report nailed things I've never told anyone. Finally found direction after years of confusion. Surbhi Ji's predictions about my marriage were exact to the month!"
-    },
-    {
-      name: "Suresh Patel",
-      loc: "Ahmedabad, Gujarat",
-      text: "Tried so many apps — nothing worked. Got this Kundali, followed the remedies for 6 months and landed my dream job! The WhatsApp question feature is unbelievably accurate. Worth 10x the price."
-    },
-    {
-      name: "Priya Mehta",
-      loc: "Delhi, NCR",
-      text: "Asked about my marriage timing on WhatsApp and Surbhi Ji's answer gave me goosebumps — it was that precise! My relationship has improved so much after following her guidance. Forever grateful!"
-    },
-    {
-      name: "Rajiv Khanna",
-      loc: "Bangalore, Karnataka",
-      text: "My financial situation has turned around completely. The gemstone recommendation and specific puja guidance changed everything. Best ₹999 I've ever spent — I got back lakhs in return!"
+  const startDrag = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.button !== 0 || !carouselRef.current) return;
+    dragRef.current = {
+      active: true,
+      startX: event.clientX,
+      startScrollLeft: carouselRef.current.scrollLeft,
+      moved: false,
+    };
+  };
+
+  const moveDrag = (event: React.MouseEvent<HTMLDivElement>) => {
+    const carousel = carouselRef.current;
+    if (!carousel || !dragRef.current.active) return;
+
+    const distance = event.clientX - dragRef.current.startX;
+    if (Math.abs(distance) > 5) {
+      dragRef.current.moved = true;
+      setIsDragging(true);
+      event.preventDefault();
     }
-  ];
-
-  // --- Auto Scroll Logic ---
-  useEffect(() => {
-    if (isHovered || isDragging) return;
-
-    const interval = setInterval(() => {
-      if (carouselRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
-        if (scrollLeft + clientWidth >= scrollWidth - 10) {
-          carouselRef.current.scrollTo({ left: 0, behavior: "smooth" });
-        } else {
-          const cardWidth = clientWidth >= 768 ? clientWidth / 2 : clientWidth * 0.85;
-          carouselRef.current.scrollBy({ left: cardWidth, behavior: "smooth" });
-        }
-      }
-    }, 3500); 
-
-    return () => clearInterval(interval);
-  }, [isHovered, isDragging]);
-
-  // --- Arrow Navigation ---
-  const scrollNext = () => {
-    if (carouselRef.current) {
-      const cardWidth = carouselRef.current.clientWidth >= 768 ? carouselRef.current.clientWidth / 2 : carouselRef.current.clientWidth * 0.85;
-      carouselRef.current.scrollBy({ left: cardWidth, behavior: "smooth" });
+    if (dragRef.current.moved) {
+      carousel.scrollLeft = dragRef.current.startScrollLeft - distance;
     }
   };
 
-  const scrollPrev = () => {
-    if (carouselRef.current) {
-      const cardWidth = carouselRef.current.clientWidth >= 768 ? carouselRef.current.clientWidth / 2 : carouselRef.current.clientWidth * 0.85;
-      carouselRef.current.scrollBy({ left: -cardWidth, behavior: "smooth" });
-    }
-  };
-
-  // --- Mouse Drag Logic ---
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setStartX(e.pageX - carouselRef.current!.offsetLeft);
-    setScrollLeft(carouselRef.current!.scrollLeft);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    e.preventDefault();
-    const x = e.pageX - carouselRef.current!.offsetLeft;
-    const walk = (x - startX) * 2; 
-    carouselRef.current!.scrollLeft = scrollLeft - walk;
-  };
-
-  const handleMouseUpOrLeave = () => {
+  const endDrag = () => {
+    dragRef.current.active = false;
     setIsDragging(false);
   };
 
-  return (
-    <section className="py-4 md:py-10 bg-[#FCF7EE] relative overflow-hidden">
-      
-      {/* Background Ambient Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#C5A880] rounded-full blur-[120px] opacity-10 pointer-events-none"></div>
+  const scrollByCard = (direction: -1 | 1) => {
+    const carousel = carouselRef.current;
+    const card = carousel?.firstElementChild as HTMLElement | null;
+    if (!carousel || !card) return;
 
-      <div className="max-w-[1300px] mx-auto relative z-10 px-4 sm:px-5 lg:px-8">
-        
-        {/* =========================================
-            HEADER & CONTROLS
-            ========================================= */}
-        {/* FIXED: Removed the 'reveal' class from this div so it renders instantly */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 sm:mb-16">
-          
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    carousel.scrollBy({ left: direction * (card.offsetWidth + 16), behavior: reducedMotion ? "instant" : "smooth" });
+  };
+
+  const scrollToReview = (index: number) => {
+    const carousel = carouselRef.current;
+    const card = carousel?.children.item(index) as HTMLElement | null;
+    if (!carousel || !card) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const left = card.getBoundingClientRect().left - carousel.getBoundingClientRect().left + carousel.scrollLeft;
+    carousel.scrollTo({ left, behavior: reducedMotion ? "instant" : "smooth" });
+    setActiveIndex(index);
+  };
+
+  const updateActiveReview = () => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    setCanScrollBack(carousel.scrollLeft > 2);
+    setCanScrollForward(carousel.scrollLeft + carousel.clientWidth < carousel.scrollWidth - 2);
+
+    const visibleLeft = carousel.getBoundingClientRect().left;
+    const closest = Array.from(carousel.children).reduce(
+      (current, child, index) => {
+        const distance = Math.abs(child.getBoundingClientRect().left - visibleLeft);
+        return distance < current.distance ? { index, distance } : current;
+      },
+      { index: 0, distance: Number.POSITIVE_INFINITY },
+    );
+    setActiveIndex(closest.index);
+  };
+
+  return (
+    <section aria-labelledby="customer-reviews-heading" className="bg-[#FCF7EE] py-14 sm:py-16 lg:py-20">
+      <div className="mx-auto max-w-[1300px] px-4 sm:px-5 lg:px-8">
+        <div className="mb-8 flex flex-col gap-6 md:mb-10 md:flex-row md:items-end md:justify-between">
           <div className="text-center md:text-left">
-            <SectionEyebrow className="mb-4 sm:mb-6">Client Success Stories</SectionEyebrow>
-            <h2 className="section-title text-[#2D1B11]">
-              Real People. <br className="hidden md:block" />
-              <span className="text-[#84623F]">Real Transformations.</span>
+            <SectionEyebrow className="mb-4">Customer Messages</SectionEyebrow>
+            <h2 id="customer-reviews-heading" className="section-title text-[#2D1B11]">
+              Their Words, <span className="text-[#A3631D]">Their Experience</span>
             </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-[#6C5140] sm:text-base md:mx-0">
+              A look at the messages customers sent after receiving their Surbhi Kundali reports.
+            </p>
           </div>
 
-          {/* Luxury Arrow Dials */}
-          <div className="flex items-center justify-center gap-4 mt-8 md:mt-0">
-            <button 
-              onClick={scrollPrev} 
-              className="w-12 h-12 md:w-14 md:h-14 rounded-full border border-[#C5A880]/60 flex items-center justify-center text-[#84623F] bg-[#FDF7EC] hover:bg-[#C5A880] hover:text-white hover:border-[#C5A880] transition-all duration-300 shadow-[0_5px_15px_rgba(132,98,63,0.1)] active:scale-95 group"
-              aria-label="Previous Testimonial"
+          <div className="hidden shrink-0 items-center gap-3 md:flex">
+            <button
+              type="button"
+              onClick={() => scrollByCard(-1)}
+              disabled={!canScrollBack}
+              aria-label="Previous customer message"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-[#DDBD82] bg-white text-[#8A1C21] transition-colors hover:bg-[#F7E9D0] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <svg className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
+              <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
             </button>
-            <button 
-              onClick={scrollNext} 
-              className="w-12 h-12 md:w-14 md:h-14 rounded-full border border-[#C5A880]/60 flex items-center justify-center text-[#84623F] bg-[#FDF7EC] hover:bg-[#C5A880] hover:text-white hover:border-[#C5A880] transition-all duration-300 shadow-[0_5px_15px_rgba(132,98,63,0.1)] active:scale-95 group"
-              aria-label="Next Testimonial"
+            <button
+              type="button"
+              onClick={() => scrollByCard(1)}
+              disabled={!canScrollForward}
+              aria-label="Next customer message"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-[#DDBD82] bg-white text-[#8A1C21] transition-colors hover:bg-[#F7E9D0] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <svg className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+              <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
             </button>
           </div>
         </div>
 
-        {/* =========================================
-            TESTIMONIALS CAROUSEL
-            ========================================= */}
-        <div 
+        <div
           ref={carouselRef}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => { setIsHovered(false); handleMouseUpOrLeave(); }}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUpOrLeave}
-          className={`flex overflow-x-auto pb-12 -mx-4 px-4 sm:-mx-5 sm:px-5 lg:-mx-8 lg:px-8 gap-5 md:gap-8 snap-x snap-mandatory hide-scrollbar cursor-grab ${isDragging ? 'cursor-grabbing select-none snap-none' : ''}`}
+          onScroll={updateActiveReview}
+          onMouseDown={startDrag}
+          onMouseMove={moveDrag}
+          onMouseUp={endDrag}
+          onMouseLeave={endDrag}
+          onClickCapture={(event) => {
+            if (dragRef.current.moved) {
+              event.preventDefault();
+              dragRef.current.moved = false;
+            }
+          }}
+          role="region"
+          aria-label="Customer WhatsApp messages"
+          className={`flex snap-x snap-mandatory gap-4 overflow-x-auto pb-5 select-none cursor-grab [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${isDragging ? "cursor-grabbing snap-none" : ""}`}
         >
-          {testimonials.map((testimonial, i) => (
-            <div 
-              key={i} 
-              className="relative min-w-[85vw] sm:min-w-[420px] md:min-w-[calc(50%-16px)] lg:min-w-[calc(50%-20px)] snap-center rounded-[2rem] p-8 sm:p-10 border border-[#C5A880]/40 shadow-[0_15px_40px_rgba(45,27,17,0.15)] hover:shadow-[0_25px_60px_rgba(132,98,63,0.25)] hover:-translate-y-2 transition-all duration-500 group flex flex-col justify-between overflow-hidden"
-              style={{ background: 'linear-gradient(145deg, #2D1B11 0%, #1A0F0A 100%)' }}
+          {reviews.map((review, index) => (
+            <a
+              key={review.src}
+              href={review.src}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`View customer WhatsApp message ${index + 1} full size`}
+              className="group w-[min(78vw,310px)] shrink-0 snap-start overflow-hidden rounded-[18px] border border-[#E9D3AF] bg-white shadow-[0_12px_32px_rgba(72,42,15,0.10)] transition-shadow hover:shadow-[0_18px_42px_rgba(72,42,15,0.16)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#8A1C21] lg:w-[340px]"
             >
-              
-              {/* Subtle Cosmic Background Pattern inside Card */}
-              <div className="absolute -top-10 -right-10 text-[12rem] text-[#C5A880] opacity-5 font-serif leading-none pointer-events-none select-none group-hover:scale-110 transition-transform duration-700">
-                ☸
-              </div>
+              <Image
+                src={review.src}
+                alt={review.alt}
+                width={738}
+                height={1600}
+                draggable={false}
+                sizes="(max-width: 640px) 78vw, 310px"
+                className="h-auto w-full"
+              />
+            </a>
+          ))}
+        </div>
 
-              {/* Giant Decorative Quote Mark */}
-              <div className="absolute top-6 right-8 text-7xl text-[#C5A880] opacity-20 font-serif leading-none pointer-events-none drop-shadow-md">
-                &rdquo;
-              </div>
-
-              <div className="relative z-10 pointer-events-none flex-1 flex flex-col">
-                
-                {/* Top Row: Stars & Verified Badge */}
-                <div className="flex justify-between items-start mb-6 md:mb-8">
-                  <div className="flex gap-1 text-[#C5A880] text-lg sm:text-xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
-                    ★★★★★
-                  </div>
-                  <div className="bg-[#1B4D30]/20 border border-[#4ADE80]/30 text-[#4ADE80] text-[9px] md:text-[10px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 uppercase tracking-widest shrink-0 shadow-sm backdrop-blur-md">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-                    Verified
-                  </div>
-                </div>
-
-                {/* Testimonial Text */}
-                <p className="text-[#FDF7EC]/90 text-base sm:text-lg lg:text-[1.15rem] leading-[1.8] font-light italic mb-8 flex-1">
-                  "{testimonial.text}"
-                </p>
-              </div>
-
-              {/* Bottom Row: Customer Profile */}
-              <div className="relative z-10 flex items-center gap-4 pt-6 border-t border-[#C5A880]/20 pointer-events-none mt-auto">
-                
-                {/* Avatar with Metallic Ring */}
-                <div className="relative w-12 h-12 md:w-14 md:h-14 shrink-0">
-                  <div className="absolute inset-0 rounded-full border border-[#C5A880]/50 scale-[1.15]"></div>
-                  <div className="w-full h-full rounded-full bg-gradient-to-br from-[#C5A880] to-[#84623F] flex items-center justify-center text-[#2D1B11] font-serif font-bold text-xl md:text-2xl shadow-[0_5px_15px_rgba(0,0,0,0.3)]">
-                    {testimonial.name.charAt(0)}
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-serif font-medium text-[#FDF7EC] text-lg leading-tight mb-1">
-                    {testimonial.name}
-                  </h4>
-                  <p className="text-[#C5A880] text-[10px] sm:text-xs font-medium uppercase tracking-widest">
-                    {testimonial.loc}
-                  </p>
-                </div>
-
-              </div>
-            </div>
+        <div className="mt-2 flex items-center justify-center gap-2 md:hidden" aria-label={`Message ${activeIndex + 1} of ${reviews.length}`}>
+          {reviews.map((review, index) => (
+            <button
+              key={review.src}
+              type="button"
+              onClick={() => scrollToReview(index)}
+              aria-label={`Go to customer message ${index + 1}`}
+              aria-current={activeIndex === index ? "true" : undefined}
+              className="flex h-11 w-11 items-center justify-center"
+            >
+              <span className={`block h-2 rounded-full transition-all ${activeIndex === index ? "w-6 bg-[#8A1C21]" : "w-2 bg-[#DDBD82]"}`} />
+            </button>
           ))}
         </div>
       </div>
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      ` }} />
     </section>
   );
 }

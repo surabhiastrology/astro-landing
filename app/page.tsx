@@ -2,10 +2,6 @@
 import dynamic from 'next/dynamic';
 
 // Lazy load the heavy interactive components
-const ComparisonSlider2 = dynamic(() => import("@/components/Comparisonslider2"), {
-  ssr: false, // Prevents server-side bloat
-  loading: () => <div className="h-[500px] bg-ivory animate-pulse" /> // Placeholder
-});
 import HowItWorksSection from "@/components/Simplesteps";
 import SectionEyebrow from "@/components/SectionEyebrow";
 import TrustSurbhiSection from "@/components/TrustSurbhiSection";
@@ -140,11 +136,6 @@ const GlobalStyles = () => (
     }
     @media (max-width: 768px) { .timeline-line::before { left: 16px; } }
     
-    /* Comparison Slider */
-    .slider-handle { cursor: ew-resize; touch-action: pan-y; }
-    .clip-before { clip-path: polygon(0 0, var(--pos) 0, var(--pos) 100%, 0 100%); }
-    .clip-after { clip-path: polygon(var(--pos) 0, 100% 0, 100% 100%, var(--pos) 100%); }
-
     
   `}</style>
 );
@@ -235,10 +226,6 @@ function useReveal() {
     return () => io.disconnect();
   }, []);
 }
-
-/* ─── COMPARISON SLIDER COMPONENT ─── */
-
-
 
 export default function NewLandingPage() {
   useReveal();
@@ -742,29 +729,6 @@ const time = useCountdown();
       </section>
 
       <HowItWorksSection />
-
-      {/* ════════════════════════════════
-          BEFORE VS AFTER (Interactive Image Slider)
-      ════════════════════════════════ */}
-
-    <section className=" py-8 md:py-14 bg-gradient-to-b from-[#fae8dc] to-[#e4c0c0]">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-5">
-        <div className="text-center mb-12 reveal">
-          <SectionEyebrow className="mb-6">The Transformation</SectionEyebrow>
-          <h2 className="section-title mb-6 text-black/80">
-            Life Before vs  After Your <span className="text-[#e89b1f]">Surbhi Kundali Report</span>
-          </h2>
-          <p className="text-black/80 max-w-2xl mx-auto text-base sm:text-lg">
-            Drag the slider to see the difference cosmic alignment makes. Don't let confusion hold you back from the life you were destined to live.
-          </p>
-        </div>
-
-        <div className="reveal d2">
-          <ComparisonSlider2 />
-        </div>
-      </div>
-    </section>
-  
 
 {/* ════════════════════════════════
           FEATURED PREDICTION (Modi Section)
