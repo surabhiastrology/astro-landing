@@ -22,7 +22,7 @@ const reviews = [
     alt: "WhatsApp message thanking Surbhi for sharing a Kundali report",
   },
   {
-    src: "/customer-reviews/kundali-whatsapp-review-05.jpeg",
+    src: "/customer-reviews/kundali-whatsapp-review-05-redacted.jpeg",
     alt: "Customer WhatsApp conversation about a Surbhi Kundali report",
   },
   {

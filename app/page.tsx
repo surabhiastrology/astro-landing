@@ -9,6 +9,7 @@ import WhoIsItForSection from "@/components/WhoIsItForSection";
 import PremiumReportSection from "@/components/PremiumReportSection";
 import WhatsInsideSection from "@/components/WhatsInsideSection";
 import FeaturedPredictionSection from "@/components/FeaturedPredictionSection";
+import KundaliFaqSection from "@/components/KundaliFaqSection";
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -182,85 +183,6 @@ function useCountdown() {
     return () => clearInterval(id);
   }, []);
   return time;
-}
-
-/* ─── FAQ ITEM ─── */
-function FaqItem({
-  q,
-  a,
-  delay = "",
-}: {
-  q: string;
-  a: string;
-  delay?: string;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div
-      className={`reveal ${delay}`}
-      style={{
-        background: "#fff",
-        border: `1px solid ${open ? "rgba(200,168,75,.35)" : C.iv3}`,
-        borderRadius: 12,
-        overflow: "hidden",
-        boxShadow: "0 2px 14px rgba(42,14,0,.09)",
-        transition: "border-color .2s",
-        marginBottom: 9,
-      }}
-    >
-      <button
-        onClick={() => setOpen(!open)}
-        style={{
-          width: "100%",
-          background: "none",
-          border: "none",
-          padding: "19px 22px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 14,
-          cursor: "pointer",
-          fontFamily: "'Nunito Sans',sans-serif",
-          fontSize: ".89rem",
-          fontWeight: 700,
-          color: C.t1,
-          textAlign: "left",
-        }}
-      >
-        {q}
-        <span
-          style={{
-            width: 27,
-            height: 27,
-            borderRadius: "50%",
-            background: open ? C.g : C.iv2,
-            border: `1px solid ${open ? C.g : C.iv3}`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: open ? "#fff" : C.g,
-            flexShrink: 0,
-            transform: open ? "rotate(45deg)" : "none",
-            transition: "all .25s",
-            fontSize: "1rem",
-          }}
-        >
-          +
-        </span>
-      </button>
-      <div
-        className={`faq-answer ${open ? "open" : ""}`}
-        style={{
-          padding: open ? "0 22px 20px" : "0 22px",
-          fontSize: ".82rem",
-          color: C.t2,
-          lineHeight: 1.8,
-        }}
-      >
-        {a}
-      </div>
-    </div>
-  );
 }
 
 /* ─── 3D COSMIC EARTH BACKGROUND ─── */
@@ -1274,6 +1196,7 @@ export default function NewLandingPage() {
 
       {/* Surbhi Gupta authority section */}
       <TrustSurbhiSection />
+      <KundaliFaqSection />
 
       {/* ════════════════════════════════
           OFFER & CTA (Elegant Compact Design)
