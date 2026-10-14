@@ -73,7 +73,7 @@
   height: clamp(255px, 24vw, 350px);
   overflow: hidden;
   border: 1px solid #e7c88e;
-  border-radius: 120px 120px 74px 74px;
+  border-radius: 120px 120px 30px 30px;
   background: #ead4af;
   box-shadow: 0 15px 33px rgba(91, 52, 18, 0.12);
 }

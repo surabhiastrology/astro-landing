@@ -21,6 +21,38 @@ const reviews = [
     src: "/customer-reviews/kundali-whatsapp-review-04.jpeg",
     alt: "WhatsApp message thanking Surbhi for sharing a Kundali report",
   },
+  {
+    src: "/customer-reviews/kundali-whatsapp-review-05.jpeg",
+    alt: "Customer WhatsApp conversation about a Surbhi Kundali report",
+  },
+  {
+    src: "/customer-reviews/kundali-whatsapp-review-06.jpeg",
+    alt: "Customer WhatsApp conversation showing a Surbhi Kundali report and voice note",
+  },
+  {
+    src: "/customer-reviews/kundali-whatsapp-review-07.jpeg",
+    alt: "Customer WhatsApp conversation after receiving a Surbhi Kundali report",
+  },
+  {
+    src: "/customer-reviews/kundali-whatsapp-review-08.jpeg",
+    alt: "Customer WhatsApp conversation about a Surbhi Kundali report",
+  },
+  {
+    src: "/customer-reviews/kundali-whatsapp-review-09.jpeg",
+    alt: "Customer WhatsApp conversation about a question answered after a Kundali report",
+  },
+  {
+    src: "/customer-reviews/kundali-whatsapp-review-10.jpeg",
+    alt: "Customer WhatsApp conversation after receiving a Surbhi Kundali report",
+  },
+  {
+    src: "/customer-reviews/kundali-whatsapp-review-11.jpeg",
+    alt: "Customer WhatsApp conversation showing a Surbhi Kundali report and voice note",
+  },
+  {
+    src: "/customer-reviews/kundali-whatsapp-review-12.jpeg",
+    alt: "Customer WhatsApp conversation about a Surbhi Kundali report",
+  },
 ];
 
 export default function TestimonialsSection() {
@@ -68,17 +100,6 @@ export default function TestimonialsSection() {
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     carousel.scrollBy({ left: direction * (card.offsetWidth + 16), behavior: reducedMotion ? "instant" : "smooth" });
-  };
-
-  const scrollToReview = (index: number) => {
-    const carousel = carouselRef.current;
-    const card = carousel?.children.item(index) as HTMLElement | null;
-    if (!carousel || !card) return;
-
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const left = card.getBoundingClientRect().left - carousel.getBoundingClientRect().left + carousel.scrollLeft;
-    carousel.scrollTo({ left, behavior: reducedMotion ? "instant" : "smooth" });
-    setActiveIndex(index);
   };
 
   const updateActiveReview = () => {
@@ -174,19 +195,28 @@ export default function TestimonialsSection() {
           ))}
         </div>
 
-        <div className="mt-2 flex items-center justify-center gap-2 md:hidden" aria-label={`Message ${activeIndex + 1} of ${reviews.length}`}>
-          {reviews.map((review, index) => (
-            <button
-              key={review.src}
-              type="button"
-              onClick={() => scrollToReview(index)}
-              aria-label={`Go to customer message ${index + 1}`}
-              aria-current={activeIndex === index ? "true" : undefined}
-              className="flex h-11 w-11 items-center justify-center"
-            >
-              <span className={`block h-2 rounded-full transition-all ${activeIndex === index ? "w-6 bg-[#8A1C21]" : "w-2 bg-[#DDBD82]"}`} />
-            </button>
-          ))}
+        <div className="mt-2 flex items-center justify-center gap-4 md:hidden">
+          <button
+            type="button"
+            onClick={() => scrollByCard(-1)}
+            disabled={!canScrollBack}
+            aria-label="Previous customer message"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-[#DDBD82] bg-white text-[#8A1C21] disabled:opacity-40"
+          >
+            <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+          </button>
+          <span className="min-w-14 text-center text-sm font-semibold tabular-nums text-[#6C5140]" aria-label={`Message ${activeIndex + 1} of ${reviews.length}`}>
+            {activeIndex + 1} / {reviews.length}
+          </span>
+          <button
+            type="button"
+            onClick={() => scrollByCard(1)}
+            disabled={!canScrollForward}
+            aria-label="Next customer message"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-[#DDBD82] bg-white text-[#8A1C21] disabled:opacity-40"
+          >
+            <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+          </button>
         </div>
       </div>
     </section>

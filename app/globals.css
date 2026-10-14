@@ -95,6 +95,137 @@ body::before {
   animation: bar-shimmer 8s infinite ease-in-out;
 }
 
+/* Compact, fixed purchase bar shared by desktop and mobile. */
+.sticky-cta-bar {
+  position: relative;
+  background: linear-gradient(105deg, #650918 0%, #8b1024 49%, #650918 100%);
+  border-top: 1px solid #d9ad5f;
+  box-shadow: 0 -8px 28px rgba(42, 14, 0, 0.18), inset 0 -3px #bc872f;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.sticky-cta-inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: 108px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 22px;
+  width: min(100%, 1440px);
+  min-height: 94px;
+  margin-inline: auto;
+  padding: 9px 36px;
+}
+
+.sticky-cta-book {
+  align-self: stretch;
+  width: 108px;
+}
+
+.sticky-cta-book img {
+  position: absolute;
+  bottom: -4px;
+  left: 10px;
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  filter: drop-shadow(1px 5px 5px rgba(31, 8, 3, 0.35));
+}
+
+.sticky-cta-product { min-width: 0; }
+.sticky-cta-title {
+  color: #fff8ed;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(17px, 1.8vw, 26px);
+  font-weight: 600;
+  line-height: 1.18;
+}
+.sticky-cta-bonus {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 5px;
+  color: #f5d98a;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.sticky-cta-bonus svg { flex: none; width: 20px; height: 20px; color: #28cf72; }
+
+.sticky-cta-pricing {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 22px;
+  border-left: 1px solid rgba(245, 217, 138, 0.26);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.sticky-cta-current { color: #f5d98a; font-size: 30px; font-weight: 800; line-height: 1; }
+.sticky-cta-original { color: rgba(255, 248, 237, 0.58); font-size: 15px; }
+.sticky-cta-savings {
+  border: 1px solid #f5d98a;
+  border-radius: 999px;
+  color: #f5d98a;
+  padding: 7px 11px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.sticky-cta-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-width: 168px;
+  min-height: 54px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: linear-gradient(110deg, #deB85d, #efcf7a);
+  color: #2a0e00;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  white-space: nowrap;
+  box-shadow: 0 7px 16px rgba(37, 6, 9, 0.23);
+  transition: transform 180ms ease, filter 180ms ease;
+}
+.sticky-cta-button:hover { transform: translateY(-2px); filter: brightness(1.04); }
+.sticky-cta-button:focus-visible { outline: 3px solid white; outline-offset: 3px; }
+.sticky-cta-button svg { flex: none; }
+
+@media (max-width: 1000px) {
+  .sticky-cta-inner { grid-template-columns: 88px minmax(0, 1fr) auto auto; gap: 12px; padding-inline: 18px; }
+  .sticky-cta-book { width: 88px; }
+  .sticky-cta-book img { left: -3px; width: 135px; height: 135px; }
+  .sticky-cta-savings { display: none; }
+  .sticky-cta-pricing { padding-left: 13px; gap: 8px; }
+  .sticky-cta-button { min-width: 125px; }
+}
+
+@media (max-width: 639px) {
+  .sticky-cta-inner {
+    grid-template-columns: 52px minmax(0, 1fr) auto 72px;
+    gap: 7px;
+    min-height: 77px;
+    padding: 7px 8px 7px 6px;
+  }
+  .sticky-cta-book { width: 52px; }
+  .sticky-cta-book img { bottom: -3px; left: -9px; width: 90px; height: 90px; }
+  .sticky-cta-title { font-size: 12px; line-height: 1.1; }
+  .sticky-cta-bonus { align-items: flex-start; gap: 3px; margin-top: 5px; font-size: 9px; line-height: 1.08; }
+  .sticky-cta-bonus svg { width: 13px; height: 13px; }
+  .sticky-cta-pricing { flex-direction: column; align-items: flex-start; gap: 3px; padding-left: 7px; }
+  .sticky-cta-current { font-size: 18px; }
+  .sticky-cta-original { font-size: 10px; }
+  .sticky-cta-button { gap: 4px; min-width: 72px; min-height: 48px; padding: 7px 5px; border-radius: 17px; font-size: 12px; }
+  .sticky-cta-button span span { display: block; }
+  .sticky-cta-button svg { width: 15px; height: 15px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sticky-cta-button.btn-auto-shine::after { animation: none; }
+}
+
 @keyframes checkout-button-shimmer {
   0%, 62% { transform: translateX(-160%) skewX(-18deg); }
   100% { transform: translateX(260%) skewX(-18deg); }
