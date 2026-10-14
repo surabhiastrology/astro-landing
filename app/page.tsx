@@ -8,6 +8,7 @@ import TrustSurbhiSection from "@/components/TrustSurbhiSection";
 import WhoIsItForSection from "@/components/WhoIsItForSection";
 import PremiumReportSection from "@/components/PremiumReportSection";
 import WhatsInsideSection from "@/components/WhatsInsideSection";
+import FeaturedPredictionSection from "@/components/FeaturedPredictionSection";
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -1258,98 +1259,18 @@ export default function NewLandingPage() {
       ════════════════════════════════ */}
       <WhatsInsideSection />
 
+      {/* FEATURED PREDICTION (Modi Section) */}
+      <FeaturedPredictionSection />
+
       {/* ════════════════════════════════
         TESTIMONIALS (Real Transformations)
       ════════════════════════════════ */}
       <TestimonialsSection />
 
-      <HowItWorksSection />
-
-      {/* ════════════════════════════════
-          FEATURED PREDICTION (Modi Section)
-      ════════════════════════════════ */}
-      <section className="py-8 sm:py-12 md:py-20 bg-[#FCF7EE] px-4 sm:px-5">
-        <div className="max-w-[1200px] mx-auto reveal">
-          {/* Main Container - Dark Cinematic Wrapper */}
-          {/* CRITICAL CHANGE: Reduced mobile min-height drastically (from 650px to 460px) */}
-          <div className="relative rounded-[1.5rem] sm:rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(61,22,0,0.2)] bg-[#2A0E00] border border-[#C8A84B]/20 flex flex-col md:flex-row items-center justify-center min-h-[460px] sm:min-h-[520px] md:min-h-[450px] lg:min-h-[500px]">
-            {/* ================= BACKGROUND IMAGES & GRADIENT MASKS ================= */}
-
-            {/* LEFT / TOP: PM Modi Image */}
-            {/* CRITICAL CHANGE: Reduced mobile image height (h-[180px]) */}
-            <div className="absolute top-0 left-0 w-full md:w-1/2 h-[180px] sm:h-[220px] md:h-full opacity-90 md:opacity-80">
-              <Image
-                src="https://archive.siasat.com/wp-content/uploads/2023/07/2023_7img15_Jul_2023_PTI07_15_2023_000054B-scaled-1.jpg"
-                alt="PM Narendra Modi"
-                // 1. Using 'fill' because the parent container defines the size
-                fill
-                // 2. 'priority' ensures it loads immediately to improve LCP
-                priority
-                // 3. 'sizes' tells the browser not to download the 2000px version for mobile
-                sizes="(max-width: 768px) 100vw, 50vw"
-                quality={40}
-                // 4. Keeping your custom positioning styles
-                className="object-cover object-[center_top] md:object-[right_top]"
-              />
-              {/* Fade to transparent on bottom (Mobile) and right (Desktop) */}
-              <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-transparent via-transparent to-[#2A0E00]"></div>
-            </div>
-
-            {/* RIGHT / BOTTOM: Celebrity Astrologer Surbhi Gupta Image */}
-            {/* CRITICAL CHANGE: Reduced mobile image height (h-[200px]) */}
-            <div className="absolute bottom-0 right-0 w-full md:w-1/2 h-[200px] sm:h-[240px] md:h-full opacity-90 md:opacity-80">
-              <Image
-                src="/surbhi-narendra.JPG"
-                alt="Celebrity Astrologer Surbhi Gupta"
-                width={400} // Based on the maximum width this image will be (on desktop)
-                height={500} // Based on the standard 4/5 aspect ratio in your CSS
-                priority // Crucial for faster LCP since this is a featured image
-                sizes="(max-width: 768px) 100vw, 50vw"
-                quality={50}
-                className="w-full h-full object-cover md:object-left object-[center_top]"
-              />
-              {/* Fade to transparent on top (Mobile) and left (Desktop) */}
-              <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-transparent via-transparent to-[#2A0E00]"></div>
-            </div>
-
-            {/* ================= CENTER: TEXT CONTENT ================= */}
-            {/* CRITICAL CHANGE: Tightened padding and text sizes for mobile */}
-            <div className="relative z-20 w-full max-w-2xl mx-auto px-4 py-6 sm:py-8 md:py-20 flex flex-col items-center text-center my-auto md:my-0">
-              {/* Central Glowing Aura - Tighter spread on mobile */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[100%] md:w-[100%] md:h-[150%] bg-[#2A0E00] blur-lg md:blur-2xl rounded-full opacity-100 -z-10"></div>
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100%] h-[100%] md:w-[100%] md:h-full bg-[#C8A84B] blur-[40px] md:blur-[100px] rounded-full opacity-20 md:opacity-10 -z-10"></div>
-
-              {/* Tag / Badge */}
-              <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-[#F5D98A]/10 border border-[#F5D98A]/30 text-[#F5D98A] text-[8px] sm:text-[10px] md:text-[11px] font-bold uppercase tracking-[0.2em] px-3 py-1 sm:px-4 sm:py-1.5 rounded-full mb-2 sm:mb-3 md:mb-4 shadow-[0_0_15px_rgba(245,217,138,0.1)]">
-                <span>★</span> Featured Prediction
-              </div>
-
-              {/* Title */}
-              <h2 className="section-title mb-1 text-[#E2C06A] drop-shadow-md sm:mb-2">
-                Narendra Modi
-              </h2>
-
-              {/* Subtitle */}
-              <h3 className="text-[#E8D8B8] font-serif text-xs sm:text-sm md:text-lg lg:text-xl italic mb-3 sm:mb-4 md:mb-6 px-2">
-                Prime Minister of India
-              </h3>
-
-              {/* Description Line */}
-              <div className="w-10 sm:w-16 h-[1px] bg-[#C8A84B]/40 mb-3 sm:mb-4 md:mb-6"></div>
-
-              {/* Paragraph */}
-              <p className="text-white/80 text-[11px] sm:text-xs md:text-base leading-snug sm:leading-relaxed font-medium max-w-[260px] sm:max-w-[320px] md:max-w-md">
-                Discover the remarkable celestial predictions that accurately
-                foretold India's political transformation and leadership
-                journey.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Premium report product and pricing */}
       <PremiumReportSection checkoutHref={kundaliCheckoutHref} />
+
+      <HowItWorksSection />
 
       {/* Surbhi Gupta authority section */}
       <TrustSurbhiSection />
@@ -1502,9 +1423,7 @@ export default function NewLandingPage() {
               tabIndex={stickyVisible ? 0 : -1}
               className="sticky-cta-button btn-auto-shine"
             >
-              <span>
-                Get <span>Now</span>
-              </span>
+              <span>Get Now</span>
               <ArrowRight aria-hidden="true" size={21} strokeWidth={1.8} />
             </a>
           </div>
