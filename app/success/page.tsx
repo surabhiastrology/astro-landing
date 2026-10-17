@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Check, Clock3, ClipboardList, CreditCard, Headset, IndianRupee, Mail, MessageCircle, RotateCcw, ShieldCheck, Sparkles, Tag } from "lucide-react";
+import { trackVerifiedPurchaseOnce } from "@/lib/meta-checkout-events";
 
 type Receipt = {
   name: string;
@@ -59,6 +60,7 @@ export default function SuccessPage() {
           const result = await response.json() as { status?: string; receipt?: Receipt };
           if (result.receipt) setReceipt(result.receipt);
           if (result.status === "paid" && result.receipt) {
+            trackVerifiedPurchaseOnce(result.receipt.orderId, result.receipt.amount, result.receipt.reportType);
             setState("paid");
             return;
           }

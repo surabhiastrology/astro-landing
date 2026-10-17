@@ -17,6 +17,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import MenuItem from "@mui/material/MenuItem";
 import ListSubheader from "@mui/material/ListSubheader";
 import { APPROXIMATE_BIRTH_TIME_RANGES, isApproximateBirthTimeRange } from "@/lib/birth-time";
+import { trackMetaCheckoutEvent } from "@/lib/meta-checkout-events";
 
 type RazorpayPaymentResponse = {
   razorpay_payment_id: string;
@@ -725,6 +726,9 @@ function CheckoutContent() {
   const planName = checkoutPlan.plan;
 
   const hasStartedForm = useRef(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const trackedCheckoutEvents = useRef(new Set<string>());
+  const checkoutEventPrefix = useRef<string | null>(null);
 
   const isMatchmaking = serviceName.toLowerCase().includes("couple match making");
   
@@ -740,14 +744,31 @@ function CheckoutContent() {
   const cleanPlanName = planName;
   const fullReportType = checkoutPlan.reportType;
 
+  const trackCheckoutStep = (
+    kind: "track" | "trackCustom",
+    name: string,
+    data: Record<string, string | number>,
+  ) => {
+    if (trackedCheckoutEvents.current.has(name)) return;
+    trackedCheckoutEvents.current.add(name);
+    checkoutEventPrefix.current ??= crypto.randomUUID();
+    trackMetaCheckoutEvent(kind, name, data, `${checkoutEventPrefix.current}_${name}`);
+  };
+
   useEffect(() => {
-    if (window.fbq) {
-      window.fbq('track', 'InitiateCheckout', {
+    const formElement = formRef.current;
+    if (!formElement) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      trackCheckoutStep("track", "InitiateCheckout", {
         content_name: serviceName,
         value: basePrice,
-        currency: 'INR'
+        currency: "INR",
       });
-    }
+      observer.disconnect();
+    });
+    observer.observe(formElement);
+    return () => observer.disconnect();
   }, [serviceName, basePrice]);
 
   const [form, setForm] = useState({
@@ -785,14 +806,18 @@ function CheckoutContent() {
     document.body.appendChild(script);
   }, []);
 
-  const trackFormStart = () => {
+  const trackFormStart = (event?: { type?: string }) => {
+    if (event?.type === "focus") return;
     if (!hasStartedForm.current) {
-      if (window.fbq) {
-        window.fbq('trackCustom', 'FormFillStarted', {
-          service: serviceName,
-          plan: planName
-        });
-      }
+      trackCheckoutStep("track", "InitiateCheckout", {
+        content_name: serviceName,
+        value: basePrice,
+        currency: "INR",
+      });
+      trackCheckoutStep("trackCustom", "FormFillStarted", {
+        service: serviceName,
+        plan: planName,
+      });
       hasStartedForm.current = true;
     }
   };
@@ -807,6 +832,7 @@ function CheckoutContent() {
   };
 
   const handlePickerValueChange = (field: string, value: string) => {
+    if (value) trackFormStart();
     setForm((current) => ({ ...current, [field]: value }));
     clearFieldError(field);
   };
@@ -900,21 +926,6 @@ function CheckoutContent() {
     }
 
     setPaymentError("");
-    if (window.fbq) {
-      window.fbq('trackCustom', 'ClickPaySecurely', {
-        content_name: form.reportType,
-        value: finalAmount,
-        currency: 'INR'
-      });
-    }
-
-    if (window.fbq) {
-      window.fbq('track', 'AddPaymentInfo', {
-        content_name: form.reportType,
-        value: finalAmount,
-        currency: 'INR'
-      });
-    }
 
     const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
     const Razorpay = (window as unknown as { Razorpay?: RazorpayConstructor }).Razorpay;
@@ -948,24 +959,22 @@ function CheckoutContent() {
         throw new Error("The payment order response was incomplete or invalid.");
       }
 
+      const orderAmount = order.amount;
       sessionStorage.setItem(`order-receipt:${order.id}`, order.receiptToken);
+      trackCheckoutStep("trackCustom", "FormSubmitted", {
+        content_name: form.reportType,
+        value: orderAmount / 100,
+        currency: "INR",
+      });
 
       const options: RazorpayOptions = {
         key: razorpayKey,
-        amount: order.amount,
+        amount: orderAmount,
         currency: "INR",
         name: "Astro Surbhi Gupta",
         description: form.reportType, 
         order_id: order.id,
         handler: async function (response: RazorpayPaymentResponse) {
-          if (window.fbq) {
-            window.fbq('track', 'Purchase', {
-              value: finalAmount,
-              currency: 'INR',
-              content_name: form.reportType
-            });
-          }
-
           try {
             await fetch("/api/payment-success", {
               method: "POST",
@@ -987,9 +996,25 @@ function CheckoutContent() {
 
       const rzp = new Razorpay(options);
       rzp.on("payment.failed", () => {
+        trackCheckoutStep("trackCustom", "PaymentFailed", {
+          content_name: form.reportType,
+          value: orderAmount / 100,
+          currency: "INR",
+        });
         setPaymentError("The payment could not be completed. Your details are still here—please try again or use another payment method.");
       });
       rzp.open();
+      trackCheckoutStep("trackCustom", "ClickPaySecurely", {
+        content_name: form.reportType,
+        value: orderAmount / 100,
+        currency: "INR",
+      });
+      // Preserve the existing standard event, now aligned with gateway opening.
+      trackCheckoutStep("track", "AddPaymentInfo", {
+        content_name: form.reportType,
+        value: orderAmount / 100,
+        currency: "INR",
+      });
     } catch (error) {
       console.error("Payment initiation failed:", error);
       setPaymentError("We couldn't open secure checkout. Your details are still here—please try again in a moment.");
@@ -1067,7 +1092,7 @@ function CheckoutContent() {
           {!isMatchmaking && <p className="mt-1.5 text-sm leading-6 text-[#6B7280]">Your personalized Kundali report will be prepared using the information below.</p>}
         </div>
 
-        <form id="checkout-form" className="space-y-5" onSubmit={handlePayment} noValidate>
+        <form ref={formRef} id="checkout-form" className="space-y-5" onSubmit={handlePayment} noValidate>
           {!isMatchmaking && <div className="flex items-center gap-2.5 pb-0.5 text-xs font-bold uppercase tracking-[0.16em] text-[#C8A84B]"><FieldIcon name="person" /><span>Contact Information</span><span className="h-px flex-1 bg-[#E8D8B8]" /></div>}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>

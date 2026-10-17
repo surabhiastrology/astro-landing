@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, DM_Serif_Display, Karla } from "next/font/google"; // CHANGED: Replaced existing fonts with Cormorant Garamond and Karla
+import { Cormorant_Garamond, Karla } from "next/font/google"; // CHANGED: Replaced existing fonts with Cormorant Garamond and Karla
 import Script from "next/script";
 import "./globals.css";
 
@@ -35,8 +35,8 @@ export const metadata: Metadata = {
 
 declare global {
   interface Window {
-    fbq: any;
-    _fbq: any;
+    fbq: (...args: unknown[]) => void;
+    _fbq: (...args: unknown[]) => void;
   }
 }
 
@@ -61,9 +61,9 @@ export default function RootLayout({
         </Script>
 
         {/* OPTIMIZATION: FACEBOOK PIXEL */}
-        <Script id="fb-pixel" strategy="lazyOnload">
+        <Script id="fb-pixel" strategy="afterInteractive">
           {`
-            if (window.location.hostname !== 'localhost') {
+            if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
               !function(f,b,e,v,n,t,s)
               {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
               n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -73,10 +73,8 @@ export default function RootLayout({
               s.parentNode.insertBefore(t,s)}(window,document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
               
-              (window.requestIdleCallback || window.setTimeout)(function() {
-                fbq('init', '1836254097051134'); 
-                fbq('track', 'PageView');
-              });
+              fbq('init', '1836254097051134');
+              fbq('track', 'PageView');
             }
           `}
         </Script>
