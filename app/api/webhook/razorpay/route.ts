@@ -6,6 +6,7 @@ import { Resend } from "resend";
 import Redis from "ioredis";
 import { buildOrderConfirmationEmail } from "@/lib/order-confirmation-email";
 import { formatBirthTime } from "@/lib/birth-time";
+import { planIncludesWhatsAppQuestion } from "@/lib/checkout-plans";
 
 // ==========================================
 // 1. INITIALIZE SERVICES (With Caching)
@@ -232,13 +233,14 @@ async function triggerNotifications(order: any) {
   const reportType = order.reportType || "Service";
   const isHi = order.customer.language === "hindi";
   const isCareer = reportType.toLowerCase().includes("career") || reportType.toLowerCase().includes("करियर");
+  const includesWhatsAppQuestion = planIncludesWhatsAppQuestion(reportType);
   const isMatchmaking = reportType.toLowerCase().includes("couple match making");
 
   let replyMessage = `✅ *Payment Confirmed!*\n\n🙏 *Radhe Radhe, ${order.customer.name || "ji"}!*\nYour order for the *${reportType}* has been successfully confirmed.\n\nSurbhi ji and the team will deliver your detailed analysis right here within *72 hours*. ⏳`;
   let waButtons: string[] | undefined = undefined;
 
-  if (isCareer) {
-    replyMessage += `\n\n🎁 *Bonus:* As promised, please click below to choose your 1 FREE career question!`;
+  if (includesWhatsAppQuestion) {
+    replyMessage += `\n\n🎁 *Included:* Please send your 1 FREE question here on WhatsApp.`;
     waButtons = isHi ? ["प्रश्न पूछें"] : ["Ask Question"];
   }
 
@@ -256,7 +258,7 @@ async function triggerNotifications(order: any) {
     params: [order.customer.name || "Customer", reportType]
   };
 
-  const nextStep = isCareer ? "F1_START" : "F1_END";
+  const nextStep = includesWhatsAppQuestion ? "F1_START" : "F1_END";
 
   await Promise.allSettled([
     // Customer Email

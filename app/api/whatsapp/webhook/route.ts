@@ -255,8 +255,8 @@ export async function POST(req: NextRequest) {
     const isStandardCommand = ["restart", "hi", "hello", "hi surbhi", "paid"].includes(lowerInput);
     const isInteractive = msgType === "list_selection" || msgType === "button_click";
     
-    const isExpectingFreeQuestion = prev.step === "F1_START";
-    const isShortIntentKeyword = prev.step === "F2_HOOK" && incomingText.trim().length <= 25;
+    const isExpectingFreeQuestion = prev.step === "F1_START" || prev.step === "F1_FREE_QUESTION";
+    const isShortIntentKeyword = (prev.step === "F2_HOOK" || prev.step === "F2_SOLUTION") && incomingText.trim().length <= 25;
 
     let finalReply = "";
     let finalButtons: string[] | undefined = undefined;

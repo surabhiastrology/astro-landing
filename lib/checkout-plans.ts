@@ -253,6 +253,14 @@ export function getCheckoutPlanByReportType(reportType?: unknown) {
   );
 }
 
+export function planIncludesWhatsAppQuestion(reportType?: unknown) {
+  const plan = getCheckoutPlanByReportType(reportType);
+  if (!plan) return false;
+  if (plan.service === "Surbhi Kundali") return true;
+  if (plan.service === "Baby Name Report" && plan.plan === "Report + Name") return true;
+  return /1\s*question/i.test(plan.plan);
+}
+
 export function getCheckoutPlanByWhatsAppSelection(
   intent?: unknown,
   planId?: unknown

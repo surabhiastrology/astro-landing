@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import { Resend } from "resend";
 import Redis from "ioredis";
 import Razorpay from "razorpay";
-import { getCheckoutPlanByReportType } from "@/lib/checkout-plans";
+import { getCheckoutPlanByReportType, planIncludesWhatsAppQuestion } from "@/lib/checkout-plans";
 import { buildOrderConfirmationEmail } from "@/lib/order-confirmation-email";
 import { formatBirthTime } from "@/lib/birth-time";
 
@@ -229,13 +229,14 @@ export async function POST(req: Request) {
     const reportType = trustedForm.reportType || "Service";
     const isHi = trustedForm.language === "hindi";
     const isCareer = reportType.toLowerCase().includes("career") || reportType.toLowerCase().includes("करियर");
+    const includesWhatsAppQuestion = planIncludesWhatsAppQuestion(reportType);
     const isMatchmaking = reportType.toLowerCase().includes("couple match making");
 
     let replyMessage = `✅ *Payment Confirmed!*\n\n🙏 *Radhe Radhe, ${trustedForm.name || "ji"}!*\nYour order for the *${reportType}* has been successfully confirmed.\n\nSurbhi ji and the team will deliver your detailed analysis right here within *72 hours*. ⏳`;
     let waButtons: string[] | undefined = undefined;
 
-    if (isCareer) {
-      replyMessage += `\n\n🎁 *Bonus:* As promised, please click below to choose your 1 FREE career question!`;
+    if (includesWhatsAppQuestion) {
+      replyMessage += `\n\n🎁 *Included:* Please send your 1 FREE question here on WhatsApp.`;
       waButtons = isHi ? ["प्रश्न पूछें"] : ["Ask Question"];
     }
 
@@ -333,7 +334,7 @@ export async function POST(req: Request) {
       redis.set(
         `user_state:${formattedPhone}`, 
         JSON.stringify({ 
-          step: isCareer ? "F1_START" : "F1_END", 
+          step: includesWhatsAppQuestion ? "F1_START" : "F1_END",
           userData: { 
             name: trustedForm.name,
             intent: reportType, 

@@ -1,8 +1,8 @@
 // lib/waFlow.ts
-import { getCheckoutPlanByWhatsAppSelection } from "@/lib/checkout-plans";
+import { getCheckoutPlanByWhatsAppSelection, planIncludesWhatsAppQuestion } from "@/lib/checkout-plans";
 
 export type BotStep =
-  | "START" | "F2_INTENT" | "F2_HOOK" | "F2_CHECKOUT"
+  | "START" | "F2_INTENT" | "F2_HOOK" | "F2_SOLUTION" | "F2_CHECKOUT"
   | "F1_START" | "F1_FREE_QUESTION" | "F1_END";
 
 export type UserData = {
@@ -20,22 +20,6 @@ export type FlowState = {
 function isCareerService(intent: string = "") {
   const lowerIntent = intent.toLowerCase();
   return lowerIntent.includes("career") || lowerIntent.includes("business") || lowerIntent.includes("करियर") || lowerIntent.includes("व्यापार");
-}
-
-function getCareerQuestions(isHi: boolean) {
-  if (isHi) {
-    return [
-      { id: "c_q1", title: "नौकरी कब मिलेगी?", description: "नई नौकरी या प्रमोशन का समय" },
-      { id: "c_q2", title: "नौकरी या व्यापार?", description: "मेरे लिए क्या बेहतर है?" },
-      { id: "c_q3", title: "आर्थिक स्थिति", description: "धन लाभ और स्थिर करियर" }
-    ];
-  } else {
-    return [
-      { id: "c_q1", title: "When will I get a job?", description: "Timing for job or promotion" },
-      { id: "c_q2", title: "Job or Business?", description: "Which path is better for me?" },
-      { id: "c_q3", title: "Financial Stability", description: "When will wealth & career improve?" }
-    ];
-  }
 }
 
 function getServicePlans(intent: string = "", isHi: boolean) {
@@ -105,21 +89,7 @@ function getServicePlans(intent: string = "", isHi: boolean) {
     }];
   }
 
-  // 5. Specific Problems (Career, Love, Health, Money, Family)
-  if (lower.includes("career") || lower.includes("love") || lower.includes("health") || lower.includes("money") || lower.includes("family") || lower.includes("करियर") || lower.includes("प्रेम") || lower.includes("स्वास्थ्य") || lower.includes("धन") || lower.includes("परिवार")) {
-    return [{
-      title: isHi ? "समाधान चुनें" : "Choose Solution",
-      rows: isHi ? [
-        { id: "p1", title: "10-साल रिपोर्ट+1Q(₹999)", description: "रिपोर्ट विस्तृत पीडीएफ रिपोर्ट + 1 निःशुल्क प्रश्न " },
-        { id: "p2", title: "व्यक्तिगत कॉल(₹11,000)", description: "सुरभि जी के साथ व्यक्तिगत कॉल" }
-      ] : [
-        { id: "p1", title: "10-Yr Report+1Q(₹999)", description: "Detailed PDF Report + 1 Free Question on Whatsapp" },
-        { id: "p2", title: "1-on-1 Call (₹11,000)", description: "Personal consultation call with Surbhi ji" }
-      ]
-    }];
-  }
-
-  // 6. Default: Surbhi  kundali 
+  // Default: Surbhi Kundali.
   return [{
     title: isHi ? "कुंडली योजनाएं" : "Kundli Plans",
     rows: isHi ? [
@@ -185,7 +155,7 @@ export function nextMessage(
   }
 
   if (lowerMsg === "paid") {
-    if (isCareerService(data.intent)) {
+    if (planIncludesWhatsAppQuestion(data.intent) || data.plan?.toLowerCase().includes("1question") || isCareerService(data.intent)) {
       return {
         reply: isHi 
           ? "✅ *भुगतान सफल!*\nआपका ऑर्डर कन्फर्म हो गया है। अपना 1 मुफ़्त प्रश्न पूछने के लिए नीचे क्लिक करें 👇"
@@ -240,7 +210,7 @@ export function nextMessage(
               ]
             },
             {
-              title: isHindi ? "प्रीमियम सेवाएं" : "Premium Services",
+              title: isHindi ? "अन्य सेवाएं" : "Other Services",
               rows: isHindi ? [
                 { id: "surbhi_kundli", title: "सुरभि कुंडली", description: "आपकी व्यक्तिगत कुंडली" },
                 { id: "surbhi_consultation", title: "सुरभि गुप्ता परामर्श", description: "व्यक्तिगत मार्गदर्शन" },
@@ -267,9 +237,27 @@ export function nextMessage(
       const selectedIntent = msg.toLowerCase();
 
       if (selectedIntent.includes("career") || selectedIntent.includes("business") || selectedIntent.includes("love") || selectedIntent.includes("marriage") || selectedIntent.includes("money") || selectedIntent.includes("health") || selectedIntent.includes("family") || selectedIntent.includes("करियर") || selectedIntent.includes("व्यापार") || selectedIntent.includes("प्रेम") || selectedIntent.includes("विवाह") || selectedIntent.includes("धन") || selectedIntent.includes("स्वास्थ्य") || selectedIntent.includes("परिवार")) {
-        hookReply = isHi 
-          ? `मैं *${msg}* को लेकर आपकी चिंता समझता हूँ। 🌟\nसुरभि जी एक विस्तृत 10-वर्षीय भविष्यवाणी रिपोर्ट और एक महत्वपूर्ण प्रश्न पर मार्गदर्शन के साथ स्पष्टता प्राप्त करने में आपकी मदद कर सकती हैं।\n\n🔒 पूरी तरह से निजी और गोपनीय\n📱 24 घंटे के भीतर WhatsApp पर साझा किया जाएगा\n\n👇 कृपया अपना विकल्प चुनें:`
-          : `I understand your concern about *${msg}*. 🌟\nSurbhi Ji can help you gain clarity with a detailed 10-Year Prediction Report and guidance on one important question.\n\n🔒 Completely private & confidential\n📱 Shared on WhatsApp within 24 hours\n\n👇 Choose an option:`;
+        hookReply = isHi
+          ? `मैं *${msg}* को लेकर आपकी चिंता समझता हूँ। 🌟\nइस विषय पर आगे बढ़ने के लिए आप सुरभि जी की व्यक्तिगत कुंडली रिपोर्ट चुन सकते हैं या उनसे सीधे परामर्श ले सकते हैं।\n\n👇 आप किस तरह का मार्गदर्शन पसंद करेंगे?`
+          : `I understand your concern about *${msg}*. 🌟\nThere are two ways to get guidance: a personalized Surbhi Kundali report, or a direct consultation with Surbhi ji.\n\n👇 Which would you prefer?`;
+        data.intent = msg;
+        return {
+          reply: hookReply,
+          list: {
+            button: isHi ? "विकल्प चुनें" : "Choose an option",
+            sections: [{
+              title: isHi ? "आपका मार्गदर्शन" : "Your guidance",
+              rows: isHi ? [
+                { id: "surbhi_kundli", title: "सुरभि कुंडली रिपोर्ट", description: "व्यक्तिगत रिपोर्ट और जीवन मार्गदर्शन" },
+                { id: "surbhi_consultation", title: "सुरभि जी से परामर्श", description: "सीधे व्यक्तिगत मार्गदर्शन के लिए" }
+              ] : [
+                { id: "surbhi_kundli", title: "Surbhi Kundali Report", description: "Personalized report and life guidance" },
+                { id: "surbhi_consultation", title: "Consultation with Surbhi", description: "Speak directly for personal guidance" }
+              ]
+            }]
+          },
+          newState: { step: "F2_SOLUTION", userData: data },
+        };
       } else if (selectedIntent.includes("kundli") || selectedIntent.includes("कुंडली")) {
         hookReply = isHi
           ? `🌙 आपने सुरभि कुंडली का चयन किया है।\nकभी-कभी हम जिन उत्तरों की तलाश कर रहे होते हैं वे उन पैटर्नों में छिपे होते हैं जिन्हें हम खुद नहीं देख सकते।\nसुरभि जी व्यक्तिगत रूप से आपके जन्म विवरण का अध्ययन करेंगी और आपके जीवन के महत्वपूर्ण चरणों को कवर करते हुए एक विस्तृत 10-वर्षीय भविष्यवाणी रिपोर्ट तैयार करेंगी।\n✨ एक विशेष पेशकश के रूप में, वह व्यक्तिगत रूप से एक ऐसे प्रश्न का उत्तर भी देंगी जो आपके दिल के सबसे करीब है।\n\n👇 शुरू करने के लिए नीचे एक विकल्प चुनें।`
@@ -288,6 +276,26 @@ export function nextMessage(
         },
         newState: { step: "F2_CHECKOUT", userData: data },
       };
+
+    case "F2_SOLUTION": {
+      const selected = lowerMsg;
+      if (!["surbhi_kundli", "surbhi_consultation"].includes(selected)) {
+        return {
+          reply: isHi ? "कृपया सूची से कुंडली रिपोर्ट या परामर्श चुनें।" : "Please choose either the Kundali report or consultation from the list.",
+          buttons: ["Main Menu"],
+          newState: { step: "START", userData: { name: data.name, language: data.language } },
+        };
+      }
+
+      data.intent = selected;
+      return {
+        reply: selected === "surbhi_consultation"
+          ? (isHi ? "आपने सुरभि जी से परामर्श चुना है। नीचे उपलब्ध विकल्प देखें:" : "You selected a consultation with Surbhi ji. Please review the available options below:")
+          : (isHi ? "आपने सुरभि कुंडली रिपोर्ट चुनी है। नीचे अपनी रिपोर्ट का विकल्प चुनें:" : "You selected the Surbhi Kundali report. Please choose your report option below:"),
+        list: { button: isHi ? "योजना चुनें" : "Choose a plan", sections: getServicePlans(selected, isHi) },
+        newState: { step: "F2_CHECKOUT", userData: data },
+      };
+    }
 
     case "F2_CHECKOUT":
       const checkoutPlan = getCheckoutPlanByWhatsAppSelection(data.intent, msg);
@@ -313,7 +321,7 @@ export function nextMessage(
         ? `धन्यवाद! 🌟\n\nअपने अनुरोध की पुष्टि करने और अपनी बुकिंग सुरक्षित करने के लिए, कृपया नीचे दिए गए *'Complete Payment'* बटन पर क्लिक करें। 👇`
         : `Thank you! 🌟\n\nTo confirm your request and secure your booking, please click the *'Complete Payment'* button below 👇`;
         
-      if (isCareerService(data.intent)) {
+      if (planIncludesWhatsAppQuestion(data.plan) || data.plan?.toLowerCase().includes("1question") || (selectedService.includes("surbhi kundali") && data.plan === "With Call")) {
         checkoutMsg += isHi 
           ? `\n\n🎁 *बोनस:* भुगतान के बाद आपको 1 मुफ़्त प्रश्न पूछने का अवसर मिलेगा!` 
           : `\n\n🎁 *Bonus:* You get 1 FREE question answered after payment!`;
@@ -330,27 +338,26 @@ export function nextMessage(
       };
 
     case "F1_START":
+      if (!lowerMsg.includes("ask question") && !lowerMsg.includes("प्रश्न पूछें")) {
+        return {
+          reply: isHi
+            ? "🙏 धन्यवाद। आपका प्रश्न मिल गया है। सुरभि जी इसकी समीक्षा करके जल्द ही यहीं जवाब देंगी।"
+            : "🙏 Thank you. Your question has been received. Surbhi ji will review it and reply here shortly.",
+          newState: { step: "F1_END", userData: data },
+        };
+      }
       return {
         reply: isHi
-          ? "✨ *उत्तम।*\n\nवादे के अनुसार, अब आप अपने क्यरियर से संबंधित अपना 1 मुफ़्त प्रश्न पूछ सकते हैं। कृपया नीचे दिए गए विकल्पों में से चुनें 👇"
-          : "✨ *Perfect.*\n\nAs promised, you can now ask your 1 FREE question related to your career. Please select an option below 👇",
-        list: {
-          button: isHi ? "प्रश्न चुनें" : "Select Question",
-          sections: [
-            {
-              title: isHi ? "मुफ़्त प्रश्न" : "Free Question",
-              rows: getCareerQuestions(isHi)
-            }
-          ]
-        },
+          ? "✨ *बहुत अच्छा।*\n\nआपकी योजना में 1 मुफ़्त प्रश्न शामिल है। कृपया अपना एक सवाल इसी चैट में लिखकर भेजें।"
+          : "✨ *Perfect.*\n\nYour plan includes 1 FREE question. Please type and send your one question here.",
         newState: { step: "F1_FREE_QUESTION", userData: data },
       };
 
     case "F1_FREE_QUESTION":
       return {
         reply: isHi
-          ? `🙏 धन्यवाद। सुरभि जी आपके चार्ट की समीक्षा करेंगी और जल्द ही इस प्रश्न का उत्तर देंगी!`
-          : `🙏 Thank you. Surbhi ji will review your chart and answer this question shortly!`,
+          ? `🙏 धन्यवाद। आपका प्रश्न मिल गया है। सुरभि जी इसकी समीक्षा करके जल्द ही यहीं जवाब देंगी।`
+          : `🙏 Thank you. Your question has been received. Surbhi ji will review it and reply here shortly.`,
         newState: { step: "F1_END", userData: data },
       };
 
