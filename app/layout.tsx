@@ -96,7 +96,7 @@ export default function RootLayout({
 
         {children}
 
-        <footer className="border-t border-[#DCC9A8] bg-[#FFF9EF] px-5 py-5 text-center text-xs text-[#6B4423] sm:text-sm">
+        <footer id="site-footer" className="border-t border-[#DCC9A8] bg-[#FFF9EF] px-5 py-5 text-center text-xs text-[#6B4423] sm:text-sm">
           <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 sm:flex-row">
             <span>© {new Date().getFullYear()} Surabhi Astrology. All rights reserved.</span>
             <span>

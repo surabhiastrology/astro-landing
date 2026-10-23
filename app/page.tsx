@@ -256,10 +256,16 @@ export default function NewLandingPage() {
       .catch(() => setIsVideoPlaying(false));
   }, []);
   useEffect(() => {
-    const onScroll = () =>
-      setStickyVisible(
-        (heroSectionRef.current?.getBoundingClientRect().bottom ?? 600) < 0,
+    const onScroll = () => {
+      const hasPassedHero =
+        (heroSectionRef.current?.getBoundingClientRect().bottom ?? 600) < 0;
+      const footerRect = document.getElementById("site-footer")?.getBoundingClientRect();
+      const footerOnScreen = Boolean(
+        footerRect && footerRect.top < window.innerHeight && footerRect.bottom > 0,
       );
+
+      setStickyVisible(hasPassedHero && !footerOnScreen);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
