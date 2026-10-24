@@ -5,6 +5,7 @@ import type { ChangeEvent, FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { LoaderCircle } from "lucide-react";
 import {
   DEFAULT_CHECKOUT_PLAN,
   getCheckoutAmount,
@@ -933,6 +934,7 @@ function CheckoutContent() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [urgentDelivery, setUrgentDelivery] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [confirmingPayment, setConfirmingPayment] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [paymentError, setPaymentError] = useState("");
   const selectedUrgentDelivery = urgentDeliveryAvailable && urgentDelivery;
@@ -1114,6 +1116,7 @@ function CheckoutContent() {
         description: form.reportType, 
         order_id: order.id,
         handler: async function (response: RazorpayPaymentResponse) {
+          setConfirmingPayment(true);
           try {
             await fetch("/api/payment-success", {
               method: "POST",
@@ -1167,6 +1170,18 @@ function CheckoutContent() {
 
   return (
     <>
+    {confirmingPayment && (
+      <div className="fixed inset-0 z-[100] flex min-h-dvh items-center justify-center bg-[#2A1400]/55 px-4 py-8 backdrop-blur-sm" role="status" aria-live="polite">
+        <div className="w-full max-w-sm rounded-2xl border border-[#E8D8B8] bg-[#FFFCF6] px-6 py-8 text-center shadow-[0_24px_80px_rgba(42,20,0,0.22)]">
+          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#F4EADF] text-[#8B1E1E]">
+            <LoaderCircle size={32} className="motion-safe:animate-spin" aria-hidden="true" />
+          </span>
+          <h2 className="mt-5 font-serif text-2xl font-semibold text-[#2A1400]">Verifying your payment</h2>
+          <p className="mt-3 text-sm leading-6 text-[#6B4423]">Please stay on this page. We’re confirming the result with Razorpay and will show your order details next.</p>
+          <p className="mt-4 text-sm font-semibold text-[#8B1E1E]">Please don’t pay again.</p>
+        </div>
+      </div>
+    )}
     <div className="mx-auto grid max-w-[1320px] items-start gap-0 px-0 py-3 lg:grid-cols-[minmax(360px,0.86fr)_minmax(0,1.55fr)] lg:gap-5 lg:px-4 [&>div+div]:border-t [&>div+div]:border-[#E8D8B8] [&>div+div]:pt-6 [&>div+div]:mt-6 lg:[&>div+div]:mt-0 lg:[&>div+div]:border-t-0 lg:[&>div+div]:pt-0">
       
       {/* ================= LEFT: PRODUCT SUMMARY ================= */}

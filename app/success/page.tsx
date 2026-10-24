@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { Check, Clock3, ClipboardList, CreditCard, Headset, IndianRupee, Mail, MessageCircle, RotateCcw, ShieldCheck, Sparkles, Tag } from "lucide-react";
+import { Check, Clock3, ClipboardList, CreditCard, Headset, IndianRupee, LoaderCircle, Mail, MessageCircle, RotateCcw, ShieldCheck, Sparkles, Tag } from "lucide-react";
 import { trackVerifiedPurchaseOnce } from "@/lib/meta-checkout-events";
 
 type Receipt = {
@@ -83,6 +83,7 @@ export default function SuccessPage() {
 
   const isPaid = state === "paid";
   const isChecking = state === "checking";
+  const isCallService = /consultation|call/i.test(receipt?.reportType || "");
   const supportText = orderId
     ? `Hi, I completed checkout but need help confirming my payment. Order reference: ${orderId}`
     : "Hi, I need help confirming my checkout payment.";
@@ -91,14 +92,14 @@ export default function SuccessPage() {
 
   const copy = {
     support: "Support",
-    checking: "We’re checking your payment",
+    checking: "Confirming your payment",
     paid: "Your order is confirmed",
     pending: "Your payment is still being confirmed",
     unavailable: "Need help confirming your order?",
-    checkingBody: "We’re securely checking Razorpay for the final payment status. This can take a few seconds.",
+    checkingBody: "Please stay on this page while we verify your payment with Razorpay. This usually takes a few seconds—please don’t pay again.",
     paidBody: receipt?.urgentDelivery
-      ? "Your priority order is confirmed. Your report will arrive on WhatsApp within 24 hours of confirmed payment."
-      : "Your payment is recorded. We’ll keep you updated as your report is prepared.",
+      ? "Your payment is confirmed. There’s nothing else to pay. Check WhatsApp and email for your order details; your report will arrive on WhatsApp within 24 hours."
+      : "Your payment is confirmed. There’s nothing else to pay. Check WhatsApp and email for your order details and next steps.",
     pendingBody: "Razorpay hasn’t confirmed the final status yet. Please don’t pay again; share the order reference below if you contact us.",
     unavailableBody: "If you completed a payment, contact us with your order reference and we’ll help check it.",
     receipt: "Payment receipt",
@@ -107,11 +108,15 @@ export default function SuccessPage() {
     orderReference: "Order reference",
     paymentReference: "Payment reference",
     next: "What happens next",
-    stepOne: "Your payment is recorded. You don’t need to submit it again.",
-    stepTwo: "Surbhi Gupta will personally prepare your report and answer your question.",
-    stepThree: receipt?.urgentDelivery
-      ? "We’ll send your report on WhatsApp within 24 hours of confirmed payment."
-      : "When it’s ready, we’ll send it to you on WhatsApp.",
+    stepOne: "Your payment is confirmed. There is nothing else to pay or submit.",
+    stepTwo: isCallService
+      ? "Our team will review your details and coordinate your consultation."
+      : "Surbhi Gupta and the team will prepare your selected report.",
+    stepThree: isCallService
+      ? "We’ll contact you on WhatsApp with the next steps for your call."
+      : receipt?.urgentDelivery
+        ? "We’ll send your report on WhatsApp within 24 hours of confirmed payment."
+        : "When it’s ready, we’ll send it to you on WhatsApp.",
     pendingHelp: "Our support team can check the order reference. Please don’t make another payment while confirmation is pending.",
     checkAgain: "Check again",
     checkingButton: "Checking…",
@@ -169,7 +174,21 @@ export default function SuccessPage() {
                   </div>
                 </div>
 
-                {receipt ? (
+                {isChecking ? (
+                  <div>
+                    <div aria-hidden="true" className="space-y-3 motion-safe:animate-pulse">
+                      {["w-2/3", "w-1/2", "w-3/4", "w-2/5"].map((width) => (
+                        <div key={width} className="flex items-center gap-3 border-b border-dashed border-[#E3D3B7] py-3">
+                          <span className="h-9 w-9 shrink-0 rounded-full bg-[#EFE2CE]" />
+                          <span className="h-3 w-20 rounded-full bg-[#EFE2CE]" />
+                          <span className={`ml-auto h-3 ${width} max-w-[38%] rounded-full bg-[#EFE2CE]`} />
+                        </div>
+                      ))}
+                    </div>
+                    <p className="mt-4 text-sm leading-6 text-[#6B4423]">Your verified receipt will appear here automatically.</p>
+                    {orderId && <p className="mt-2 break-all font-mono text-xs text-[#6B4423]">Order reference: {orderId}</p>}
+                  </div>
+                ) : receipt ? (
                   <dl className="divide-y divide-dashed divide-[#E3D3B7]">
                     <div className="flex items-center gap-3 py-3.5 sm:gap-4">
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#8B1E1E]"><ClipboardList size={17} aria-hidden="true" /></span>
@@ -209,10 +228,10 @@ export default function SuccessPage() {
 
                 <div aria-live="polite" className={`mt-6 flex items-center gap-3 rounded-2xl p-4 sm:p-5 ${isPaid ? "bg-[#EEF4E9]" : "bg-[#F7F0E4]"}`}>
                   <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${isPaid ? "bg-[#2D8A58] text-white" : "bg-[#F1E3C8] text-[#8B1E1E]"}`}>
-                    {isPaid ? <ShieldCheck size={24} aria-hidden="true" /> : isChecking || state === "pending" ? <Clock3 size={22} aria-hidden="true" /> : <ShieldCheck size={22} aria-hidden="true" />}
+                    {isPaid ? <ShieldCheck size={24} aria-hidden="true" /> : isChecking ? <LoaderCircle size={23} className="motion-safe:animate-spin" aria-hidden="true" /> : state === "pending" ? <Clock3 size={22} aria-hidden="true" /> : <ShieldCheck size={22} aria-hidden="true" />}
                   </span>
                   <div>
-                    <p className="text-sm font-semibold text-[#2A1400]">{isPaid ? "Payment successful" : isChecking ? "Checking your payment" : state === "pending" ? "Payment confirmation pending" : "Need help confirming?"}</p>
+                    <p className="text-sm font-semibold text-[#2A1400]">{isPaid ? "Payment successful" : isChecking ? "Verifying with Razorpay" : state === "pending" ? "Payment confirmation pending" : "Need help confirming?"}</p>
                     <p className="mt-0.5 text-sm leading-5 text-[#6B4423]">{isPaid ? "Your payment has been securely processed." : description}</p>
                   </div>
                 </div>
@@ -220,18 +239,9 @@ export default function SuccessPage() {
             </section>
 
             <section aria-label="Payment confirmation" aria-live="polite" className="order-1 bg-white px-0 py-7 lg:order-2 lg:px-10 lg:py-10">
-              <div className="relative mb-6 aspect-[16/9] overflow-hidden rounded-2xl bg-[#F2E7D4] lg:hidden">
-                <Image
-                  src="/premium-kundali-report-astrology-banner.webp"
-                  alt="Surbhi Kundali report prepared by Surabhi Astrology"
-                  fill
-                  sizes="(max-width: 1023px) calc(100vw - 32px), 0px"
-                  className="object-cover"
-                />
-              </div>
               <div className="mb-7 flex items-start gap-4 sm:mb-8">
                 <span className={`mt-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${isPaid ? "bg-[#19965A] text-white" : "bg-[#F4EADF] text-[#8B1E1E]"}`}>
-                  {isPaid ? <Check size={25} strokeWidth={2.5} aria-hidden="true" /> : isChecking || state === "pending" ? <Clock3 size={23} aria-hidden="true" /> : <ShieldCheck size={23} aria-hidden="true" />}
+                  {isPaid ? <Check size={25} strokeWidth={2.5} aria-hidden="true" /> : isChecking ? <LoaderCircle size={26} className="motion-safe:animate-spin" aria-hidden="true" /> : state === "pending" ? <Clock3 size={23} aria-hidden="true" /> : <ShieldCheck size={23} aria-hidden="true" />}
                 </span>
                 <div className="min-w-0">
                   <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8B1E1E]">{isPaid ? "Payment received" : isChecking ? "Secure payment check" : "Payment support"}</p>
@@ -242,7 +252,25 @@ export default function SuccessPage() {
                 {isPaid && <Sparkles className="mt-2 hidden shrink-0 text-[#B9782E] sm:block" size={23} aria-hidden="true" />}
               </div>
 
-              {isPaid ? (
+              {isChecking ? (
+                <div role="status" className="mb-7 rounded-2xl border border-[#E8D8B8] bg-[#FFFCF6] p-5 sm:mb-8 sm:p-6">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#F4EADF] text-[#8B1E1E]">
+                      <LoaderCircle size={24} className="motion-safe:animate-spin" aria-hidden="true" />
+                    </span>
+                    <div>
+                      <h2 className="text-base font-semibold text-[#2A1400]">Checking your payment securely</h2>
+                      <p className="mt-0.5 text-sm text-[#6B4423]">Your confirmation and next steps will appear here automatically.</p>
+                    </div>
+                  </div>
+                  <div aria-hidden="true" className="mt-6 space-y-3 motion-safe:animate-pulse">
+                    <div className="h-3 w-4/5 rounded-full bg-[#EFE2CE]" />
+                    <div className="h-3 w-full rounded-full bg-[#EFE2CE]" />
+                    <div className="h-3 w-2/3 rounded-full bg-[#EFE2CE]" />
+                  </div>
+                  <p className="mt-6 border-t border-[#E8D8B8] pt-4 text-sm leading-6 text-[#6B4423]">Please don’t make another payment while this check is in progress.</p>
+                </div>
+              ) : isPaid ? (
                 <div className="mb-7 rounded-2xl border border-[#E8D8B8] bg-[#FFFCF6] p-5 sm:mb-8 sm:p-6">
                   <h2 className="mb-5 flex items-center gap-2.5 font-serif text-2xl font-semibold text-[#2A1400]">
                     <Sparkles size={20} className="text-[#C8A84B]" aria-hidden="true" /> {copy.next}?
@@ -250,8 +278,8 @@ export default function SuccessPage() {
                   <ol className="relative space-y-5 before:absolute before:bottom-5 before:left-[15px] before:top-5 before:border-l-2 before:border-dashed before:border-[#D9B681]">
                     {[
                       { title: "Payment received", detail: copy.stepOne },
-                      { title: "Surbhi prepares your report", detail: copy.stepTwo },
-                      { title: "Report delivered to you", detail: copy.stepThree },
+                      { title: isCallService ? "Consultation coordinated" : "Your report is prepared", detail: copy.stepTwo },
+                      { title: isCallService ? "We contact you on WhatsApp" : "Report delivered to you", detail: copy.stepThree },
                     ].map((step, index) => (
                       <li key={step.title} className="relative flex gap-3.5 sm:gap-4">
                         <span className="z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#E6C9A4] bg-[#F9EAE2] text-xs font-semibold text-[#8B1E1E]">0{index + 1}</span>
@@ -271,6 +299,18 @@ export default function SuccessPage() {
                       <RotateCcw size={16} aria-hidden="true" /> {isChecking ? copy.checkingButton : copy.checkAgain}
                     </button>
                   )}
+                </div>
+              )}
+
+              {isPaid && (
+                <div className="relative mb-7 aspect-[16/9] overflow-hidden rounded-2xl bg-[#F2E7D4] lg:hidden">
+                  <Image
+                    src="/premium-kundali-report-astrology-banner.webp"
+                    alt="Surbhi Kundali report prepared by Surabhi Astrology"
+                    fill
+                    sizes="(max-width: 1023px) calc(100vw - 32px), 0px"
+                    className="object-cover"
+                  />
                 </div>
               )}
 
