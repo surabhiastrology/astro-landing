@@ -61,6 +61,10 @@ const nextConfig: NextConfig = {
   // 3. Custom Headers for Aggressive Caching (Browser side)
   async headers() {
     return [
+      ...(process.env.VERCEL_ENV === 'preview' ? [{
+        source: '/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex' }],
+      }] : []),
       {
         // Cache all static assets (images, fonts, etc.) in the public folder
         source: '/(.*).(jpg|jpeg|png|svg|webp|JPG|mp4|webm)',

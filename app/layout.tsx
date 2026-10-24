@@ -29,6 +29,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Celebrity Astrologer Surbhi Gupta - Personalized Astrology Reports",
   description: "Unveil the secrets of your future with Surbhi Gupta. Personalized astrology, career guidance, and love compatibility analysis.",
+  ...(process.env.VERCEL_ENV === "preview" ? { robots: { index: false, follow: false } } : {}),
   alternates: {
     canonical: "https://surabhiastrology.com",
   },
