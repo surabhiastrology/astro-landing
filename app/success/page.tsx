@@ -122,7 +122,6 @@ export default function SuccessPage() {
     checkingButton: "Checking…",
     whatsapp: "WhatsApp support",
     email: "Email support",
-    returnHome: "Return to Surabhi Astrology",
     brandLine: "Your Kundali, personally prepared by Surbhi Gupta.",
   };
 
@@ -335,10 +334,6 @@ export default function SuccessPage() {
           </div>
         </div>
 
-        <footer className="mt-6 flex flex-col items-center justify-between gap-3 border-t border-[#DCC9A8] pt-4 text-xs text-[#806E5D] sm:flex-row">
-          <span>info@surabhiastrology.com</span>
-          <Link href="/" className="font-semibold text-[#6B4423] underline decoration-[#C8A77D] underline-offset-4">{copy.returnHome}</Link>
-        </footer>
       </div>
       </div>
     </main>

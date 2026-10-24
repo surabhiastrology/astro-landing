@@ -8,6 +8,7 @@ import Razorpay from "razorpay";
 import { buildOrderConfirmationEmail } from "@/lib/order-confirmation-email";
 import { formatBirthTime } from "@/lib/birth-time";
 import { getCheckoutAmount, getCheckoutPlanByReportType, planIncludesWhatsAppQuestion, supportsUrgentDelivery } from "@/lib/checkout-plans";
+import { getPaymentWhatsAppTemplate } from "@/lib/payment-whatsapp-template";
 
 // ==========================================
 // 1. INITIALIZE SERVICES (With Caching)
@@ -251,7 +252,6 @@ async function triggerNotifications(order: any) {
 
   const reportType = order.reportType || "Service";
   const isHi = order.customer.language === "hindi";
-  const isCareer = reportType.toLowerCase().includes("career") || reportType.toLowerCase().includes("करियर");
   const includesWhatsAppQuestion = planIncludesWhatsAppQuestion(reportType);
   const isMatchmaking = reportType.toLowerCase().includes("couple match making");
 
@@ -263,22 +263,12 @@ async function triggerNotifications(order: any) {
     waButtons = isHi ? ["प्रश्न पूछें"] : ["Ask Question"];
   }
 
-  // Prepare Template Data for Webhook
-  let templateName = "";
-  if (isCareer) {
-    templateName = isHi ? "payment_career_hi" : "payment_career_en";
-  } else {
-    templateName = isHi ? "payment_general_hi" : "payment_general_en";
-  }
-
-  const waTemplateData = {
-    name: templateName,
-    language: isHi ? "hi" : "en",
-    params: [
-      order.customer.name || "Customer",
-      order.urgentDelivery ? `${reportType} (${isHi ? "24 घंटे में प्राथमिकता डिलीवरी" : "24-hour priority delivery"})` : reportType,
-    ]
-  };
+  const waTemplateData = getPaymentWhatsAppTemplate({
+    customerName: order.customer.name,
+    reportType,
+    language: order.customer.language,
+    urgentDelivery: order.urgentDelivery === true,
+  });
 
   const nextStep = includesWhatsAppQuestion ? "F1_START" : "F1_END";
 
