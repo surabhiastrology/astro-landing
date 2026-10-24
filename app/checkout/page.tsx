@@ -746,7 +746,7 @@ function getCheckoutPresentation(service: string, plan: string): CheckoutPresent
       deliveryDetail: "We’ll contact you here with the next steps.",
       quote: "A focused conversation can bring clarity to the questions that matter most.",
       benefits: [
-        priority ? "Priority booking with fast-track consultation" : "60-minute personal consultation",
+        priority ? "Priority booking with fast-track consultation" : "30-minute personal consultation",
         priority ? "Personal guidance from Surbhi Gupta" : "Astrology, palmistry & numerology guidance",
         "Private coordination through WhatsApp",
       ],

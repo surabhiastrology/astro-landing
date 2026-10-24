@@ -30,10 +30,10 @@ function getServicePlans(intent: string = "", isHi: boolean) {
     return [{
       title: isHi ? "परामर्श योजनाएं" : "Consultation Plans",
       rows: isHi ? [
-        { id: "p1", title: "व्यक्तिगत (₹24,000)", description: "60 मिनट | ज्योतिष, हस्तरेखा, अंकशास्त्र" },
+        { id: "p1", title: "व्यक्तिगत (₹24,000)", description: "30 मिनट | ज्योतिष, हस्तरेखा, अंकशास्त्र" },
         { id: "p2", title: "तत्काल (₹51,000)", description: "इंतजार छोड़ें | तत्काल परामर्श" }
       ] : [
-        { id: "p1", title: "Offline (₹24,000)", description: "60 mins | Astrology, Palmistry, Numerology" },
+        { id: "p1", title: "Offline (₹24,000)", description: "30 mins | Astrology, Palmistry, Numerology" },
         { id: "p2", title: "Priority (₹51,000)", description: "Skip the wait | Fast-track your destiny" }
       ]
     }];
@@ -63,12 +63,12 @@ function getServicePlans(intent: string = "", isHi: boolean) {
         { id: "p1", title: "कपल रिपोर्ट (₹1,100)", description: "विस्तृत अनुकूलता रिपोर्ट" },
         { id: "p2", title: "रिपोर्ट+Q (₹3,300)", description: "रिपोर्ट + WhatsApp पर 1 व्यक्तिगत प्रश्न" },
         { id: "p3", title: "रिपोर्ट+कॉल (₹11,000)", description: "रिपोर्ट + ऑन-कॉल परामर्श" },
-        { id: "p4", title: "कपल कॉल (₹15,000)", description: "सुरभि जी के साथ 45 मिनट की कॉल" }
+        { id: "p4", title: "कपल कॉल (₹15,000)", description: "सुरभि जी के साथ 30 मिनट की कॉल" }
       ] : [
         { id: "p1", title: "Basic Match (₹1,100)", description: "Detailed compatibility report" },
         { id: "p2", title: "Match + 1Q (₹3,300)", description: "Report + Ask 1 question on WhatsApp" },
         { id: "p3", title: "Match+Call (₹11,000)", description: "Report + On-Call Consultation" },
-        { id: "p4", title: "Direct Call (₹15,000)", description: "45-Min direct call with Surbhi Gupta" }
+        { id: "p4", title: "Direct Call (₹15,000)", description: "30-Min direct call with Surbhi Gupta" }
       ]
     }];
   }
@@ -116,7 +116,7 @@ export function nextMessage(
 
   const baseUrl = publicBaseUrl || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
   const paymentLink = `${baseUrl}/checkout`;
-  const imgWelcome = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTuTgSGYd_yMRX4jHMgI_Pvfb2bqtVoqZM3eQ&s"; 
+  const imgWelcome = `${baseUrl}/celebs/8.png`;
   const imgServices = "https://pbs.twimg.com/profile_images/2027040849813721088/X4RajwNP.jpg"; 
 
   const isHi = data.language === "hi";
