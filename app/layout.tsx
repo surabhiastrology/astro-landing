@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Karla } from "next/font/google"; // CHANGED: Replaced existing fonts with Cormorant Garamond and Karla
 import Script from "next/script";
+import { META_PRODUCTION_HOSTNAME } from "@/lib/meta-checkout-events";
 import "./globals.css";
 
 // 1. Optimize Font Loading
@@ -45,25 +46,29 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const hasLiveRazorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.startsWith("rzp_live_") === true;
+
   return (
     // CHANGED: Linked the HTML tag to inject both variables into the layout tree
     <html lang="en" className={`${cormorantGaramond.variable} ${karla.variable}`}>
       <head>
         {/* GLOBAL GOOGLE TAG MANAGER (GTM) CODES */}
-        <Script id="google-tag-manager" strategy="afterInteractive">
+        {hasLiveRazorpayKey && <Script id="google-tag-manager" strategy="afterInteractive">
           {`
-            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer','GTM-N6XWPHSK');
+            if (window.location.hostname === '${META_PRODUCTION_HOSTNAME}') {
+              (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+              })(window,document,'script','dataLayer','GTM-N6XWPHSK');
+            }
           `}
-        </Script>
+        </Script>}
 
         {/* OPTIMIZATION: FACEBOOK PIXEL */}
-        <Script id="fb-pixel" strategy="afterInteractive">
+        {hasLiveRazorpayKey && <Script id="fb-pixel" strategy="afterInteractive">
           {`
-            if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            if (window.location.hostname === '${META_PRODUCTION_HOSTNAME}') {
               !function(f,b,e,v,n,t,s)
               {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
               n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -77,7 +82,7 @@ export default function RootLayout({
               fbq('track', 'PageView');
             }
           `}
-        </Script>
+        </Script>}
       </head>
       {/* CHANGED: Configured the baseline body stack utilizing your precise font variables and cross-platform fallback priorities */}
       <body 
@@ -85,14 +90,14 @@ export default function RootLayout({
         style={{ fontFamily: `var(--font-sans), ui-sans-serif, system-ui, sans-serif` }}
       >
         {/* GTM FALLBACK LAYER FOR BROWSERS WITH RUNTIME JAVASCRIPT DISABLED */}
-        <noscript>
+        {hasLiveRazorpayKey && process.env.VERCEL_ENV === "production" && <noscript>
           <iframe 
             src="https://www.googletagmanager.com/ns.html?id=GTM-N6XWPHSK" 
             height="0" 
             width="0" 
             style={{ display: 'none', visibility: 'hidden' }}
           ></iframe>
-        </noscript>
+        </noscript>}
 
         {children}
 
@@ -114,7 +119,7 @@ export default function RootLayout({
         </footer>
 
         {/* FACEBOOK PIXEL FALLBACK LAYER */}
-        <noscript>
+        {hasLiveRazorpayKey && process.env.VERCEL_ENV === "production" && <noscript>
           <img 
             height="1" 
             width="1" 
@@ -122,7 +127,7 @@ export default function RootLayout({
             src="https://www.facebook.com/tr?id=1836254097051134&ev=PageView&noscript=1"
             alt="pixel"
           />
-        </noscript>
+        </noscript>}
       </body>
     </html>
   );

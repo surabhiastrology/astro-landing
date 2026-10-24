@@ -1,4 +1,10 @@
-const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
+export const META_PRODUCTION_HOSTNAME = "kundalireport.surabhiastrology.com";
+
+export function isProductionMetaTrackingEnabled() {
+  return typeof window !== "undefined" &&
+    window.location.hostname === META_PRODUCTION_HOSTNAME &&
+    process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.startsWith("rzp_live_") === true;
+}
 
 type MetaEventKind = "track" | "trackCustom";
 
@@ -9,7 +15,7 @@ export function trackMetaCheckoutEvent(
   data: Record<string, string | number>,
   eventId: string,
 ) {
-  if (typeof window === "undefined" || LOCAL_HOSTS.has(window.location.hostname)) return;
+  if (!isProductionMetaTrackingEnabled()) return;
 
   let attempts = 0;
   const sendWhenReady = () => {
@@ -26,7 +32,7 @@ export function trackMetaCheckoutEvent(
 }
 
 export function trackVerifiedPurchaseOnce(orderId: string, amountInr: number, reportType: string) {
-  if (typeof window === "undefined" || !/^order_[a-zA-Z0-9]+$/.test(orderId)) return;
+  if (!isProductionMetaTrackingEnabled() || !/^order_[a-zA-Z0-9]+$/.test(orderId)) return;
   if (!Number.isFinite(amountInr) || amountInr <= 0) return;
 
   const key = `meta:purchase:${orderId}`;
