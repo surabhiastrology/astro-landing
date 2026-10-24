@@ -10,6 +10,7 @@ type Receipt = {
   name: string;
   reportType: string;
   amount: number;
+  urgentDelivery?: boolean;
   orderId: string;
   paymentId: string | null;
 };
@@ -95,7 +96,9 @@ export default function SuccessPage() {
     pending: "Your payment is still being confirmed",
     unavailable: "Need help confirming your order?",
     checkingBody: "We’re securely checking Razorpay for the final payment status. This can take a few seconds.",
-    paidBody: "Your payment is recorded. We’ll keep you updated as your report is prepared.",
+    paidBody: receipt?.urgentDelivery
+      ? "Your priority order is confirmed. Your report will arrive on WhatsApp within 24 hours of confirmed payment."
+      : "Your payment is recorded. We’ll keep you updated as your report is prepared.",
     pendingBody: "Razorpay hasn’t confirmed the final status yet. Please don’t pay again; share the order reference below if you contact us.",
     unavailableBody: "If you completed a payment, contact us with your order reference and we’ll help check it.",
     receipt: "Payment receipt",
@@ -106,7 +109,9 @@ export default function SuccessPage() {
     next: "What happens next",
     stepOne: "Your payment is recorded. You don’t need to submit it again.",
     stepTwo: "Surbhi Gupta will personally prepare your report and answer your question.",
-    stepThree: "When it’s ready, we’ll send it to you on WhatsApp.",
+    stepThree: receipt?.urgentDelivery
+      ? "We’ll send your report on WhatsApp within 24 hours of confirmed payment."
+      : "When it’s ready, we’ll send it to you on WhatsApp.",
     pendingHelp: "Our support team can check the order reference. Please don’t make another payment while confirmation is pending.",
     checkAgain: "Check again",
     checkingButton: "Checking…",
@@ -176,6 +181,13 @@ export default function SuccessPage() {
                       <dt className="text-sm text-[#6B4423]">{copy.amount}</dt>
                       <dd className="ml-auto text-xl font-semibold tabular-nums text-[#2A1400]">{formatAmount(receipt.amount)}</dd>
                     </div>
+                    {receipt.urgentDelivery && (
+                      <div className="flex items-center gap-3 py-3.5 sm:gap-4">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#8B1E1E]"><Clock3 size={18} aria-hidden="true" /></span>
+                        <dt className="text-sm text-[#6B4423]">Delivery</dt>
+                        <dd className="ml-auto text-right text-sm font-semibold text-[#8B1E1E]">Priority · within 24 hours (+₹199)</dd>
+                      </div>
+                    )}
                     <div className="flex items-center gap-3 py-3.5 sm:gap-4">
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#8B1E1E]"><Tag size={17} aria-hidden="true" /></span>
                       <dt className="shrink-0 text-sm text-[#6B4423]">{copy.orderReference}</dt>

@@ -197,6 +197,17 @@ const CHECKOUT_PLANS: readonly CheckoutPlan[] = [
 
 export const DEFAULT_CHECKOUT_PLAN = CHECKOUT_PLANS[0];
 
+export const URGENT_DELIVERY_FEE_INR = 199;
+
+export function supportsUrgentDelivery(plan: CheckoutPlan) {
+  return plan.service === "Premium Personalized Kundali" ||
+    (plan.service === "Surbhi Kundali" && plan.plan !== "With Call");
+}
+
+export function getCheckoutAmount(plan: CheckoutPlan, urgentDelivery: boolean) {
+  return plan.amount + (urgentDelivery && supportsUrgentDelivery(plan) ? URGENT_DELIVERY_FEE_INR : 0);
+}
+
 // WhatsApp list rows historically use p1/p2/p3/p4 for every service. Resolve
 // those local row IDs against the selected service before looking up a plan.
 const WHATSAPP_PLAN_ID_ALIASES: Record<string, Record<string, string>> = {

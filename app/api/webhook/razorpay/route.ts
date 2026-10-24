@@ -4,9 +4,10 @@ import crypto from "crypto";
 import mongoose from "mongoose";
 import { Resend } from "resend";
 import Redis from "ioredis";
+import Razorpay from "razorpay";
 import { buildOrderConfirmationEmail } from "@/lib/order-confirmation-email";
 import { formatBirthTime } from "@/lib/birth-time";
-import { planIncludesWhatsAppQuestion } from "@/lib/checkout-plans";
+import { getCheckoutAmount, getCheckoutPlanByReportType, planIncludesWhatsAppQuestion, supportsUrgentDelivery } from "@/lib/checkout-plans";
 
 // ==========================================
 // 1. INITIALIZE SERVICES (With Caching)
@@ -59,6 +60,8 @@ const OrderSchema = new mongoose.Schema({
   orderId: { type: String, required: true },
   amount: { type: Number, required: true },
   reportType: { type: String },
+  urgentDelivery: { type: Boolean, default: false },
+  deliveryDueAt: { type: Date },
   customer: {
     name: String, email: String, phone: String,
     dob: String, tob: String, tobAccuracy: String, tobApproximateRange: String, city: String,
@@ -167,18 +170,32 @@ export async function POST(req: Request) {
     const event = JSON.parse(rawBody);
 
     if (event.event === "payment.captured") {
-      const { id: paymentId, order_id: razorpayOrderId, notes, amount: amountPaise } = event.payload.payment.entity;
+      const { id: paymentId, order_id: razorpayOrderId, amount: amountPaise } = event.payload.payment.entity;
 
       await connectDB();
-      
       const order = await Order.findOne({ orderId: razorpayOrderId });
-      
-      if (order && order.status === "Paid") {
-        return NextResponse.json({ status: "already_processed" }, { status: 200 }); 
+      if (order?.status === "Paid") {
+        return NextResponse.json({ status: "already_processed" }, { status: 200 });
       }
 
-      // 1. EXTRACT DATA FROM NOTES
-      const formData = notes?.formData ? JSON.parse(notes.formData) : {};
+      const razorpay = new Razorpay({
+        key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID as string,
+        key_secret: process.env.RAZORPAY_KEY_SECRET as string,
+      });
+      const gatewayOrder = await razorpay.orders.fetch(razorpayOrderId);
+      const savedFormData = gatewayOrder.notes?.formData;
+      const formData = typeof savedFormData === "string" ? JSON.parse(savedFormData) : null;
+      const checkoutPlan = getCheckoutPlanByReportType(formData?.reportType);
+      const urgentDelivery = formData?.urgentDelivery === true;
+      if (
+        !checkoutPlan ||
+        (urgentDelivery && !supportsUrgentDelivery(checkoutPlan)) ||
+        gatewayOrder.currency !== "INR" ||
+        Number(gatewayOrder.amount) !== getCheckoutAmount(checkoutPlan, urgentDelivery) * 100 ||
+        Number(amountPaise) !== Number(gatewayOrder.amount)
+      ) {
+        return NextResponse.json({ error: "Payment does not match this order." }, { status: 400 });
+      }
 
       if (!order) {
         // Fallback: Create Order if success API hasn't run yet
@@ -186,8 +203,10 @@ export async function POST(req: Request) {
           paymentId,
           orderId: razorpayOrderId,
           amount: amountPaise / 100,
-          reportType: formData.reportType || "Vedic Report",
-          customer: formData,
+          reportType: checkoutPlan.reportType,
+          urgentDelivery,
+          ...(urgentDelivery ? { deliveryDueAt: new Date(Date.now() + 24 * 60 * 60 * 1000) } : {}),
+          customer: { ...formData, reportType: checkoutPlan.reportType, urgentDelivery },
           partner: {
             name: formData?.partnerName,
             dob: formData?.partnerDob,
@@ -203,7 +222,7 @@ export async function POST(req: Request) {
         // Update existing pending order
         await Order.updateOne(
           { _id: order._id },
-          { $set: { status: "Paid", paymentId: paymentId, challenge: formData.challenge } }
+          { $set: { status: "Paid", paymentId, challenge: formData.challenge, urgentDelivery, ...(urgentDelivery ? { deliveryDueAt: new Date(Date.now() + 24 * 60 * 60 * 1000) } : {}) } }
         );
       }
 
@@ -236,7 +255,7 @@ async function triggerNotifications(order: any) {
   const includesWhatsAppQuestion = planIncludesWhatsAppQuestion(reportType);
   const isMatchmaking = reportType.toLowerCase().includes("couple match making");
 
-  let replyMessage = `✅ *Payment Confirmed!*\n\n🙏 *Radhe Radhe, ${order.customer.name || "ji"}!*\nYour order for the *${reportType}* has been successfully confirmed.\n\nSurbhi ji and the team will deliver your detailed analysis right here within *72 hours*. ⏳`;
+  let replyMessage = `✅ *Payment Confirmed!*\n\n🙏 *Radhe Radhe, ${order.customer.name || "ji"}!*\nYour order for the *${reportType}* has been successfully confirmed.\n\nSurbhi ji and the team will deliver your detailed analysis right here within *${order.urgentDelivery ? "24" : "72"} hours*. ⏳`;
   let waButtons: string[] | undefined = undefined;
 
   if (includesWhatsAppQuestion) {
@@ -255,7 +274,10 @@ async function triggerNotifications(order: any) {
   const waTemplateData = {
     name: templateName,
     language: isHi ? "hi" : "en",
-    params: [order.customer.name || "Customer", reportType]
+    params: [
+      order.customer.name || "Customer",
+      order.urgentDelivery ? `${reportType} (${isHi ? "24 घंटे में प्राथमिकता डिलीवरी" : "24-hour priority delivery"})` : reportType,
+    ]
   };
 
   const nextStep = includesWhatsAppQuestion ? "F1_START" : "F1_END";
@@ -269,6 +291,7 @@ async function triggerNotifications(order: any) {
         name: order.customer.name,
         reportType: order.reportType,
         amount: order.amount,
+        urgentDelivery: order.urgentDelivery,
         orderId: order.orderId,
         paymentId: order.paymentId,
         language: order.customer.language,
@@ -281,7 +304,7 @@ async function triggerNotifications(order: any) {
     getResend().emails.send({
       from: senderEmail,
       to: adminEmails,
-      subject: `🚨 NEW PAID ORDER: ${order.customer.name} [₹${order.amount}] | ${order.customer.language}`,
+      subject: `${order.urgentDelivery ? "⚡ URGENT 24H | " : ""}🚨 NEW PAID ORDER: ${order.customer.name} [₹${order.amount}] | ${order.customer.language}`,
       html: `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden;">
           <div style="background-color: #8B1E1E; padding: 25px; text-align: center;">
@@ -296,6 +319,7 @@ async function triggerNotifications(order: any) {
                 <tr><td style="padding: 5px 0; color: #666;">Report Type:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${order.reportType}</td></tr>
                 <tr><td style="padding: 5px 0; color: #666;">Language:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${order.customer.language}</td></tr>
                 <tr><td style="padding: 5px 0; color: #666;">Amount Paid:</td><td style="padding: 5px 0; font-weight: bold; text-align: right; color: #1B4D30;">₹${order.amount}</td></tr>
+                ${order.urgentDelivery ? '<tr><td style="padding: 5px 0; color: #666;">Delivery:</td><td style="padding: 5px 0; font-weight: bold; text-align: right; color: #8B1E1E;">Urgent — within 24 hours (+₹199)</td></tr>' : ''}
               </table>
             </div>
 

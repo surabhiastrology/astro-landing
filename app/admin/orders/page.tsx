@@ -62,6 +62,8 @@ export default function OrdersPage() {
       Email: o.customer.email,
       Service: o.reportType,
       Amount: o.amount,
+      UrgentDelivery: o.urgentDelivery ? "Yes - 24 hours" : "No",
+      DeliveryDue: o.deliveryDueAt ? new Date(o.deliveryDueAt).toLocaleString("en-IN") : "",
       PaymentID: o.paymentId,
       OrderID: o.orderId,
       Status: o.status,
@@ -200,6 +202,7 @@ export default function OrdersPage() {
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] font-black bg-slate-100 px-2 py-0.5 rounded text-slate-500 uppercase tracking-tighter italic">Order #{order.orderId?.slice(-8)}</span>
                     <span className="text-[10px] font-black bg-green-100 text-green-700 px-2 py-0.5 rounded uppercase">PAID</span>
+                    {order.urgentDelivery && <span className="rounded bg-[#F8E9CC] px-2 py-0.5 text-[10px] font-black uppercase text-[#8B1E1E]">Urgent · 24h</span>}
                   </div>
                   <h3 className="font-bold text-slate-800 mt-1 truncate">{order.reportType}</h3>
                   {/* Delivery Status Badges */}
@@ -237,6 +240,9 @@ export default function OrdersPage() {
                   <div className="text-[10px] font-bold text-slate-400 flex items-center justify-end gap-1">
                     <Clock size={10} /> {new Date(order.createdAt).toLocaleDateString()}
                   </div>
+                  {order.urgentDelivery && order.deliveryDueAt && !order.reportSent && (
+                    <div className="mt-1 text-[10px] font-bold text-[#8B1E1E]">Due {new Date(order.deliveryDueAt).toLocaleString("en-IN")}</div>
+                  )}
                 </div>
                 
                 {/* Dual Dispatch Buttons */}
@@ -278,6 +284,7 @@ export default function OrdersPage() {
                 </h2>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Order ID: {viewOrder.orderId}</p>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Payment ID: {viewOrder.paymentId}</p>
+                {viewOrder.urgentDelivery && <p className="mt-2 text-xs font-bold text-[#8B1E1E]">Urgent delivery · due {viewOrder.deliveryDueAt ? new Date(viewOrder.deliveryDueAt).toLocaleString("en-IN") : "within 24 hours of payment"}</p>}
               </div>
               <button onClick={() => setViewOrder(null)} className="h-10 w-10 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-slate-100 transition-all text-slate-400">
                 <X size={20}/>

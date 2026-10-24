@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { z } from "zod";
-import { getCheckoutPlanByReportType } from "@/lib/checkout-plans";
+import { getCheckoutAmount, getCheckoutPlanByReportType, supportsUrgentDelivery } from "@/lib/checkout-plans";
 
 const requestSchema = z.object({
   orderId: z.string().regex(/^order_[a-zA-Z0-9]+$/).max(64),
@@ -42,12 +42,14 @@ export async function POST(request: Request) {
       return privateResponse({ error: "Receipt details unavailable" }, 404);
     }
 
-    const form = JSON.parse(order.notes.formData) as { name?: string; reportType?: string; language?: string };
+    const form = JSON.parse(order.notes.formData) as { name?: string; reportType?: string; language?: string; urgentDelivery?: unknown };
     const checkoutPlan = getCheckoutPlanByReportType(form.reportType);
+    const urgentDelivery = form.urgentDelivery === true;
     if (
       !checkoutPlan ||
+      (urgentDelivery && !supportsUrgentDelivery(checkoutPlan)) ||
       order.currency !== "INR" ||
-      Number(order.amount) !== checkoutPlan.amount * 100
+      Number(order.amount) !== getCheckoutAmount(checkoutPlan, urgentDelivery) * 100
     ) {
       return privateResponse({ error: "Receipt details unavailable" }, 404);
     }
@@ -74,7 +76,8 @@ export async function POST(request: Request) {
       receipt: {
         name: form.name || "Customer",
         reportType: checkoutPlan.reportType,
-        amount: checkoutPlan.amount,
+        amount: getCheckoutAmount(checkoutPlan, urgentDelivery),
+        urgentDelivery,
         orderId: order.id,
         paymentId,
         language: form.language || "english",

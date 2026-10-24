@@ -7,7 +7,10 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   DEFAULT_CHECKOUT_PLAN,
+  getCheckoutAmount,
   getCheckoutPlan,
+  supportsUrgentDelivery,
+  URGENT_DELIVERY_FEE_INR,
 } from "@/lib/checkout-plans";
 import dayjs, { type Dayjs } from "dayjs";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
@@ -96,7 +99,7 @@ const QUESTION_DATA = {
   }
 };
 
-type FieldIconName = "mail" | "lock" | "package" | "globe" | "person" | "calendar" | "clock" | "pin" | "hash" | "message" | "info";
+type FieldIconName = "mail" | "lock" | "package" | "globe" | "person" | "calendar" | "clock" | "timer" | "pin" | "hash" | "message" | "info";
 
 function FieldIcon({ name, className = "h-4 w-4 shrink-0 text-[#C8A84B]" }: { name: FieldIconName; className?: string }) {
   const paths: Record<FieldIconName, React.ReactNode> = {
@@ -107,6 +110,7 @@ function FieldIcon({ name, className = "h-4 w-4 shrink-0 text-[#C8A84B]" }: { na
     person: <><circle cx="12" cy="8" r="3.5" /><path d="M5 21a7 7 0 0 1 14 0" /></>,
     calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4m10-4v4M3 10h18" /></>,
     clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3.5 2" /></>,
+    timer: <><path d="M9 2h6m-3 0v3m6.5 1.5L20 5" /><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2.5 1.5" /></>,
     pin: <><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.5" /></>,
     hash: <><path d="M5 9h14M4 15h14M10 4 8 20m8-16-2 16" /></>,
     message: <><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8 8 0 0 1-3.5-.8L4 20l1.2-3.4A7.2 7.2 0 0 1 4 12c0-4.1 3.6-7.5 8-7.5s8 3.1 8 7Z" /><path d="M8 12h8m-8 3h5" /></>,
@@ -713,6 +717,137 @@ function BirthTimePickerField({
   );
 }
 
+type CheckoutPresentation = {
+  image: string;
+  imageAlt: string;
+  imageClassName: string;
+  imageContainerClassName: string;
+  intro: string;
+  deliveryTitle: string;
+  deliveryDetail: string;
+  quote: string;
+  benefits: string[];
+};
+
+function getCheckoutPresentation(service: string, plan: string): CheckoutPresentation {
+  const product = service.toLowerCase();
+  const selectedPlan = plan.toLowerCase();
+
+  if (product.includes("consultation")) {
+    const priority = selectedPlan.includes("priority");
+    return {
+      image: "/checkout/surbhi-consultation-session.webp",
+      imageAlt: "Surbhi Gupta writing consultation notes at her desk",
+      imageClassName: "object-cover object-[50%_58%]",
+      imageContainerClassName: "aspect-[4/5]",
+      intro: "Share your details so we can coordinate your personal consultation with Surbhi Gupta.",
+      deliveryTitle: "Consultation updates on WhatsApp",
+      deliveryDetail: "We’ll contact you here with the next steps.",
+      quote: "A focused conversation can bring clarity to the questions that matter most.",
+      benefits: [
+        priority ? "Priority booking with fast-track consultation" : "60-minute personal consultation",
+        priority ? "Personal guidance from Surbhi Gupta" : "Astrology, palmistry & numerology guidance",
+        "Private coordination through WhatsApp",
+      ],
+    };
+  }
+
+  if (product.includes("couple match making")) {
+    const callPlan = selectedPlan.includes("call");
+    return {
+      image: "/checkout/couple-matchmaking-report.webp",
+      imageAlt: "Couple's hands beside a kundali compatibility chart",
+      imageClassName: "object-cover",
+      imageContainerClassName: "aspect-[16/9]",
+      intro: "Enter both partners’ birth details for the matchmaking service you selected.",
+      deliveryTitle: callPlan ? "Call coordination on WhatsApp" : "Matchmaking service on WhatsApp",
+      deliveryDetail: "We’ll use both partners’ details for the selected plan.",
+      quote: "Understand compatibility with a thoughtful reading of both birth charts.",
+      benefits: callPlan
+        ? ["Personal compatibility discussion", "Both partners’ details considered", "Call coordination through WhatsApp"]
+        : ["Compatibility analysis for both partners", "Personalized matchmaking insights", "Your selected report delivered on WhatsApp"],
+    };
+  }
+
+  if (product.includes("baby name")) {
+    const includesNames = selectedPlan.includes("name") || selectedPlan.includes("premium call");
+    const callPlan = selectedPlan.includes("call");
+    return {
+      image: "/checkout/baby-name-guidance.webp",
+      imageAlt: "Parent holding a newborn beside a notebook for name guidance",
+      imageClassName: "object-cover",
+      imageContainerClassName: "aspect-[16/9]",
+      intro: "Share the baby’s birth details for the baby-name service you selected.",
+      deliveryTitle: callPlan ? "Service updates on WhatsApp" : "Baby report on WhatsApp",
+      deliveryDetail: "We’ll contact you here with delivery or booking details.",
+      quote: "Thoughtful guidance for a meaningful beginning.",
+      benefits: [
+        "Personalized astrology and numerology guidance",
+        includesNames ? "Name suggestions included in your selected plan" : "Baby-focused report based on your selected plan",
+        callPlan ? "Consultation coordination through WhatsApp" : "Delivered to your WhatsApp",
+      ],
+    };
+  }
+
+  if (product.includes("numerology")) {
+    const correction = selectedPlan.includes("correction");
+    const callPlan = selectedPlan.includes("call");
+    return {
+      image: "/checkout/numerology-guidance.webp",
+      imageAlt: "Numerology guidance being prepared at an astrology studio desk",
+      imageClassName: "object-cover",
+      imageContainerClassName: "aspect-[16/9]",
+      intro: "Share your details for the numerology service selected below.",
+      deliveryTitle: callPlan ? "Service updates on WhatsApp" : "Numerology report on WhatsApp",
+      deliveryDetail: "We’ll contact you here with delivery or booking details.",
+      quote: "A personal numerology reading, prepared around the service you chose.",
+      benefits: [
+        correction ? "Name correction suggestions included" : "Personalized numerology analysis",
+        callPlan ? "30-minute call with Surbhi Gupta" : "Prepared for your selected numerology plan",
+        callPlan ? "Call coordination through WhatsApp" : "Delivered to your WhatsApp",
+      ],
+    };
+  }
+
+  const concern = product.includes("career")
+    ? { image: "/section-guidance/career-business.webp", alt: "Career and business guidance", label: "career or business" }
+    : product.includes("marriage & relationships")
+      ? { image: "/section-guidance/love-relationships.webp", alt: "Relationship guidance", label: "relationships and marriage" }
+      : product.includes("money & finances")
+        ? { image: "/section-guidance/wealth-finance.webp", alt: "Financial guidance", label: "finances and stability" }
+        : product.includes("health")
+          ? { image: "/section-guidance/health-wellbeing.webp", alt: "Well-being guidance", label: "your selected well-being concern" }
+          : product.includes("family")
+            ? { image: "/section-guidance/child-family.webp", alt: "Family guidance", label: "family concerns" }
+            : undefined;
+
+  if (concern) {
+    return {
+      image: concern.image,
+      imageAlt: concern.alt,
+      imageClassName: "object-cover",
+      imageContainerClassName: "aspect-[16/9]",
+      intro: `Your selected guidance about ${concern.label} will be prepared using the details below.`,
+      deliveryTitle: "Guidance delivered on WhatsApp",
+      deliveryDetail: "Your selected plan and next steps will be shared here.",
+      quote: "Personalized guidance from Surbhi Gupta, prepared for your chosen concern.",
+      benefits: [`Guidance focused on ${concern.label}`, "Prepared using your birth-chart details", "Personalized analysis by Surbhi Gupta"],
+    };
+  }
+
+  return {
+    image: "/premium-kundali-report-astrology-banner.webp",
+    imageAlt: "Premium Surbhi Kundali report",
+    imageClassName: "object-contain",
+    imageContainerClassName: "aspect-[16/9]",
+    intro: "Your personalized Kundali report will be prepared using the information below.",
+    deliveryTitle: "Report delivered on WhatsApp",
+    deliveryDetail: "Your report will be sent to this number once it is ready.",
+    quote: "Surbhi personally prepares your Kundali and answers the question that matters most to you.",
+    benefits: ["Authentic Vedic analysis", "100% confidential", "Personally prepared by Surbhi Gupta"],
+  };
+}
+
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const urlService = searchParams.get("service");
@@ -724,6 +859,7 @@ function CheckoutContent() {
     getCheckoutPlan(urlService, urlPlan) ?? DEFAULT_CHECKOUT_PLAN;
   const serviceName = checkoutPlan.service;
   const planName = checkoutPlan.plan;
+  const checkoutPresentation = getCheckoutPresentation(serviceName, planName);
 
   const hasStartedForm = useRef(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -741,6 +877,7 @@ function CheckoutContent() {
     planNameLower.includes("प्रश्न");
 
   const basePrice = checkoutPlan.amount;
+  const urgentDeliveryAvailable = supportsUrgentDelivery(checkoutPlan);
   const cleanPlanName = planName;
   const fullReportType = checkoutPlan.reportType;
 
@@ -794,10 +931,12 @@ function CheckoutContent() {
 
   const [countryCode, setCountryCode] = useState("+91");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [urgentDelivery, setUrgentDelivery] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [paymentError, setPaymentError] = useState("");
-  const finalAmount = basePrice; 
+  const selectedUrgentDelivery = urgentDeliveryAvailable && urgentDelivery;
+  const finalAmount = getCheckoutAmount(checkoutPlan, selectedUrgentDelivery);
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -937,7 +1076,7 @@ function CheckoutContent() {
     setLoading(true);
 
     try {
-      const checkoutForm = { ...form, phone: `${countryCode}${form.phone}` };
+      const checkoutForm = { ...form, phone: `${countryCode}${form.phone}`, urgentDelivery: selectedUrgentDelivery };
       const res = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1033,18 +1172,14 @@ function CheckoutContent() {
       {/* ================= LEFT: PRODUCT SUMMARY ================= */}
       <div className="lg:sticky lg:top-8">
       <div className="rounded-none border-0 bg-white p-5 shadow-none sm:rounded-3xl sm:border sm:border-[#E8D8B8]/50 sm:shadow-[0_15px_40px_rgba(61,22,0,0.06)] lg:p-6 xl:p-7">
-        <div className="relative mb-5 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-2xl bg-[#FCF7EE] sm:mb-6">
-          <Image src="/premium-kundali-report-astrology-banner.webp" alt="Premium Surbhi Kundali Report" className="object-contain" fill priority sizes="(max-width: 1023px) 100vw, 40vw" />
+        <div className={`relative mb-5 flex ${checkoutPresentation.imageContainerClassName} w-full items-center justify-center overflow-hidden rounded-2xl bg-[#FCF7EE] sm:mb-6`}>
+          <Image src={checkoutPresentation.image} alt={checkoutPresentation.imageAlt} className={checkoutPresentation.imageClassName} fill preload sizes="(max-width: 1023px) 100vw, 40vw" />
         </div>
         <div className="mb-3 inline-block rounded-md bg-[#8B1E1E]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#8B1E1E]">Order Summary</div>
         <h2 className="mb-2 font-serif text-2xl font-bold text-[#2A1400] lg:text-[30px]">{serviceName}</h2>
         <h3 className="mb-4 text-base font-bold uppercase tracking-wide text-[#C8A84B]">Plan: {cleanPlanName}</h3>
         <ul className="mt-5 space-y-3 text-sm text-[#2A1400]">
-          {[
-            "Authentic Vedic Analysis",
-            "100% Confidential",
-            "Personally prepared by Surbhi Gupta",
-          ].map((benefit) => (
+          {checkoutPresentation.benefits.map((benefit) => (
             <li key={benefit} className="flex items-center gap-2.5 font-medium">
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#C8A84B] text-white">
                 <svg aria-hidden="true" viewBox="0 0 16 16" className="h-3 w-3" fill="none">
@@ -1058,13 +1193,19 @@ function CheckoutContent() {
         <div className="my-5 h-px bg-[#E8D8B8]" />
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <span className="font-sans text-[34px] font-bold leading-none text-[#8B1E1E]">₹{finalAmount.toLocaleString("en-IN")}</span>
-          {basePrice === 999 && (
+          {basePrice === 999 && !selectedUrgentDelivery && (
             <>
               <del className="text-lg font-medium text-[#9CA3AF]">₹2,999</del>
               <span className="rounded-full bg-[#F4EAD6] px-3 py-1 text-xs font-semibold text-[#8B1E1E]">Limited Offer</span>
             </>
           )}
         </div>
+        {selectedUrgentDelivery && (
+          <div className="mt-3 space-y-1.5 text-sm text-[#6B4423]">
+            <div className="flex justify-between gap-3"><span>Report</span><span className="tabular-nums">₹{basePrice.toLocaleString("en-IN")}</span></div>
+            <div className="flex justify-between gap-3"><span>24-hour delivery</span><span className="tabular-nums">+₹{URGENT_DELIVERY_FEE_INR}</span></div>
+          </div>
+        )}
         <div className="mt-5 flex items-center gap-3 rounded-xl bg-[#FCF7EE] px-4 py-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white">
             <svg aria-hidden="true" viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor">
@@ -1072,14 +1213,14 @@ function CheckoutContent() {
             </svg>
           </span>
           <div>
-            <p className="text-sm font-semibold text-[#2A1400]">Delivered on WhatsApp</p>
-            <p className="mt-0.5 text-xs leading-4 text-[#6B7280]">Your report will be sent to you once it is ready.</p>
+            <p className="text-sm font-semibold text-[#2A1400]">{selectedUrgentDelivery ? "Priority report delivery on WhatsApp" : checkoutPresentation.deliveryTitle}</p>
+            <p className="mt-0.5 text-xs leading-4 text-[#6B7280]">{selectedUrgentDelivery ? "Within 24 hours of confirmed payment." : checkoutPresentation.deliveryDetail}</p>
           </div>
         </div>
       </div>
       <blockquote className="hidden items-start gap-3 px-8 pt-7 lg:flex">
         <span className="font-serif text-5xl leading-none text-[#C8A84B]/60" aria-hidden="true">“</span>
-        <p className="max-w-[290px] font-serif text-[22px] leading-tight text-[#6B4423]">Surbhi personally prepares your Kundali and answers the question that matters most to you.</p>
+        <p className="max-w-[290px] font-serif text-[22px] leading-tight text-[#6B4423]">{checkoutPresentation.quote}</p>
       </blockquote>
       </div>
 
@@ -1089,7 +1230,7 @@ function CheckoutContent() {
           <h3 className="font-serif text-2xl font-semibold leading-tight text-[#2A1400] sm:text-[30px]">
             {isMatchmaking ? "Matchmaking Calculator" : <>Complete <span className="font-normal not-italic text-[#8B1E1E]">Your Details</span></>}
           </h3>
-          {!isMatchmaking && <p className="mt-1.5 text-sm leading-6 text-[#6B7280]">Your personalized Kundali report will be prepared using the information below.</p>}
+          <p className="mt-1.5 text-sm leading-6 text-[#6B7280]">{checkoutPresentation.intro}</p>
         </div>
 
         <form ref={formRef} id="checkout-form" className="space-y-5" onSubmit={handlePayment} noValidate>
@@ -1475,6 +1616,32 @@ function CheckoutContent() {
             <FieldError field="terms" message={fieldErrors.terms} />
           </div>
 
+          {urgentDeliveryAvailable && (
+            <div className="mt-5">
+              <div className="mb-1.5 flex items-center justify-between gap-3">
+                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#2A1400]">
+                  <FieldIcon name="timer" className="h-4 w-4 shrink-0 text-[#B46F2C]" />
+                  Need your report sooner?
+                </span>
+                <span className="checkout-question-badge shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none"><span className="relative z-[1]">24-hour priority</span></span>
+              </div>
+              <label className={`flex min-h-[76px] cursor-pointer items-center gap-3 rounded-xl border-2 px-4 py-3 shadow-[0_4px_14px_rgba(61,22,0,0.06)] transition-colors focus-within:ring-2 focus-within:ring-[#8B1E1E]/20 ${selectedUrgentDelivery ? "border-[#8B1E1E] bg-[#FBF2E6]" : "border-[#B46F2C] bg-[#FCF7EE] hover:bg-[#FBF2E6]"}`}>
+                <input
+                  type="checkbox"
+                  name="urgentDelivery"
+                  checked={urgentDelivery}
+                  onChange={(event) => setUrgentDelivery(event.target.checked)}
+                  aria-describedby="urgent-delivery-help"
+                  className="h-5 w-5 shrink-0 cursor-pointer accent-[#8B1E1E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8B1E1E]"
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold leading-5 text-[#2A1400]">Add urgent delivery <span className="whitespace-nowrap tabular-nums text-[#8B1E1E]">+₹{URGENT_DELIVERY_FEE_INR}</span></span>
+                  <span id="urgent-delivery-help" className="mt-0.5 block text-[13px] leading-5 text-[#6B4423]">Get your report on WhatsApp within 24 hours of confirmed payment.</span>
+                </span>
+              </label>
+            </div>
+          )}
+
           <div className="mt-5 grid grid-cols-1 gap-2 rounded-xl bg-[#F8F2E8] px-3 py-3 sm:grid-cols-3 sm:gap-0 sm:px-4" aria-label="Checkout assurances">
             <div className="flex items-center gap-2.5 px-1 py-1.5 sm:border-r sm:border-[#D9C8AA] sm:px-3 sm:first:pl-0">
               <svg aria-hidden="true" viewBox="0 0 24 24" className="h-7 w-7 shrink-0 text-[#8B1E1E]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3 20 6v5c0 5.2-3.4 8.5-8 10-4.6-1.5-8-4.8-8-10V6l8-3Z"/><path d="m8.5 12 2.3 2.3 4.8-4.8"/></svg>
@@ -1528,7 +1695,7 @@ function CheckoutContent() {
           ) : (
             <>
               <span>Pay securely</span>
-              <span className="tabular-nums">₹{finalAmount}</span>
+              <span className="tabular-nums">₹{finalAmount.toLocaleString("en-IN")}</span>
               <span aria-hidden="true" className="ml-0.5 inline-flex shrink-0 items-center pl-1.5">
                 {(["googlepay", "phonepe", "popclubapp", "paytm"] as const).map((app) => (
                   <span key={app} className="relative -ml-1.5 flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border border-[#2A1400]/10 bg-white shadow-sm">

@@ -2,6 +2,7 @@ type ConfirmationEmailInput = {
   name: string;
   reportType: string;
   amount: number;
+  urgentDelivery?: boolean;
   orderId: string;
   paymentId: string;
   language?: string;
@@ -39,8 +40,12 @@ export function buildOrderConfirmationEmail(order: ConfirmationEmailInput) {
     : `Your order for <strong>${reportType}</strong> is confirmed.`;
   const nextHeading = isHindi ? "अब आगे क्या होगा" : "What happens next";
   const nextCopy = isHindi
-    ? "हमारी टीम आपकी जानकारी देखकर रिपोर्ट तैयार करेगी। रिपोर्ट तैयार होने पर हम इसे WhatsApp पर भेजेंगे। यदि आपने ईमेल दिया है, तो वहाँ भी साझा करेंगे।"
-    : "Our team will review your details and prepare your report. When it’s ready, we’ll send it to you on WhatsApp. If you provided an email address, we’ll share it there too.";
+    ? order.urgentDelivery
+      ? "आपकी रिपोर्ट प्राथमिकता से तैयार की जाएगी और भुगतान की पुष्टि के 24 घंटे के भीतर WhatsApp पर भेजी जाएगी।"
+      : "हमारी टीम आपकी जानकारी देखकर रिपोर्ट तैयार करेगी। रिपोर्ट तैयार होने पर हम इसे WhatsApp पर भेजेंगे। यदि आपने ईमेल दिया है, तो वहाँ भी साझा करेंगे।"
+    : order.urgentDelivery
+      ? "Your report has priority delivery and will be sent to your WhatsApp within 24 hours of confirmed payment."
+      : "Our team will review your details and prepare your report. When it’s ready, we’ll send it to you on WhatsApp. If you provided an email address, we’ll share it there too.";
   const supportCopy = isHindi
     ? "WhatsApp या ईमेल पर संदेश न मिले, तब भी आपका ऑर्डर सुरक्षित है। मदद के लिए नीचे दिए गए संदर्भ नंबर के साथ हमसे संपर्क करें।"
     : "If you don’t receive a WhatsApp message, your order is still recorded. Contact us with the order reference below and we’ll help.";
@@ -62,6 +67,7 @@ export function buildOrderConfirmationEmail(order: ConfirmationEmailInput) {
               <table role="presentation" style="width:100%;border-collapse:collapse;font-size:14px;">
                 <tr><td style="padding:6px 0;color:#6b5b4d;">${isHindi ? "रिपोर्ट" : "Report"}</td><td style="padding:6px 0;text-align:right;font-weight:bold;">${reportType}</td></tr>
                 <tr><td style="padding:6px 0;color:#6b5b4d;">${isHindi ? "भुगतान" : "Amount paid"}</td><td style="padding:6px 0;text-align:right;font-weight:bold;">${amount}</td></tr>
+                ${order.urgentDelivery ? `<tr><td style="padding:6px 0;color:#6b5b4d;">${isHindi ? "डिलीवरी" : "Delivery"}</td><td style="padding:6px 0;text-align:right;font-weight:bold;color:#8b1e1e;">${isHindi ? "24 घंटे के भीतर (+₹199)" : "Within 24 hours (+₹199)"}</td></tr>` : ""}
                 <tr><td style="padding:6px 0;color:#6b5b4d;">${isHindi ? "ऑर्डर संदर्भ" : "Order reference"}</td><td style="padding:6px 0;text-align:right;font-size:12px;word-break:break-all;">${orderId}</td></tr>
                 <tr><td style="padding:6px 0;color:#6b5b4d;">${isHindi ? "भुगतान संदर्भ" : "Payment reference"}</td><td style="padding:6px 0;text-align:right;font-size:12px;word-break:break-all;">${paymentId}</td></tr>
               </table>

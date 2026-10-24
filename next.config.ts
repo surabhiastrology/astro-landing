@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Keep the local checkout preview live when opened via 127.0.0.1.
+  allowedDevOrigins: ['127.0.0.1'],
   // 1. Advanced Image Optimization
   images: {
     qualities: [20, 40, 50, 60, 75],

@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import Razorpay from "razorpay";
-import { getCheckoutPlanByReportType } from "@/lib/checkout-plans";
+import { getCheckoutAmount, getCheckoutPlanByReportType, supportsUrgentDelivery } from "@/lib/checkout-plans";
 import { isApproximateBirthTimeRange } from "@/lib/birth-time";
 
 export async function POST(req: Request) {
@@ -20,6 +20,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid checkout plan" }, { status: 400 });
     }
 
+    if (form.urgentDelivery !== undefined && typeof form.urgentDelivery !== "boolean") {
+      return NextResponse.json({ error: "Invalid delivery selection" }, { status: 400 });
+    }
+    const urgentDelivery = form.urgentDelivery === true;
+    if (urgentDelivery && !supportsUrgentDelivery(checkoutPlan)) {
+      return NextResponse.json({ error: "Urgent delivery is unavailable for this plan" }, { status: 400 });
+    }
+
     // Use the server-side catalogue amount and canonical report type. Values
     // supplied in the browser can be edited and must never set the charge.
     if (form.tobAccuracy === "approximate" && !isApproximateBirthTimeRange(form.tobApproximateRange)) {
@@ -29,6 +37,7 @@ export async function POST(req: Request) {
     const trustedForm = {
       ...form,
       reportType: checkoutPlan.reportType,
+      urgentDelivery,
       tobAccuracy: form.tobAccuracy === "approximate" ? "approximate" : "exact",
       tob: form.tobAccuracy === "approximate" ? "" : form.tob,
       tobApproximateRange: form.tobAccuracy === "approximate" ? form.tobApproximateRange : "",
@@ -36,7 +45,7 @@ export async function POST(req: Request) {
     const receiptToken = crypto.randomBytes(32).toString("hex");
 
     const options = {
-      amount: checkoutPlan.amount * 100,
+      amount: getCheckoutAmount(checkoutPlan, urgentDelivery) * 100,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
       notes: {

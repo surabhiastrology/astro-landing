@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import { Resend } from "resend";
 import Redis from "ioredis";
 import Razorpay from "razorpay";
-import { getCheckoutPlanByReportType, planIncludesWhatsAppQuestion } from "@/lib/checkout-plans";
+import { getCheckoutAmount, getCheckoutPlanByReportType, planIncludesWhatsAppQuestion, supportsUrgentDelivery } from "@/lib/checkout-plans";
 import { buildOrderConfirmationEmail } from "@/lib/order-confirmation-email";
 import { formatBirthTime } from "@/lib/birth-time";
 
@@ -34,6 +34,8 @@ const OrderSchema = new mongoose.Schema({
   orderId: { type: String, required: true },
   amount: { type: Number, required: true },
   reportType: { type: String },
+  urgentDelivery: { type: Boolean, default: false },
+  deliveryDueAt: { type: Date },
   customer: {
     name: String, email: String, phone: String,
     dob: String, tob: String, tobAccuracy: String, tobApproximateRange: String, city: String,
@@ -160,6 +162,8 @@ export async function POST(req: Request) {
       ? JSON.parse(savedFormData)
       : null;
     const checkoutPlan = getCheckoutPlanByReportType(savedForm?.reportType);
+    const urgentDelivery = savedForm?.urgentDelivery === true;
+    const expectedAmount = checkoutPlan ? getCheckoutAmount(checkoutPlan, urgentDelivery) : 0;
 
     if (
       gatewayOrder.id !== razorpay_order_id ||
@@ -168,8 +172,9 @@ export async function POST(req: Request) {
       gatewayOrder.currency !== "INR" ||
       gatewayPayment.currency !== "INR" ||
       !checkoutPlan ||
-      Number(gatewayOrder.amount) !== checkoutPlan.amount * 100 ||
-      Number(gatewayPayment.amount) !== checkoutPlan.amount * 100
+      (urgentDelivery && !supportsUrgentDelivery(checkoutPlan)) ||
+      Number(gatewayOrder.amount) !== expectedAmount * 100 ||
+      Number(gatewayPayment.amount) !== expectedAmount * 100
     ) {
       return NextResponse.json({ error: "Payment does not match this order." }, { status: 400 });
     }
@@ -178,8 +183,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, pending: true }, { status: 202 });
     }
 
-    const trustedForm = { ...savedForm, reportType: checkoutPlan.reportType };
-    const finalAmount = checkoutPlan.amount;
+    const trustedForm = { ...savedForm, reportType: checkoutPlan.reportType, urgentDelivery };
+    const finalAmount = expectedAmount;
 
     // B. SAVE TO MONGODB
     await connectDB();
@@ -194,6 +199,8 @@ export async function POST(req: Request) {
       orderId: razorpay_order_id,
       amount: finalAmount,
       reportType: trustedForm.reportType,
+      urgentDelivery,
+      ...(urgentDelivery ? { deliveryDueAt: new Date(Date.now() + 24 * 60 * 60 * 1000) } : {}),
       customer: trustedForm,
       partner: {
         name: trustedForm.partnerName,
@@ -232,7 +239,7 @@ export async function POST(req: Request) {
     const includesWhatsAppQuestion = planIncludesWhatsAppQuestion(reportType);
     const isMatchmaking = reportType.toLowerCase().includes("couple match making");
 
-    let replyMessage = `✅ *Payment Confirmed!*\n\n🙏 *Radhe Radhe, ${trustedForm.name || "ji"}!*\nYour order for the *${reportType}* has been successfully confirmed.\n\nSurbhi ji and the team will deliver your detailed analysis right here within *72 hours*. ⏳`;
+    let replyMessage = `✅ *Payment Confirmed!*\n\n🙏 *Radhe Radhe, ${trustedForm.name || "ji"}!*\nYour order for the *${reportType}* has been successfully confirmed.\n\nSurbhi ji and the team will deliver your detailed analysis right here within *${urgentDelivery ? "24" : "72"} hours*. ⏳`;
     let waButtons: string[] | undefined = undefined;
 
     if (includesWhatsAppQuestion) {
@@ -251,7 +258,10 @@ export async function POST(req: Request) {
     const waTemplateData = {
       name: templateName,
       language: isHi ? "hi" : "en",
-      params: [trustedForm.name || "Customer", reportType]
+      params: [
+        trustedForm.name || "Customer",
+        urgentDelivery ? `${reportType} (${isHi ? "24 घंटे में प्राथमिकता डिलीवरी" : "24-hour priority delivery"})` : reportType,
+      ]
     };
 
     // D. EXECUTE ALL NOTIFICATIONS
@@ -264,6 +274,7 @@ export async function POST(req: Request) {
           name: trustedForm.name,
           reportType: trustedForm.reportType,
           amount: finalAmount,
+          urgentDelivery,
           orderId: razorpay_order_id,
           paymentId: razorpay_payment_id,
           language: trustedForm.language,
@@ -274,7 +285,7 @@ export async function POST(req: Request) {
       getResend().emails.send({
         from: senderEmail,
         to: adminEmails,
-        subject: `🚨 NEW PAID ORDER: ${trustedForm.name} [₹${finalAmount}] | ${trustedForm.language}`,
+        subject: `${urgentDelivery ? "⚡ URGENT 24H | " : ""}🚨 NEW PAID ORDER: ${trustedForm.name} [₹${finalAmount}] | ${trustedForm.language}`,
         html: `
           <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden;">
             <div style="background-color: #8B1E1E; padding: 25px; text-align: center;">
@@ -289,6 +300,7 @@ export async function POST(req: Request) {
                   <tr><td style="padding: 5px 0; color: #666;">Report Type:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${trustedForm.reportType}</td></tr>
                   <tr><td style="padding: 5px 0; color: #666;">Language:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${trustedForm.language}</td></tr>
                   <tr><td style="padding: 5px 0; color: #666;">Amount Paid:</td><td style="padding: 5px 0; font-weight: bold; text-align: right; color: #1B4D30;">₹${finalAmount}</td></tr>
+                  ${urgentDelivery ? '<tr><td style="padding: 5px 0; color: #666;">Delivery:</td><td style="padding: 5px 0; font-weight: bold; text-align: right; color: #8B1E1E;">Urgent — within 24 hours (+₹199)</td></tr>' : ''}
                 </table>
               </div>
 
