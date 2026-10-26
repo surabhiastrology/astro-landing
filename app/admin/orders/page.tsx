@@ -11,6 +11,13 @@ import {
 import Papa from "papaparse";
 import Image from "next/image";
 
+function formatWhatsAppNumber(phone: string | null | undefined) {
+  const digits = phone?.replace(/\D/g, "") || "";
+  if (!digits) return "Not provided";
+  if (phone?.trim().startsWith("00")) return `+${digits.slice(2)}`;
+  return `+${digits.length === 10 ? `91${digits}` : digits}`;
+}
+
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -48,6 +55,7 @@ export default function OrdersPage() {
     const filtered = orders.filter((o: any) => 
       o.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       o.customer?.phone?.includes(searchTerm) ||
+      o.partner?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       o.reportType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       o.orderId?.includes(searchTerm)
     );
@@ -61,7 +69,13 @@ export default function OrdersPage() {
       Phone: o.customer.phone,
       Email: o.customer.email,
       Service: o.reportType,
+      PartnerName: o.partner?.name || "",
+      PartnerDateOfBirth: o.partner?.dob || "",
+      PartnerTimeOfBirth: o.partner?.tob || "",
+      PartnerPlaceOfBirth: o.partner?.city || "",
+      PartnerGender: o.partner?.gender || "",
       Amount: o.amount,
+      TestOrder: o.isTestOrder === true ? "Yes" : "No",
       UrgentDelivery: o.urgentDelivery ? "Yes - 24 hours" : "No",
       DeliveryDue: o.deliveryDueAt ? new Date(o.deliveryDueAt).toLocaleString("en-IN") : "",
       PaymentID: o.paymentId,
@@ -202,9 +216,11 @@ export default function OrdersPage() {
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] font-black bg-slate-100 px-2 py-0.5 rounded text-slate-500 uppercase tracking-tighter italic">Order #{order.orderId?.slice(-8)}</span>
                     <span className="text-[10px] font-black bg-green-100 text-green-700 px-2 py-0.5 rounded uppercase">PAID</span>
+                    {order.isTestOrder === true && <span className="rounded bg-rose-100 px-2 py-0.5 text-[10px] font-black uppercase text-rose-800">TEST ORDER</span>}
                     {order.urgentDelivery && <span className="rounded bg-[#F8E9CC] px-2 py-0.5 text-[10px] font-black uppercase text-[#8B1E1E]">Urgent · 24h</span>}
                   </div>
                   <h3 className="font-bold text-slate-800 mt-1 truncate">{order.reportType}</h3>
+                  {order.partner?.name && <p className="mt-1 text-xs font-medium text-slate-600">Couple: {order.customer?.name} &amp; {order.partner.name}</p>}
                   {/* Delivery Status Badges */}
                   <div className="flex gap-2 mt-1">
                     {order.reportSent && <span className="flex items-center gap-1 text-[9px] font-bold text-green-600"><Check size={10}/> Report Delivered</span>}
@@ -228,7 +244,7 @@ export default function OrdersPage() {
                     <Phone size={14} className="text-slate-400" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-slate-800">+{order.customer?.phone}</p>
+                    <p className="text-xs font-bold text-slate-800">{formatWhatsAppNumber(order.customer?.phone)}</p>
                     <p className="text-[10px] font-bold text-slate-400">WhatsApp</p>
                   </div>
                 </div>
@@ -284,6 +300,7 @@ export default function OrdersPage() {
                 </h2>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Order ID: {viewOrder.orderId}</p>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Payment ID: {viewOrder.paymentId}</p>
+                {viewOrder.isTestOrder === true && <p className="mt-2 inline-block rounded bg-rose-100 px-2 py-1 text-xs font-black uppercase text-rose-800">TEST ORDER · Preview payment</p>}
                 {viewOrder.urgentDelivery && <p className="mt-2 text-xs font-bold text-[#8B1E1E]">Urgent delivery · due {viewOrder.deliveryDueAt ? new Date(viewOrder.deliveryDueAt).toLocaleString("en-IN") : "within 24 hours of payment"}</p>}
               </div>
               <button onClick={() => setViewOrder(null)} className="h-10 w-10 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-slate-100 transition-all text-slate-400">
@@ -322,7 +339,7 @@ export default function OrdersPage() {
                      </div>
                      <div className="flex justify-between">
                        <span className="text-xs text-slate-400 font-bold">WhatsApp</span>
-                       <span className="text-xs font-black text-green-600">+{viewOrder.customer?.phone}</span>
+                       <span className="text-xs font-black text-green-600">{formatWhatsAppNumber(viewOrder.customer?.phone)}</span>
                      </div>
                      <div className="flex justify-between">
                        <span className="text-xs text-slate-400 font-bold">Gender</span>
@@ -357,6 +374,21 @@ export default function OrdersPage() {
                    </div>
                 </div>
               </div>
+
+              {viewOrder.partner?.name && (
+                <section className="rounded-2xl border border-[#F5D98A]/50 bg-[#FFFBF0] p-5" aria-label="Second person details">
+                  <h4 className="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#8B1E1E]">
+                    <User size={14} /> Person 2 / Partner
+                  </h4>
+                  <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div><dt className="text-xs font-bold text-slate-500">Name</dt><dd className="mt-1 text-sm font-bold text-slate-800">{viewOrder.partner.name}</dd></div>
+                    <div><dt className="text-xs font-bold text-slate-500">Gender</dt><dd className="mt-1 text-sm font-bold text-slate-800">{viewOrder.partner.gender || "Not provided"}</dd></div>
+                    <div><dt className="text-xs font-bold text-slate-500">Date of birth</dt><dd className="mt-1 text-sm font-bold text-slate-800">{viewOrder.partner.dob || "Not provided"}</dd></div>
+                    <div><dt className="text-xs font-bold text-slate-500">Time of birth</dt><dd className="mt-1 text-sm font-bold text-slate-800">{formatBirthTime(viewOrder.partner.tob, undefined, undefined)}</dd></div>
+                    <div className="sm:col-span-2"><dt className="text-xs font-bold text-slate-500">Place of birth</dt><dd className="mt-1 text-sm font-bold text-slate-800">{viewOrder.partner.city || "Not provided"}</dd></div>
+                  </dl>
+                </section>
+              )}
 
               <div className="pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex gap-4">
@@ -404,7 +436,7 @@ export default function OrdersPage() {
                 <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center font-bold">{dispatchOrder.customer?.name?.charAt(0)}</div>
                 <div>
                   <p className="text-sm font-bold">{dispatchOrder.customer?.name}</p>
-                  <p className="text-[10px] font-bold text-white/40">Verified WhatsApp: +{dispatchOrder.customer?.phone}</p>
+                  <p className="text-[10px] font-bold text-white/40">Verified WhatsApp: {formatWhatsAppNumber(dispatchOrder.customer?.phone)}</p>
                 </div>
               </div>
             </div>
