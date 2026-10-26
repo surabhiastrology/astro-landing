@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import mongoose from "mongoose";
+import { getWhatsAppSenderCredentials } from "@/lib/whatsappEnvironment";
 
 // Ensure the model is available
 const Order = mongoose.models.Order || mongoose.model("Order", new mongoose.Schema({}, { strict: false }));
@@ -10,8 +11,7 @@ export async function POST(req: Request) {
     // 1. Get orderId from the request so we can update the database
     const { phone, pdfUrl, fileName, userName, orderId } = await req.json();
     
-    const phoneNumberId = process.env.WHATSAPP_PHONE_ID;
-    const token = process.env.WHATSAPP_TOKEN;
+    const { phoneNumberId, token } = getWhatsAppSenderCredentials();
     
     if (!phoneNumberId || !token) {
       throw new Error("Missing WhatsApp Credentials");

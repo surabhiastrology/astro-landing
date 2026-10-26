@@ -9,6 +9,7 @@ import { buildOrderConfirmationEmail } from "@/lib/order-confirmation-email";
 import { formatBirthTime } from "@/lib/birth-time";
 import { getCheckoutAmount, getCheckoutPlanByReportType, planIncludesWhatsAppQuestion, supportsUrgentDelivery } from "@/lib/checkout-plans";
 import { getPaymentWhatsAppTemplate } from "@/lib/payment-whatsapp-template";
+import { getWhatsAppSenderCredentials } from "@/lib/whatsappEnvironment";
 
 // ==========================================
 // 1. INITIALIZE SERVICES (With Caching)
@@ -96,8 +97,7 @@ const Chat = mongoose.models.Chat || mongoose.model("Chat", ChatSchema);
 // 3. WHATSAPP SENDER (UPDATED FOR TEMPLATES)
 // ==========================================
 async function sendWhatsAppMessage(to: string, text: string, buttons?: string[], templateData?: any) {
-  const phoneNumberId = process.env.WHATSAPP_PHONE_ID;
-  const token = process.env.WHATSAPP_TOKEN;
+  const { phoneNumberId, token } = getWhatsAppSenderCredentials();
   const url = `https://graph.facebook.com/v25.0/${phoneNumberId}/messages`; 
 
   let payload: any = { messaging_product: "whatsapp", recipient_type: "individual", to: to };

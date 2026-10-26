@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import mongoose from "mongoose";
 import Redis from "ioredis";
+import { getWhatsAppSenderCredentials } from "@/lib/whatsappEnvironment";
 
 const redis = new Redis(process.env.REDIS_URL!);
 
@@ -19,8 +20,7 @@ export async function POST(req: Request) {
     }
 
     // 1. Send via Meta API
-    const phoneNumberId = process.env.WHATSAPP_PHONE_ID!;
-    const token = process.env.WHATSAPP_TOKEN!;
+    const { phoneNumberId, token } = getWhatsAppSenderCredentials();
     const url = `https://graph.facebook.com/v22.0/${phoneNumberId}/messages`;
 
     const metaRes = await fetch(url, {

@@ -115,8 +115,13 @@ export function nextMessage(
   const data = { ...currentState.userData };
 
   const baseUrl = publicBaseUrl || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  // Meta cannot fetch images behind Vercel Preview Protection. Keep checkout
+  // links on preview, but load the same public images from production.
+  const mediaBaseUrl = process.env.VERCEL_ENV === "preview"
+    ? "https://kundalireport.surabhiastrology.com"
+    : baseUrl;
   const paymentLink = `${baseUrl}/checkout`;
-  const imgWelcome = `${baseUrl}/celebs/8.png`;
+  const imgWelcome = `${mediaBaseUrl}/celebs/8.png`;
   const imgServices = "https://pbs.twimg.com/profile_images/2027040849813721088/X4RajwNP.jpg"; 
 
   const isHi = data.language === "hi";
@@ -315,7 +320,7 @@ export function nextMessage(
 
       const selectedService = (data.intent || "").toLowerCase();
       const isSurbhiKundli = selectedService === "surbhi_kundli" || selectedService.includes("सुरभि कुंडली");
-      const checkoutImage = isSurbhiKundli ? `${baseUrl}/surbhi-15.png` : `${baseUrl}/surbhi-16.png`;
+      const checkoutImage = isSurbhiKundli ? `${mediaBaseUrl}/surbhi-15.png` : `${mediaBaseUrl}/surbhi-16.png`;
       
       let checkoutMsg = isHi
         ? `धन्यवाद! 🌟\n\nअपने अनुरोध की पुष्टि करने और अपनी बुकिंग सुरक्षित करने के लिए, कृपया नीचे दिए गए *'Complete Payment'* बटन पर क्लिक करें। 👇`

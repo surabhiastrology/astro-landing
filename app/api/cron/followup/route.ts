@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { sendWhatsAppMessage } from "@/app/api/whatsapp/webhook/route";
 import Redis from "ioredis";
+import { isWhatsAppPreview } from "@/lib/whatsappEnvironment";
 
 const redis = new Redis(process.env.REDIS_URL!, {
   lazyConnect: true,
@@ -9,6 +10,10 @@ const redis = new Redis(process.env.REDIS_URL!, {
 });
 
 export async function GET(req: Request) {
+  // Preview conversations must never trigger the production follow-up job.
+  if (isWhatsAppPreview) {
+    return NextResponse.json({ skipped: true, reason: "preview" });
+  }
   // Security check: Ensure this is called by Vercel Cron
   if (req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
     return new NextResponse("Unauthorized", { status: 401 });

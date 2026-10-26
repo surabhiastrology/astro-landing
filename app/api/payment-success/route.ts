@@ -8,6 +8,7 @@ import { getCheckoutAmount, getCheckoutPlanByReportType, planIncludesWhatsAppQue
 import { buildOrderConfirmationEmail } from "@/lib/order-confirmation-email";
 import { formatBirthTime } from "@/lib/birth-time";
 import { getPaymentWhatsAppTemplate } from "@/lib/payment-whatsapp-template";
+import { getWhatsAppSenderCredentials } from "@/lib/whatsappEnvironment";
 
 // ==========================================
 // 1. INITIALIZE SERVICES
@@ -64,8 +65,7 @@ const Order = mongoose.models.Order || mongoose.model("Order", OrderSchema);
 
 // UPDATED: Added optional templateData parameter while keeping all old logic intact
 async function sendWhatsAppMessage(to: string, text: string, buttons?: string[], templateData?: any) {
-  const phoneNumberId = process.env.WHATSAPP_PHONE_ID;
-  const token = process.env.WHATSAPP_TOKEN;
+  const { phoneNumberId, token } = getWhatsAppSenderCredentials();
   const url = `https://graph.facebook.com/v22.0/${phoneNumberId}/messages`;
 
   let payload: any = { messaging_product: "whatsapp", recipient_type: "individual", to: to };

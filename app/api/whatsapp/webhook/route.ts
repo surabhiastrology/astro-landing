@@ -4,6 +4,13 @@ import { nextMessage } from "@/lib/waFlow";
 import Redis from "ioredis";
 import mongoose from "mongoose";
 import { GoogleGenAI } from "@google/genai";
+import crypto from "node:crypto";
+import {
+  getWhatsAppSenderCredentials,
+  getWhatsAppVerifyToken,
+  isWhatsAppPreview,
+  WHATSAPP_TEST_PHONE_ID,
+} from "@/lib/whatsappEnvironment";
 
 // ==========================================
 // 1. SINGLETON / GLOBAL SETUP
@@ -31,7 +38,16 @@ const ChatSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now }
 });
 
-const Chat = mongoose.models.Chat || mongoose.model("Chat", ChatSchema);
+const chatModelName = isWhatsAppPreview ? "WhatsAppPreviewChat" : "Chat";
+const Chat = mongoose.models[chatModelName] || mongoose.model(
+  chatModelName,
+  ChatSchema,
+  isWhatsAppPreview ? "whatsapp_preview_chats" : undefined
+);
+const stateKey = (phone: string) => `${isWhatsAppPreview ? "wa_preview:" : ""}user_state:${phone}`;
+const processedKey = (id: string) => `${isWhatsAppPreview ? "wa_preview:" : ""}msg_processed:${id}`;
+const interactionKey = isWhatsAppPreview ? "wa_preview:last_interaction" : "wa_last_interaction";
+const namesKey = isWhatsAppPreview ? "wa_preview:names" : "wa_names";
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 // ==========================================
@@ -42,8 +58,7 @@ export async function sendWhatsAppMessage(
   text: string, 
   options?: { buttons?: string[], list?: any, image?: string, urlButton?: { text: string; url: string } }
 ): Promise<boolean> {
-  const phoneNumberId = process.env.WHATSAPP_PHONE_ID!;
-  const token = process.env.WHATSAPP_TOKEN!;
+  const { phoneNumberId, token } = getWhatsAppSenderCredentials();
   const url = `https://graph.facebook.com/v22.0/${phoneNumberId}/messages`;
 
   const commonHeaders = {
@@ -195,17 +210,50 @@ Important Rules
 // ==========================================
 export async function GET(req: NextRequest) {
   const search = req.nextUrl.searchParams;
-  if (search.get("hub.mode") === "subscribe" && search.get("hub.verify_token") === process.env.WHATSAPP_VERIFY_TOKEN) {
+  const verifyToken = getWhatsAppVerifyToken();
+  if (verifyToken && search.get("hub.mode") === "subscribe" && search.get("hub.verify_token") === verifyToken) {
     return new NextResponse(search.get("hub.challenge"), { status: 200 });
   }
   return new NextResponse("Forbidden", { status: 403 });
 }
 
 export async function POST(req: NextRequest) {
+  let body;
+  if (isWhatsAppPreview) {
+    try {
+      getWhatsAppSenderCredentials();
+    } catch {
+      return new NextResponse("Preview WhatsApp is not configured", { status: 503 });
+    }
+    const appSecret = process.env.WHATSAPP_TEST_APP_SECRET;
+    if (!appSecret) {
+      return new NextResponse("Preview webhook signing is not configured", { status: 503 });
+    }
+    const rawBody = await req.text();
+    const signature = req.headers.get("x-hub-signature-256") || "";
+    const expected = `sha256=${crypto.createHmac("sha256", appSecret).update(rawBody).digest("hex")}`;
+    if (signature.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
+      return new NextResponse("Invalid webhook signature", { status: 403 });
+    }
+    try {
+      body = JSON.parse(rawBody);
+    } catch {
+      return new NextResponse("Invalid webhook body", { status: 400 });
+    }
+  } else {
+    body = await req.json();
+  }
   try {
-    const body = await req.json();
-    const message = body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
-    const contact = body?.entry?.[0]?.changes?.[0]?.value?.contacts?.[0];
+    const value = body?.entry?.[0]?.changes?.[0]?.value;
+    // A preview deployment must never process a live-number webhook, even if
+    // Meta's app-wide callback is configured incorrectly.
+    if (isWhatsAppPreview) {
+      if (value?.metadata?.phone_number_id !== WHATSAPP_TEST_PHONE_ID) {
+        return new NextResponse("Ignored", { status: 200 });
+      }
+    }
+    const message = value?.messages?.[0];
+    const contact = value?.contacts?.[0];
     
     if (!message) return new NextResponse("OK", { status: 200 });
 
@@ -213,10 +261,10 @@ export async function POST(req: NextRequest) {
     const messageId = message.id;
     const waName = contact?.profile?.name || "Seeker";
 
-    const isDuplicate = await redis.get(`msg_processed:${messageId}`);
+    const isDuplicate = await redis.get(processedKey(messageId));
     if (isDuplicate) return new NextResponse("OK", { status: 200 });
     
-    redis.set(`msg_processed:${messageId}`, "1", "EX", 3600);
+    redis.set(processedKey(messageId), "1", "EX", 3600);
 
     let incomingText = "";
     let flowInput = "";
@@ -235,7 +283,7 @@ export async function POST(req: NextRequest) {
       flowInput = incomingText;
     }
 
-    const rawPrevState = await redis.get(`user_state:${from}`);
+    const rawPrevState = await redis.get(stateKey(from));
     const prev = rawPrevState ? JSON.parse(rawPrevState) : { step: "START", userData: { name: waName } };
     
     let lowerInput = incomingText.toLowerCase();
@@ -320,9 +368,9 @@ export async function POST(req: NextRequest) {
     const backgroundTasks = async () => {
       await connectDB();
       await Promise.all([
-        redis.set(`user_state:${from}`, JSON.stringify(finalNewState), "EX", 86400),
-        redis.hset("wa_last_interaction", from, Date.now().toString()),
-        redis.hset("wa_names", from, waName),
+        redis.set(stateKey(from), JSON.stringify(finalNewState), "EX", 86400),
+        redis.hset(interactionKey, from, Date.now().toString()),
+        redis.hset(namesKey, from, waName),
         
         // 1. Log the User's incoming message
         Chat.create({ 
