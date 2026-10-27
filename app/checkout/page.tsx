@@ -5,7 +5,7 @@ import type { ChangeEvent, FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { LoaderCircle } from "lucide-react";
+import { ArrowUpRight, Headphones, LoaderCircle, Video } from "lucide-react";
 import {
   DEFAULT_CHECKOUT_PLAN,
   getCheckoutAmount,
@@ -879,6 +879,7 @@ function CheckoutContent() {
 
   const basePrice = checkoutPlan.amount;
   const urgentDeliveryAvailable = supportsUrgentDelivery(checkoutPlan);
+  const showConsultationInvitation = basePrice === 999;
   const cleanPlanName = planName;
   const fullReportType = checkoutPlan.reportType;
 
@@ -1247,6 +1248,43 @@ function CheckoutContent() {
           </h3>
           <p className="mt-1.5 text-sm leading-6 text-[#6B7280]">{checkoutPresentation.intro}</p>
         </div>
+
+        {showConsultationInvitation && (
+          <section aria-labelledby="consultation-invitation-title" className="relative mb-7 overflow-hidden rounded-2xl border border-[#D9BD87] bg-gradient-to-br from-[#FFFCF6] via-[#FBF3E5] to-[#F7E7D3] shadow-[0_10px_28px_rgba(86,41,19,0.09)]">
+            <div className="absolute inset-y-0 left-0 w-1 bg-[#8B1E1E]" aria-hidden="true" />
+            <div className="grid grid-cols-[80px_minmax(0,1fr)] items-center gap-3 p-4 sm:grid-cols-[112px_minmax(0,1fr)] sm:gap-5 sm:p-5">
+              <div className="relative h-20 w-20 overflow-hidden rounded-xl bg-[#EEDFCC] sm:h-28 sm:w-28">
+                <Image
+                  src="/checkout/surbhi-consultation-session.webp"
+                  alt="Surbhi Gupta in a consultation setting"
+                  fill
+                  sizes="(max-width: 639px) 80px, 112px"
+                  className="object-cover object-center"
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="inline-flex rounded-full border border-[#D7BB83] bg-white/80 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[#8B1E1E]">Personal guidance</span>
+                <h4 id="consultation-invitation-title" className="mt-2 font-serif text-xl font-semibold leading-tight text-[#2A1400] sm:text-[22px]">Want to speak directly with Surbhi ji?</h4>
+                <p className="mt-1.5 text-sm leading-5 text-[#6B4423]">Explore a private 30-minute voice or video consultation with celebrity astrologer Surbhi Gupta.</p>
+                <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-xs font-medium text-[#6B4423]">
+                  <span className="inline-flex items-center gap-1.5"><Headphones size={14} aria-hidden="true" /> Voice call</span>
+                  <span className="inline-flex items-center gap-1.5"><Video size={14} aria-hidden="true" /> Video call</span>
+                </div>
+              </div>
+              <div className="col-span-2 flex flex-col items-start gap-1.5 border-t border-[#D9BD87]/65 pt-3 sm:flex-row sm:items-center sm:justify-between">
+                <a
+                  href="https://consultation.surabhiastrology.com/?utm_source=kundali_checkout&utm_medium=internal_referral&utm_campaign=consultation"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#8B1E1E] bg-white px-4 py-2.5 text-sm font-semibold text-[#8B1E1E] transition-[background-color,color,transform] duration-200 hover:-translate-y-0.5 hover:bg-[#8B1E1E] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B1E1E] focus-visible:ring-offset-2 motion-reduce:transform-none sm:w-auto"
+                >
+                  Explore options <ArrowUpRight size={16} aria-hidden="true" />
+                </a>
+                <span className="text-xs leading-4 text-[#6B4423]">Opens separately · not added to this order</span>
+              </div>
+            </div>
+          </section>
+        )}
 
         <form ref={formRef} id="checkout-form" className="space-y-5" onSubmit={handlePayment} noValidate>
           {!isMatchmaking && <div className="flex items-center gap-2.5 pb-0.5 text-xs font-bold uppercase tracking-[0.16em] text-[#C8A84B]"><FieldIcon name="person" /><span>Contact Information</span><span className="h-px flex-1 bg-[#E8D8B8]" /></div>}
