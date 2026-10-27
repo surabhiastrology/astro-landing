@@ -1676,16 +1676,15 @@ function CheckoutContent() {
                   <p className="mt-1 text-sm leading-5 text-[#6B4423]">Explore a 30-minute voice or video consultation.</p>
                 </div>
               </div>
-              <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-[#E4D2B4] pt-2">
+              <div className="mt-3 border-t border-[#E4D2B4] pt-3">
                 <a
                   href="https://consultation.surabhiastrology.com/?utm_source=kundali_checkout&utm_medium=internal_referral&utm_campaign=consultation"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[#8B1E1E] underline decoration-[#8B1E1E]/40 underline-offset-4 transition-colors hover:text-[#651717] focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B1E1E] focus-visible:ring-offset-2"
+                  className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#8B1E1E] bg-white px-4 py-2.5 text-sm font-semibold text-[#8B1E1E] transition-[background-color,color,transform] duration-200 hover:-translate-y-0.5 hover:bg-[#8B1E1E] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B1E1E] focus-visible:ring-offset-2 motion-reduce:transform-none sm:w-auto"
                 >
-                  See consultation options <ArrowUpRight size={16} aria-hidden="true" />
+                  Explore options <ArrowUpRight size={16} aria-hidden="true" />
                 </a>
-                <span className="text-xs text-[#6B4423]">Opens separately · does not change this order</span>
               </div>
             </aside>
           )}
