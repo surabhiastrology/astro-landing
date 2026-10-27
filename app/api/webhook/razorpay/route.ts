@@ -247,7 +247,7 @@ export async function POST(req: Request) {
 // 5. NOTIFICATIONS
 // ==========================================
 async function triggerNotifications(order: any) {
-  const adminEmails = ["developer.thinqit@gmail.com", "surabhiastrology9@gmail.com"]; 
+  const adminEmails = ["synergyinfosoft04@gmail.com", "surabhiastrology9@gmail.com"];
   const senderEmail = process.env.EMAIL_FROM || "Surabhi Astrology <info@surabhiastrology.com>";
   
   let formattedPhone = order.customer.phone.replace(/\D/g, "");

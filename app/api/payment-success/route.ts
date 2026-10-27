@@ -231,8 +231,8 @@ export async function POST(req: Request) {
 
 
     // C. PREPARE NOTIFICATION DATA
-    const adminEmails = ["developer.thinqit@gmail.com", "surabhiastrology9@gmail.com"]; 
-    const senderEmail = process.env.EMAIL_FROM || "Surabhi Astrology <careers@thinqit.in>";
+    const adminEmails = ["synergyinfosoft04@gmail.com", "surabhiastrology9@gmail.com"];
+    const senderEmail = process.env.EMAIL_FROM || "Surabhi Astrology <info@surabhiastrology.com>";
     
     let formattedPhone = trustedForm.phone.replace(/\D/g, "");
     if (formattedPhone.length === 10) formattedPhone = `91${formattedPhone}`;
