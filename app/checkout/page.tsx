@@ -853,6 +853,7 @@ function CheckoutContent() {
   const searchParams = useSearchParams();
   const urlService = searchParams.get("service");
   const urlPlan = searchParams.get("plan");
+  const recoveryToken = searchParams.get("recovery");
   
   // Query parameters select a product but never decide its price. Unknown or
   // edited links safely fall back to the default catalogue product.
@@ -933,6 +934,8 @@ function CheckoutContent() {
 
   const [countryCode, setCountryCode] = useState("+91");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [recoveryOptIn, setRecoveryOptIn] = useState(false);
+  const recoveryOptInAvailable = process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_CHECKOUT_RECOVERY_PREVIEW === "true";
   const [urgentDelivery, setUrgentDelivery] = useState(false);
   const [loading, setLoading] = useState(false);
   const [confirmingPayment, setConfirmingPayment] = useState(false);
@@ -1084,7 +1087,9 @@ function CheckoutContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          form: checkoutForm
+          form: checkoutForm,
+          recoveryOptIn: recoveryOptInAvailable && recoveryOptIn,
+          recoveryToken,
         }),
       });
       const order = await res.json() as { id?: unknown; amount?: unknown; receiptToken?: unknown; error?: unknown };
@@ -1631,6 +1636,19 @@ function CheckoutContent() {
             </div>
             <FieldError field="terms" message={fieldErrors.terms} />
           </div>
+
+          {recoveryOptInAvailable && (
+            <label className="mt-1 flex min-h-11 cursor-pointer items-start gap-2.5 text-sm leading-6 text-[#4B5563]">
+              <input
+                type="checkbox"
+                name="recoveryOptIn"
+                checked={recoveryOptIn}
+                onChange={(event) => setRecoveryOptIn(event.target.checked)}
+                className="mt-0.5 h-[18px] w-[18px] shrink-0 cursor-pointer accent-[#8B1E1E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8B1E1E]"
+              />
+              <span>Send me order and cart updates on WhatsApp by Surabhi Astrology.</span>
+            </label>
+          )}
 
           {urgentDeliveryAvailable && (
             <div className="mt-5">

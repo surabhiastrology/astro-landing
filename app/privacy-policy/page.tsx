@@ -66,11 +66,12 @@ export default function PrivacyPolicy() {
                 <span className="bg-[#FCF7EE] text-[#8B1E1E] w-8 h-8 rounded-full flex items-center justify-center text-sm border border-[#E8D8B8]">2</span>
                 WhatsApp API & Communications (Meta Compliance)
               </h2>
-              <p className="mb-2">We utilize the official WhatsApp Business API to deliver reports, updates, and customer support. By messaging our WhatsApp number or opting in via our website, you acknowledge that:</p>
+              <p className="mb-2">We utilize the official WhatsApp Business API to deliver reports, updates, and customer support. Checkout reminders are sent only when you separately choose the optional WhatsApp reminder checkbox.</p>
               <ul className="list-disc pl-5 space-y-2 text-[#6B4423]">
                 <li><strong>Opt-in:</strong> You consent to receive automated and manual messages from us regarding your astrology services.</li>
                 <li><strong>Opt-out:</strong> You may revoke this consent at any time by replying <strong>"STOP"</strong>, <strong>"UNSUBSCRIBE"</strong>, or by blocking the business account on WhatsApp. We will immediately cease communications.</li>
-                <li><strong>No Spam:</strong> We do not send unsolicited marketing blasts. Messages are strictly transactional or based on user-initiated inquiries.</li>
+                <li><strong>Checkout reminder:</strong> If you opt in and leave payment incomplete, we may send one WhatsApp link to return to checkout after checking payment status. We keep a record of your choice and whether a reminder led to a completed order.</li>
+                <li><strong>No Spam:</strong> We do not send unsolicited marketing blasts. Optional checkout reminders are limited to one per payment attempt.</li>
               </ul>
             </section>
 

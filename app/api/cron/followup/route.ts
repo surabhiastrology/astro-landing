@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { sendWhatsAppMessage } from "@/app/api/whatsapp/webhook/route";
 import Redis from "ioredis";
 import { isWhatsAppPreview } from "@/lib/whatsappEnvironment";
+import { isWhatsAppOptedOut } from "@/lib/checkout-recovery";
 
 const redis = new Redis(process.env.REDIS_URL!, {
   lazyConnect: true,
@@ -26,6 +27,10 @@ export async function GET(req: Request) {
     const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
 
     for (const [phone, timestampStr] of Object.entries(interactions)) {
+      if (await isWhatsAppOptedOut(phone)) {
+        await redis.hdel("wa_last_interaction", phone);
+        continue;
+      }
       const lastInteractionTime = parseInt(timestampStr, 10);
       const timeDiff = now - lastInteractionTime;
 

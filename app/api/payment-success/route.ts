@@ -9,6 +9,7 @@ import { buildOrderConfirmationEmail } from "@/lib/order-confirmation-email";
 import { formatBirthTime } from "@/lib/birth-time";
 import { getPaymentWhatsAppTemplate } from "@/lib/payment-whatsapp-template";
 import { getWhatsAppSenderCredentials } from "@/lib/whatsappEnvironment";
+import { markRecoveredOrder } from "@/lib/checkout-recovery";
 
 // ==========================================
 // 1. INITIALIZE SERVICES
@@ -228,6 +229,7 @@ export async function POST(req: Request) {
     }
 
     console.log("Order saved to DB with ID:", newOrder._id);
+    await markRecoveredOrder(typeof gatewayOrder.notes?.recoverySourceHash === "string" ? gatewayOrder.notes.recoverySourceHash : undefined, razorpay_order_id, finalAmount);
 
 
     // C. PREPARE NOTIFICATION DATA

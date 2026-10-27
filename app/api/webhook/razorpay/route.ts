@@ -10,6 +10,7 @@ import { formatBirthTime } from "@/lib/birth-time";
 import { getCheckoutAmount, getCheckoutPlanByReportType, planIncludesWhatsAppQuestion, supportsUrgentDelivery } from "@/lib/checkout-plans";
 import { getPaymentWhatsAppTemplate } from "@/lib/payment-whatsapp-template";
 import { getWhatsAppSenderCredentials } from "@/lib/whatsappEnvironment";
+import { markRecoveredOrder } from "@/lib/checkout-recovery";
 
 // ==========================================
 // 1. INITIALIZE SERVICES (With Caching)
@@ -229,6 +230,7 @@ export async function POST(req: Request) {
           { $set: { status: "Paid", paymentId, challenge: formData.challenge, urgentDelivery, isTestOrder, ...(urgentDelivery ? { deliveryDueAt: new Date(Date.now() + 24 * 60 * 60 * 1000) } : {}) } }
         );
       }
+      await markRecoveredOrder(typeof gatewayOrder.notes?.recoverySourceHash === "string" ? gatewayOrder.notes.recoverySourceHash : undefined, razorpayOrderId, amountPaise / 100);
 
       // 2. TRIGGER NOTIFICATIONS
       const finalOrder = await Order.findOne({ orderId: razorpayOrderId }).lean();

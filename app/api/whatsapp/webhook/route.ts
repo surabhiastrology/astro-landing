@@ -5,6 +5,7 @@ import Redis from "ioredis";
 import mongoose from "mongoose";
 import { GoogleGenAI } from "@google/genai";
 import crypto from "node:crypto";
+import { CheckoutRecovery, saveWhatsAppOptOut } from "@/lib/checkout-recovery";
 import {
   getWhatsAppSenderCredentials,
   getWhatsAppVerifyToken,
@@ -252,6 +253,17 @@ export async function POST(req: NextRequest) {
         return new NextResponse("Ignored", { status: 200 });
       }
     }
+    if (isWhatsAppPreview && Array.isArray(value?.statuses)) {
+      await connectDB();
+      for (const status of value.statuses) {
+        if (typeof status?.id === "string" && typeof status?.status === "string") {
+          await CheckoutRecovery.updateOne(
+            { whatsappMessageId: status.id, environment: "preview" },
+            { $set: { messageStatus: status.status } },
+          );
+        }
+      }
+    }
     const message = value?.messages?.[0];
     const contact = value?.contacts?.[0];
     
@@ -281,6 +293,14 @@ export async function POST(req: NextRequest) {
     } else {
       incomingText = message.text?.body || "";
       flowInput = incomingText;
+    }
+
+    // The Preview webhook is signature-verified. Do not add a new production
+    // opt-out mutation until the live webhook has equivalent verification.
+    if (isWhatsAppPreview && /^(stop|unsubscribe|opt\s*out)$/i.test(incomingText.trim())) {
+      await saveWhatsAppOptOut(from);
+      await redis.hdel(interactionKey, from);
+      return new NextResponse("OK", { status: 200 });
     }
 
     const rawPrevState = await redis.get(stateKey(from));

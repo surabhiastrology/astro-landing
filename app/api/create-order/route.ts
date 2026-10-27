@@ -4,6 +4,8 @@ import crypto from "crypto";
 import Razorpay from "razorpay";
 import { getCheckoutAmount, getCheckoutPlanByReportType, supportsUrgentDelivery } from "@/lib/checkout-plans";
 import { isApproximateBirthTimeRange } from "@/lib/birth-time";
+import { CheckoutRecovery, RECOVERY_CONSENT_TEXT, RECOVERY_DELAY_MS, hashRecoveryToken, isWhatsAppOptedOut, normalizeWhatsAppPhone } from "@/lib/checkout-recovery";
+import { connectDB } from "@/lib/mongodb";
 
 export async function POST(req: Request) {
   const razorpay = new Razorpay({
@@ -43,6 +45,20 @@ export async function POST(req: Request) {
       tobApproximateRange: form.tobAccuracy === "approximate" ? form.tobApproximateRange : "",
     };
     const receiptToken = crypto.randomBytes(32).toString("hex");
+    const previewRecovery = process.env.VERCEL_ENV === "preview" || process.env.NODE_ENV === "development";
+    let recoverySourceHash: string | undefined;
+    if (previewRecovery && typeof body?.recoveryToken === "string" && /^[a-f0-9]{64}$/.test(body.recoveryToken)) {
+      const candidateHash = hashRecoveryToken(body.recoveryToken);
+      await connectDB();
+      const source = await CheckoutRecovery.findOne({
+        tokenHash: candidateHash,
+        phone: normalizeWhatsAppPhone(String(form.phone || "")),
+        environment: "preview",
+        sentAt: { $exists: true },
+        clickedAt: { $exists: true },
+      }).lean();
+      if (source) recoverySourceHash = candidateHash;
+    }
 
     const options = {
       amount: getCheckoutAmount(checkoutPlan, urgentDelivery) * 100,
@@ -51,17 +67,46 @@ export async function POST(req: Request) {
       notes: {
         formData: JSON.stringify(trustedForm),
         receiptTokenHash: crypto.createHash("sha256").update(receiptToken).digest("hex"),
+        ...(recoverySourceHash ? { recoverySourceHash } : {}),
       },
     };
 
     const order = await razorpay.orders.create(options);
+    if (previewRecovery && body?.recoveryOptIn === true) {
+      try {
+        const phone = normalizeWhatsAppPhone(String(form.phone || ""));
+        if (/^91[6-9]\d{9}$/.test(phone) && !(await isWhatsAppOptedOut(phone))) {
+          await connectDB();
+          const token = crypto.randomBytes(32).toString("hex");
+          await CheckoutRecovery.create({
+            orderId: order.id,
+            phone,
+            name: String(form.name || "").trim().slice(0, 80),
+            service: checkoutPlan.service,
+            plan: checkoutPlan.plan,
+            reportType: checkoutPlan.reportType,
+            amountPaise: order.amount,
+            environment: "preview",
+            consentText: RECOVERY_CONSENT_TEXT,
+            consentedAt: new Date(),
+            dueAt: new Date(Date.now() + RECOVERY_DELAY_MS),
+            status: "pending",
+            tokenHash: hashRecoveryToken(token),
+            returnToken: token,
+          });
+        }
+      } catch (error) {
+        // Recovery is optional; a database issue must not interrupt payment.
+        console.error("Could not record checkout reminder consent:", error);
+      }
+    }
     return NextResponse.json({
       id: order.id,
       amount: order.amount,
       currency: order.currency,
       receiptToken,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
 }
