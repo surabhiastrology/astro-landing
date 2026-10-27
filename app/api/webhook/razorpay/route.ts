@@ -65,6 +65,7 @@ const OrderSchema = new mongoose.Schema({
   reportType: { type: String },
   urgentDelivery: { type: Boolean, default: false },
   isTestOrder: { type: Boolean, default: false },
+  recoveredFromCart: { type: Boolean, default: false },
   deliveryDueAt: { type: Date },
   customer: {
     name: String, email: String, phone: String,
@@ -191,6 +192,8 @@ export async function POST(req: Request) {
       const checkoutPlan = getCheckoutPlanByReportType(formData?.reportType);
       const urgentDelivery = formData?.urgentDelivery === true;
       const isTestOrder = process.env.VERCEL_ENV === "preview";
+      const recoveredFromCart = typeof gatewayOrder.notes?.recoverySourceHash === "string"
+        && /^[a-f0-9]{64}$/.test(gatewayOrder.notes.recoverySourceHash);
       if (
         !checkoutPlan ||
         (urgentDelivery && !supportsUrgentDelivery(checkoutPlan)) ||
@@ -210,6 +213,7 @@ export async function POST(req: Request) {
           reportType: checkoutPlan.reportType,
           urgentDelivery,
           isTestOrder,
+          recoveredFromCart,
           ...(urgentDelivery ? { deliveryDueAt: new Date(Date.now() + 24 * 60 * 60 * 1000) } : {}),
           customer: { ...formData, reportType: checkoutPlan.reportType, urgentDelivery },
           partner: {
@@ -227,7 +231,7 @@ export async function POST(req: Request) {
         // Update existing pending order
         await Order.updateOne(
           { _id: order._id },
-          { $set: { status: "Paid", paymentId, challenge: formData.challenge, urgentDelivery, isTestOrder, ...(urgentDelivery ? { deliveryDueAt: new Date(Date.now() + 24 * 60 * 60 * 1000) } : {}) } }
+          { $set: { status: "Paid", paymentId, challenge: formData.challenge, urgentDelivery, isTestOrder, recoveredFromCart, ...(urgentDelivery ? { deliveryDueAt: new Date(Date.now() + 24 * 60 * 60 * 1000) } : {}) } }
         );
       }
       await markRecoveredOrder(typeof gatewayOrder.notes?.recoverySourceHash === "string" ? gatewayOrder.notes.recoverySourceHash : undefined, razorpayOrderId, amountPaise / 100);
@@ -299,10 +303,11 @@ async function triggerNotifications(order: any) {
     getResend().emails.send({
       from: senderEmail,
       to: adminEmails,
-      subject: `${order.isTestOrder ? "[TEST ORDER] " : ""}${order.urgentDelivery ? "⚡ URGENT 24H | " : ""}🚨 NEW PAID ORDER: ${order.customer.name} [₹${order.amount}] | ${order.customer.language}`,
+      subject: `${order.isTestOrder ? "[TEST ORDER] " : ""}${order.recoveredFromCart ? "[CART RECOVERY] " : ""}${order.urgentDelivery ? "⚡ URGENT 24H | " : ""}🚨 NEW PAID ORDER: ${order.customer.name} [₹${order.amount}] | ${order.customer.language}`,
       html: `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden;">
           ${order.isTestOrder ? '<div style="background-color: #fff1f2; color: #9f1239; padding: 14px 25px; font-weight: bold; text-align: center;">TEST ORDER — Preview payment, not a live sale</div>' : ''}
+          ${order.recoveredFromCart ? '<div style="background-color: #ecfdf5; color: #065f46; padding: 12px 25px; font-weight: bold; text-align: center;">CONVERTED FROM CART RECOVERY</div>' : ''}
           <div style="background-color: #8B1E1E; padding: 25px; text-align: center;">
             <h1 style="color: #ffffff; margin: 0; font-size: 24px;">New Premium Order! 🚀</h1>
             <p style="color: #F5D98A; margin: 5px 0 0 0; font-weight: bold; letter-spacing: 1px;">SURABHI ASTROLOGY</p>
