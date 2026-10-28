@@ -5,7 +5,8 @@ import { isWhatsAppPreview } from "@/lib/whatsappEnvironment";
 
 export const RECOVERY_CONSENT_TEXT =
   "Send me order and cart updates on WhatsApp by Surabhi Astrology.";
-export const RECOVERY_DELAY_MS = 60 * 60 * 1000;
+// Keep the live delay at one hour; shorten only test checkouts for Preview/local QA.
+export const RECOVERY_DELAY_MS = isWhatsAppPreview ? 2 * 60 * 1000 : 60 * 60 * 1000;
 
 const recoverySchema = new mongoose.Schema({
   orderId: { type: String, required: true, unique: true },
