@@ -41,6 +41,13 @@ const CHECKOUT_PLANS: readonly CheckoutPlan[] = [
   },
   {
     service: "Surbhi Consultation",
+    plan: "Video Call",
+    reportType: "Surbhi Consultation - Video Call",
+    amount: 11000,
+    whatsappSelection: { intent: "surbhi_consultation", planId: "consultation_video" },
+  },
+  {
+    service: "Surbhi Consultation",
     plan: "Offline",
     reportType: "Surbhi Consultation - Offline",
     amount: 24000,

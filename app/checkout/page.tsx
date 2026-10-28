@@ -736,18 +736,21 @@ function getCheckoutPresentation(service: string, plan: string): CheckoutPresent
 
   if (product.includes("consultation")) {
     const priority = selectedPlan.includes("priority");
+    const videoCall = selectedPlan.includes("video");
     return {
       image: "/checkout/surbhi-consultation-session.webp",
       imageAlt: "Surbhi Gupta writing consultation notes at her desk",
       imageClassName: "object-cover object-[50%_58%]",
       imageContainerClassName: "aspect-[4/5]",
-      intro: "Share your details so we can coordinate your personal consultation with Surbhi Gupta.",
+      intro: videoCall
+        ? "Share your details so we can arrange your private video consultation with Surbhi ji."
+        : "Share your details so we can coordinate your personal consultation with Surbhi ji.",
       deliveryTitle: "Consultation updates on WhatsApp",
       deliveryDetail: "We’ll contact you here with the next steps.",
       quote: "A focused conversation can bring clarity to the questions that matter most.",
       benefits: [
-        priority ? "Priority booking with fast-track consultation" : "30-minute personal consultation",
-        priority ? "Personal guidance from Surbhi Gupta" : "Astrology, palmistry & numerology guidance",
+        priority ? "Priority booking with fast-track consultation" : videoCall ? "30-minute private video call" : "Private in-person consultation",
+        "Personal guidance from Surbhi ji",
         "Private coordination through WhatsApp",
       ],
     };
@@ -872,11 +875,13 @@ function CheckoutContent() {
   
   // FIXED: Dynamic detection for ANY plan containing 1Q, 1 Question, or Hindi equivalents
   const planNameLower = planName.toLowerCase();
-  const showQuestionDropdown = 
-    planNameLower.includes("1q") || 
-    planNameLower.includes("1 q") || 
-    planNameLower.includes("question") || 
-    planNameLower.includes("प्रश्न");
+  const isCustomKundliQuestion = checkoutPlan.whatsappSelection?.planId === "kundli_2999";
+  const showQuestionDropdown = !isCustomKundliQuestion && (
+    planNameLower.includes("1q") ||
+    planNameLower.includes("1 q") ||
+    planNameLower.includes("question") ||
+    planNameLower.includes("प्रश्न")
+  );
 
   const basePrice = checkoutPlan.amount;
   const urgentDeliveryAvailable = supportsUrgentDelivery(checkoutPlan);
@@ -1614,7 +1619,7 @@ function CheckoutContent() {
           {/* New Challenge TextArea: Shows only when dropdown is hidden and NOT matchmaking */}
           {!isMatchmaking && !showQuestionDropdown && (
             <div className="animate-in fade-in slide-in-from-top-2 duration-500 pt-2">
-                <Label htmlFor="challenge">Current Challenge You Are Facing</Label>
+                <Label htmlFor="challenge">{isCustomKundliQuestion ? "Your One Personal Question" : "Current Challenge You Are Facing"}</Label>
                 <FieldTextarea leadingIcon="message"
                   id="challenge"
                   name="challenge"

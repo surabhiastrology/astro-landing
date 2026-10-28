@@ -262,13 +262,20 @@ async function triggerNotifications(order: any) {
   const reportType = order.reportType || "Service";
   const isHi = order.customer.language === "hindi";
   const includesWhatsAppQuestion = planIncludesWhatsAppQuestion(reportType);
+  const kundliQuestionCollectedAtCheckout =
+    reportType === "Surbhi Kundali - 10-Yr Report + 1Question" ||
+    reportType === "Surbhi Kundali - Report + 1Question";
   const isMatchmaking = reportType.toLowerCase().includes("couple match making");
 
   let replyMessage = `✅ *Payment Confirmed!*\n\n🙏 *Radhe Radhe, ${order.customer.name || "ji"}!*\nYour order for the *${reportType}* has been successfully confirmed.\n\nSurbhi ji and the team will deliver your detailed analysis right here within *${order.urgentDelivery ? "24" : "72"} hours*. ⏳`;
   let waButtons: string[] | undefined = undefined;
 
-  if (includesWhatsAppQuestion) {
-    replyMessage += `\n\n🎁 *Included:* Please send your 1 FREE question here on WhatsApp.`;
+  if (kundliQuestionCollectedAtCheckout) {
+    replyMessage += isHi
+      ? `\n\n✨ चेकआउट पर चुना या लिखा गया आपका सवाल हमें मिल गया है।`
+      : `\n\n✨ We have your question from checkout. You do not need to send it again.`;
+  } else if (includesWhatsAppQuestion) {
+    replyMessage += `\n\n✨ *Included:* Please send your one question here on WhatsApp.`;
     waButtons = isHi ? ["प्रश्न पूछें"] : ["Ask Question"];
   }
 
@@ -279,7 +286,7 @@ async function triggerNotifications(order: any) {
     urgentDelivery: order.urgentDelivery === true,
   });
 
-  const nextStep = includesWhatsAppQuestion ? "F1_START" : "F1_END";
+  const nextStep = includesWhatsAppQuestion && !kundliQuestionCollectedAtCheckout ? "F1_START" : "F1_END";
 
   await Promise.allSettled([
     // Customer Email
