@@ -220,10 +220,10 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   let body;
-  // Once the live app secret is installed, continue processing signed STOP and
+  // The live webhook has its own opt-in switch. Keep it on for signed STOP and
   // delivery callbacks even if new recovery sends are later disabled.
   const recoveryWebhookEnabled = isWhatsAppPreview ||
-    (process.env.VERCEL_ENV === "production" && Boolean(process.env.WHATSAPP_APP_SECRET));
+    (process.env.VERCEL_ENV === "production" && process.env.CHECKOUT_RECOVERY_WEBHOOK_ENABLED === "true");
   if (recoveryWebhookEnabled) {
     if (isWhatsAppPreview) {
       try {

@@ -48,7 +48,7 @@ Set values in **Vercel → Project → Settings → Environment Variables** for 
 | `WHATSAPP_VERIFY_TOKEN` | Live webhook verification phrase, **Production**. |
 | `WHATSAPP_APP_SECRET` | Meta app secret for live webhook signature verification when Production checkout recovery is enabled. |
 | `NEXT_PUBLIC_CHECKOUT_RECOVERY_PREVIEW`, `CHECKOUT_RECOVERY_TEST_TEMPLATE`, `CHECKOUT_RECOVERY_TEST_PHONES` | Preview checkout-recovery checkbox, approved test-WABA template, and recipient allowlist. |
-| `CHECKOUT_RECOVERY_PRODUCTION_ENABLED`, `NEXT_PUBLIC_CHECKOUT_RECOVERY_PRODUCTION`, `CHECKOUT_RECOVERY_LIVE_TEMPLATE` | Off-by-default server/UI switches and approved live-WABA template for Production checkout recovery. See `docs/checkout-recovery-preview.md` before enabling. |
+| `CHECKOUT_RECOVERY_PRODUCTION_ENABLED`, `NEXT_PUBLIC_CHECKOUT_RECOVERY_PRODUCTION`, `CHECKOUT_RECOVERY_WEBHOOK_ENABLED`, `CHECKOUT_RECOVERY_LIVE_TEMPLATE` | Off-by-default server/UI/webhook switches and approved live-WABA template for Production checkout recovery. Enable signed webhook verification before live sends; see `docs/checkout-recovery-preview.md`. |
 | `CHECKOUT_RECOVERY_RUN_SECRET` | Separate secret in each environment for the checkout-recovery run and metrics endpoints. Not the existing `CRON_SECRET`. |
 | `MONGODB_URI` | Order/chat database. Per current operational setup, test and live orders appear in a shared database/admin dashboard; confirm actual configured targets in Vercel before changing them. |
 | `REDIS_URL` | WhatsApp conversation state/deduplication. Preview keys are prefixed in code even if the service is shared. |

@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     ? process.env.CHECKOUT_RECOVERY_TEST_TEMPLATE
     : process.env.CHECKOUT_RECOVERY_LIVE_TEMPLATE;
   if ((preview && !allowedPhones.size) || !templateName || !/^[a-z0-9_]+$/.test(templateName) ||
-      (!preview && (!process.env.WHATSAPP_APP_SECRET || process.env.NEXT_PUBLIC_CHECKOUT_RECOVERY_PRODUCTION !== "true"))) {
+      (!preview && (!process.env.WHATSAPP_APP_SECRET || process.env.CHECKOUT_RECOVERY_WEBHOOK_ENABLED !== "true"))) {
     return NextResponse.json({ error: "Recovery is not fully configured" }, { status: 503 });
   }
 
