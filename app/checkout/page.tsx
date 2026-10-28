@@ -935,7 +935,9 @@ function CheckoutContent() {
   const [countryCode, setCountryCode] = useState("+91");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [recoveryOptIn, setRecoveryOptIn] = useState(false);
-  const recoveryOptInAvailable = process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_CHECKOUT_RECOVERY_PREVIEW === "true";
+  const recoveryOptInAvailable = process.env.NODE_ENV === "development" ||
+    process.env.NEXT_PUBLIC_CHECKOUT_RECOVERY_PREVIEW === "true" ||
+    process.env.NEXT_PUBLIC_CHECKOUT_RECOVERY_PRODUCTION === "true";
   const [urgentDelivery, setUrgentDelivery] = useState(false);
   const [loading, setLoading] = useState(false);
   const [confirmingPayment, setConfirmingPayment] = useState(false);

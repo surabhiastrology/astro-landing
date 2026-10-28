@@ -1,22 +1,25 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import { CheckoutRecovery, WhatsAppOptOut } from "@/lib/checkout-recovery";
+import { CheckoutRecovery, WhatsAppOptOut, recoveryEnvironment } from "@/lib/checkout-recovery";
 
 export async function GET(req: Request) {
-  if (process.env.VERCEL_ENV !== "preview") return NextResponse.json({ error: "Preview only" }, { status: 403 });
+  if (process.env.VERCEL_ENV !== "preview" && process.env.VERCEL_ENV !== "production") {
+    return NextResponse.json({ error: "Unavailable" }, { status: 403 });
+  }
   const secret = process.env.CHECKOUT_RECOVERY_RUN_SECRET;
   if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   await connectDB();
-  const attempts = await CheckoutRecovery.find({ environment: "preview" })
+  const environment = recoveryEnvironment();
+  const attempts = await CheckoutRecovery.find({ environment })
     .select("status messageStatus recoveredAmountInr recoveredOrderId phone sentAt clickedAt")
     .lean();
   const sent = attempts.filter((item) => item.sentAt);
   const recovered = attempts.filter((item) => item.recoveredOrderId);
   const sentPhones = [...new Set(sent.map((item) => item.phone))];
   const optOuts = sentPhones.length
-    ? await WhatsAppOptOut.countDocuments({ environment: "preview", phone: { $in: sentPhones } })
+    ? await WhatsAppOptOut.countDocuments({ environment, phone: { $in: sentPhones } })
     : 0;
   return NextResponse.json({
     consentedPaymentAttempts: attempts.length,

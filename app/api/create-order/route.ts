@@ -4,7 +4,7 @@ import crypto from "crypto";
 import Razorpay from "razorpay";
 import { getCheckoutAmount, getCheckoutPlanByReportType, supportsUrgentDelivery } from "@/lib/checkout-plans";
 import { isApproximateBirthTimeRange } from "@/lib/birth-time";
-import { CheckoutRecovery, RECOVERY_CONSENT_TEXT, RECOVERY_DELAY_MS, hashRecoveryToken, isWhatsAppOptedOut, normalizeWhatsAppPhone } from "@/lib/checkout-recovery";
+import { CheckoutRecovery, RECOVERY_CONSENT_TEXT, RECOVERY_DELAY_MS, hashRecoveryToken, isRecoveryCheckoutEnabled, recoveryEnvironment, isWhatsAppOptedOut, normalizeWhatsAppPhone } from "@/lib/checkout-recovery";
 import { connectDB } from "@/lib/mongodb";
 
 export async function POST(req: Request) {
@@ -45,15 +45,18 @@ export async function POST(req: Request) {
       tobApproximateRange: form.tobAccuracy === "approximate" ? form.tobApproximateRange : "",
     };
     const receiptToken = crypto.randomBytes(32).toString("hex");
-    const previewRecovery = process.env.VERCEL_ENV === "preview" || process.env.NODE_ENV === "development";
+    const recoveryEnabled = isRecoveryCheckoutEnabled;
+    // A previously sent link can still be attributed after the send switch is turned off.
+    const recoveryAttributionEnabled = recoveryEnabled || process.env.VERCEL_ENV === "production";
+    const environment = recoveryEnvironment();
     let recoverySourceHash: string | undefined;
-    if (previewRecovery && typeof body?.recoveryToken === "string" && /^[a-f0-9]{64}$/.test(body.recoveryToken)) {
+    if (recoveryAttributionEnabled && typeof body?.recoveryToken === "string" && /^[a-f0-9]{64}$/.test(body.recoveryToken)) {
       const candidateHash = hashRecoveryToken(body.recoveryToken);
       await connectDB();
       const source = await CheckoutRecovery.findOne({
         tokenHash: candidateHash,
         phone: normalizeWhatsAppPhone(String(form.phone || "")),
-        environment: "preview",
+        environment,
         sentAt: { $exists: true },
         clickedAt: { $exists: true },
       }).lean();
@@ -72,7 +75,7 @@ export async function POST(req: Request) {
     };
 
     const order = await razorpay.orders.create(options);
-    if (previewRecovery && body?.recoveryOptIn === true) {
+    if (recoveryEnabled && body?.recoveryOptIn === true) {
       try {
         const phone = normalizeWhatsAppPhone(String(form.phone || ""));
         if (/^91[6-9]\d{9}$/.test(phone) && !(await isWhatsAppOptedOut(phone))) {
@@ -86,7 +89,7 @@ export async function POST(req: Request) {
             plan: checkoutPlan.plan,
             reportType: checkoutPlan.reportType,
             amountPaise: order.amount,
-            environment: "preview",
+            environment,
             consentText: RECOVERY_CONSENT_TEXT,
             consentedAt: new Date(),
             dueAt: new Date(Date.now() + RECOVERY_DELAY_MS),

@@ -5,7 +5,7 @@ import Redis from "ioredis";
 import mongoose from "mongoose";
 import { GoogleGenAI } from "@google/genai";
 import crypto from "node:crypto";
-import { CheckoutRecovery, saveWhatsAppOptOut } from "@/lib/checkout-recovery";
+import { CheckoutRecovery, recoveryEnvironment, saveWhatsAppOptOut } from "@/lib/checkout-recovery";
 import {
   getWhatsAppSenderCredentials,
   getWhatsAppVerifyToken,
@@ -220,15 +220,23 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   let body;
-  if (isWhatsAppPreview) {
-    try {
-      getWhatsAppSenderCredentials();
-    } catch {
-      return new NextResponse("Preview WhatsApp is not configured", { status: 503 });
+  // Once the live app secret is installed, continue processing signed STOP and
+  // delivery callbacks even if new recovery sends are later disabled.
+  const recoveryWebhookEnabled = isWhatsAppPreview ||
+    (process.env.VERCEL_ENV === "production" && Boolean(process.env.WHATSAPP_APP_SECRET));
+  if (recoveryWebhookEnabled) {
+    if (isWhatsAppPreview) {
+      try {
+        getWhatsAppSenderCredentials();
+      } catch {
+        return new NextResponse("Preview WhatsApp is not configured", { status: 503 });
+      }
     }
-    const appSecret = process.env.WHATSAPP_TEST_APP_SECRET;
+    const appSecret = isWhatsAppPreview
+      ? process.env.WHATSAPP_TEST_APP_SECRET
+      : process.env.WHATSAPP_APP_SECRET;
     if (!appSecret) {
-      return new NextResponse("Preview webhook signing is not configured", { status: 503 });
+      return new NextResponse("Webhook signing is not configured", { status: 503 });
     }
     const rawBody = await req.text();
     const signature = req.headers.get("x-hub-signature-256") || "";
@@ -248,18 +256,19 @@ export async function POST(req: NextRequest) {
     const value = body?.entry?.[0]?.changes?.[0]?.value;
     // A preview deployment must never process a live-number webhook, even if
     // Meta's app-wide callback is configured incorrectly.
-    if (isWhatsAppPreview) {
-      if (value?.metadata?.phone_number_id !== WHATSAPP_TEST_PHONE_ID) {
-        return new NextResponse("Ignored", { status: 200 });
-      }
+    if ((isWhatsAppPreview && value?.metadata?.phone_number_id !== WHATSAPP_TEST_PHONE_ID) ||
+        (recoveryWebhookEnabled && !isWhatsAppPreview && value?.metadata?.phone_number_id !== process.env.WHATSAPP_PHONE_ID)) {
+      return new NextResponse("Ignored", { status: 200 });
     }
-    if (isWhatsAppPreview && Array.isArray(value?.statuses)) {
+    if (recoveryWebhookEnabled && Array.isArray(value?.statuses)) {
       await connectDB();
       for (const status of value.statuses) {
         if (typeof status?.id === "string" && typeof status?.status === "string") {
+          const deliveryError = status.status === "failed" && Number.isInteger(status?.errors?.[0]?.code)
+            ? { errorCode: `meta_delivery_code_${status.errors[0].code}` } : {};
           await CheckoutRecovery.updateOne(
-            { whatsappMessageId: status.id, environment: "preview" },
-            { $set: { messageStatus: status.status } },
+            { whatsappMessageId: status.id, environment: recoveryEnvironment() },
+            { $set: { messageStatus: status.status, ...deliveryError } },
           );
         }
       }
@@ -295,9 +304,8 @@ export async function POST(req: NextRequest) {
       flowInput = incomingText;
     }
 
-    // The Preview webhook is signature-verified. Do not add a new production
-    // opt-out mutation until the live webhook has equivalent verification.
-    if (isWhatsAppPreview && /^(stop|unsubscribe|opt\s*out)$/i.test(incomingText.trim())) {
+    // STOP changes persistent opt-out state only after webhook signature verification.
+    if (recoveryWebhookEnabled && /^(stop|unsubscribe|opt\s*out)$/i.test(incomingText.trim())) {
       await saveWhatsAppOptOut(from);
       await redis.hdel(interactionKey, from);
       return new NextResponse("OK", { status: 200 });

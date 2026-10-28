@@ -2,40 +2,43 @@ import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import mongoose from "mongoose";
 import { connectDB } from "@/lib/mongodb";
-import { CheckoutRecovery, isWhatsAppOptedOut } from "@/lib/checkout-recovery";
+import { CheckoutRecovery, isRecoveryProductionEnabled, isWhatsAppOptedOut, recoveryEnvironment } from "@/lib/checkout-recovery";
 import { getWhatsAppSenderCredentials } from "@/lib/whatsappEnvironment";
 
 const Order = () => mongoose.connection.collection("orders");
 
 export async function POST(req: Request) {
-  // This endpoint is deliberately not a production Vercel cron. Preview jobs
-  // must be invoked by an authorized tester or a Preview-only scheduler.
-  if (process.env.VERCEL_ENV !== "preview") {
-    return NextResponse.json({ error: "Preview only" }, { status: 403 });
+  const preview = process.env.VERCEL_ENV === "preview";
+  if (!preview && !isRecoveryProductionEnabled) {
+    return NextResponse.json({ error: "Recovery is disabled" }, { status: 403 });
   }
   const secret = process.env.CHECKOUT_RECOVERY_RUN_SECRET;
   if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const allowedPhones = new Set(
-    (process.env.CHECKOUT_RECOVERY_TEST_PHONES || "")
+    (preview ? process.env.CHECKOUT_RECOVERY_TEST_PHONES || "" : "")
       .split(",")
       .map((value) => value.replace(/\D/g, ""))
       .filter(Boolean),
   );
-  const templateName = process.env.CHECKOUT_RECOVERY_TEST_TEMPLATE;
-  if (!allowedPhones.size || !templateName || !/^[a-z0-9_]+$/.test(templateName)) {
-    return NextResponse.json({ error: "Test recipients or template are not configured" }, { status: 503 });
+  const templateName = preview
+    ? process.env.CHECKOUT_RECOVERY_TEST_TEMPLATE
+    : process.env.CHECKOUT_RECOVERY_LIVE_TEMPLATE;
+  if ((preview && !allowedPhones.size) || !templateName || !/^[a-z0-9_]+$/.test(templateName) ||
+      (!preview && (!process.env.WHATSAPP_APP_SECRET || process.env.NEXT_PUBLIC_CHECKOUT_RECOVERY_PRODUCTION !== "true"))) {
+    return NextResponse.json({ error: "Recovery is not fully configured" }, { status: 503 });
   }
 
   const { phoneNumberId, token } = getWhatsAppSenderCredentials();
+  const environment = recoveryEnvironment();
   const razorpay = new Razorpay({
     key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID as string,
     key_secret: process.env.RAZORPAY_KEY_SECRET as string,
   });
   await connectDB();
   const due = await CheckoutRecovery.find({
-    environment: "preview", status: "pending", dueAt: { $lte: new Date() },
+    environment, status: "pending", dueAt: { $lte: new Date() },
   }).sort({ dueAt: 1 }).limit(20).lean();
   const result = { checked: 0, sent: 0, skipped: 0, failed: 0 };
 
@@ -43,18 +46,18 @@ export async function POST(req: Request) {
     const claimed = await CheckoutRecovery.findOneAndUpdate(
       { _id: candidate._id, status: "pending" },
       { $set: { status: "processing" } },
-      { new: true },
+      { returnDocument: "after" },
     );
     if (!claimed) continue;
     result.checked++;
     try {
-      if (!allowedPhones.has(claimed.phone) || await isWhatsAppOptedOut(claimed.phone)) {
+      if ((preview && !allowedPhones.has(claimed.phone)) || await isWhatsAppOptedOut(claimed.phone)) {
         await CheckoutRecovery.updateOne({ _id: claimed._id }, { $set: { status: "skipped", errorCode: "recipient_not_eligible" } });
         result.skipped++;
         continue;
       }
       const alreadyMessaged = await CheckoutRecovery.exists({
-        _id: { $ne: claimed._id }, phone: claimed.phone, environment: "preview",
+        _id: { $ne: claimed._id }, phone: claimed.phone, environment,
         sentAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
       });
       if (alreadyMessaged) {
@@ -107,13 +110,19 @@ export async function POST(req: Request) {
         throw new Error(`meta_${response.status}${code}${subcode}`);
       }
       await CheckoutRecovery.updateOne({ _id: claimed._id }, {
-        $set: { status: "sent", sentAt: new Date(), whatsappMessageId: payload.messages[0].id, messageStatus: "accepted" },
+        $set: {
+          status: "sent", sentAt: new Date(), whatsappMessageId: payload.messages[0].id,
+          messageStatus: payload.messages[0].message_status === "held_for_quality_assessment"
+            ? "held_for_quality_assessment" : "accepted",
+        },
         $unset: { returnToken: "" },
       });
       result.sent++;
     } catch (error) {
       // Never retry an ambiguous API failure automatically: one reminder max.
-      await CheckoutRecovery.updateOne({ _id: claimed._id }, { $set: { status: "failed", errorCode: error instanceof Error ? error.message.slice(0, 80) : "unknown" } });
+      const errorCode = error instanceof Error && /^(meta_\d{3}(?:_code_\d+)?(?:_subcode_\d+)?|invalid_return_token)$/.test(error.message)
+        ? error.message : "recovery_run_error";
+      await CheckoutRecovery.updateOne({ _id: claimed._id }, { $set: { status: "failed", errorCode } });
       result.failed++;
     }
   }

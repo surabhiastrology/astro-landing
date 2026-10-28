@@ -8,6 +8,14 @@ export const RECOVERY_CONSENT_TEXT =
 // Keep the live delay at one hour; shorten only test checkouts for Preview/local QA.
 export const RECOVERY_DELAY_MS = isWhatsAppPreview ? 2 * 60 * 1000 : 60 * 60 * 1000;
 
+// A Production deployment may contain the code without enabling live reminders.
+export const isRecoveryProductionEnabled =
+  process.env.VERCEL_ENV === "production" &&
+  process.env.CHECKOUT_RECOVERY_PRODUCTION_ENABLED === "true" &&
+  process.env.NEXT_PUBLIC_CHECKOUT_RECOVERY_PRODUCTION === "true";
+
+export const isRecoveryCheckoutEnabled = isWhatsAppPreview || isRecoveryProductionEnabled;
+
 const recoverySchema = new mongoose.Schema({
   orderId: { type: String, required: true, unique: true },
   phone: { type: String, required: true },

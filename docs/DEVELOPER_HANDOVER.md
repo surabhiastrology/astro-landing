@@ -1,6 +1,6 @@
 # Developer handover: domains, payments, WhatsApp, and testing
 
-Last reviewed: 26 October 2026. This maps the code and setup tested by the team. Check the current Vercel and Meta dashboards before changing external configuration; those settings are not version-controlled. Never add credential values to this document, Git, tickets, chat, or screenshots.
+Last reviewed: 28 October 2026. This maps the code and setup tested by the team. Check the current Vercel and Meta dashboards before changing external configuration; those settings are not version-controlled. Never add credential values to this document, Git, tickets, chat, or screenshots.
 
 ## Repositories and domains
 
@@ -46,6 +46,10 @@ Set values in **Vercel → Project → Settings → Environment Variables** for 
 | `WHATSAPP_PHONE_ID` | Live WhatsApp sender ID, **Production**. |
 | `WHATSAPP_TOKEN` | Live WhatsApp API access token, **Production**. |
 | `WHATSAPP_VERIFY_TOKEN` | Live webhook verification phrase, **Production**. |
+| `WHATSAPP_APP_SECRET` | Meta app secret for live webhook signature verification when Production checkout recovery is enabled. |
+| `NEXT_PUBLIC_CHECKOUT_RECOVERY_PREVIEW`, `CHECKOUT_RECOVERY_TEST_TEMPLATE`, `CHECKOUT_RECOVERY_TEST_PHONES` | Preview checkout-recovery checkbox, approved test-WABA template, and recipient allowlist. |
+| `CHECKOUT_RECOVERY_PRODUCTION_ENABLED`, `NEXT_PUBLIC_CHECKOUT_RECOVERY_PRODUCTION`, `CHECKOUT_RECOVERY_LIVE_TEMPLATE` | Off-by-default server/UI switches and approved live-WABA template for Production checkout recovery. See `docs/checkout-recovery-preview.md` before enabling. |
+| `CHECKOUT_RECOVERY_RUN_SECRET` | Separate secret in each environment for the checkout-recovery run and metrics endpoints. Not the existing `CRON_SECRET`. |
 | `MONGODB_URI` | Order/chat database. Per current operational setup, test and live orders appear in a shared database/admin dashboard; confirm actual configured targets in Vercel before changing them. |
 | `REDIS_URL` | WhatsApp conversation state/deduplication. Preview keys are prefixed in code even if the service is shared. |
 | `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_TO_FALLBACK` | Customer/admin email and general notification settings. Preview tests can still send real email. |
@@ -70,7 +74,9 @@ Meta may need a **Vercel Protection Bypass for Automation** query parameter on t
 
 Preview conversation state uses `wa_preview:` Redis prefixes and a separate `whatsapp_preview_chats` Mongo collection. Its checkout links are built from the webhook request origin. Preview welcome media deliberately comes from the public Production host because Meta cannot fetch media behind Preview authentication; checkout links still point to Preview.
 
-**Templates belong to the WhatsApp business account.** At the last test, the test WABA had only Meta's `hello_world` template, while payment confirmation templates were approved on the live WABA. A Preview Razorpay payment can therefore succeed and send email without sending the same WhatsApp payment template. Confirm template status in the correct WABA before testing template messages. Urgent orders select `payment_priority_en` or `payment_priority_hi`; normal orders select the existing general/career variants in `lib/payment-whatsapp-template.ts`.
+**Templates belong to the WhatsApp business account.** The test WABA has an approved checkout-reminder template; payment-confirmation templates may still differ from the live WABA. A Preview Razorpay payment can therefore succeed and send email without sending the same WhatsApp payment template. Confirm template status in the correct WABA before testing template messages. Urgent orders select `payment_priority_en` or `payment_priority_hi`; normal orders select the existing general/career variants in `lib/payment-whatsapp-template.ts`.
+
+Checkout recovery is operational in Preview and production-capable in code but **disabled by default in Production**. Its authenticated runner is separate from the existing daily follow-up cron. Do not enable live recovery before the live template, signed webhook, scheduler, consent review, and end-to-end checks in `docs/checkout-recovery-preview.md` are complete.
 
 ## Payments, orders, and Meta
 
