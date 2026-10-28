@@ -100,7 +100,11 @@ export async function POST(req: Request) {
       });
       const payload = await response.json();
       if (!response.ok || !payload?.messages?.[0]?.id) {
-        throw new Error(`meta_${response.status}`);
+        // Persist only Meta's numeric diagnostics; its free-text message may
+        // contain request details and must not be stored with recovery data.
+        const code = Number.isInteger(payload?.error?.code) ? `_code_${payload.error.code}` : "";
+        const subcode = Number.isInteger(payload?.error?.error_subcode) ? `_subcode_${payload.error.error_subcode}` : "";
+        throw new Error(`meta_${response.status}${code}${subcode}`);
       }
       await CheckoutRecovery.updateOne({ _id: claimed._id }, {
         $set: { status: "sent", sentAt: new Date(), whatsappMessageId: payload.messages[0].id, messageStatus: "accepted" },
