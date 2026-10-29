@@ -26,8 +26,23 @@ export default function SuccessPage() {
   const [receipt, setReceipt] = useState<Receipt | null>(null);
   const [orderId, setOrderId] = useState("");
   const [retry, setRetry] = useState(0);
+  const [isDemoPreview, setIsDemoPreview] = useState(false);
 
   const checkReceipt = useCallback(async () => {
+    if (process.env.NODE_ENV === "development" &&
+        new URLSearchParams(window.location.search).get("preview") === "paid") {
+      setIsDemoPreview(true);
+      setReceipt({
+        name: "Sample Customer",
+        reportType: "Surbhi Kundali - 10-Yr Report + 1Question",
+        amount: 999,
+        orderId: "order_demo_preview",
+        paymentId: "pay_demo_preview",
+      });
+      setState("paid");
+      return;
+    }
+
     const id = new URLSearchParams(window.location.search).get("orderId") || "";
     setOrderId(id);
 
@@ -246,6 +261,7 @@ export default function SuccessPage() {
                   <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8B1E1E]">{isPaid ? "Payment received" : isChecking ? "Secure payment check" : "Payment support"}</p>
                   <h1 className="font-serif text-[30px] font-medium leading-tight text-[#2A1400] sm:text-4xl">{isPaid && receipt?.name ? <>Thank you, <span className="text-[#8B1E1E]">{receipt.name}</span></> : title}</h1>
                   {isPaid && receipt?.name && <p className="mt-1 text-lg font-semibold text-[#C8A84B]">Your order is confirmed!</p>}
+                  {isDemoPreview && <p className="mt-2 text-xs font-semibold text-[#8B1E1E]">Design preview only · no payment was made</p>}
                   <p className="mt-3 max-w-xl text-[15px] leading-7 text-[#6B4423]">{description}</p>
                 </div>
                 {isPaid && <Sparkles className="mt-2 hidden shrink-0 text-[#B9782E] sm:block" size={23} aria-hidden="true" />}
