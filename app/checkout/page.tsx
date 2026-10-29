@@ -5,7 +5,7 @@ import type { ChangeEvent, FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight, LoaderCircle } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import {
   DEFAULT_CHECKOUT_PLAN,
   getCheckoutAmount,
@@ -885,7 +885,6 @@ function CheckoutContent() {
 
   const basePrice = checkoutPlan.amount;
   const urgentDeliveryAvailable = supportsUrgentDelivery(checkoutPlan);
-  const showConsultationInvitation = basePrice === 999;
   const cleanPlanName = planName;
   const fullReportType = checkoutPlan.reportType;
 
@@ -1681,37 +1680,6 @@ function CheckoutContent() {
                 </span>
               </label>
             </div>
-          )}
-
-          {showConsultationInvitation && (
-            <aside aria-labelledby="consultation-invitation-title" className="rounded-2xl border border-[#E4D2B4] bg-[#FCF8F0] p-3.5 sm:p-4">
-              <div className="flex items-center gap-3.5 sm:gap-4">
-                <div className="relative h-[104px] w-24 shrink-0 overflow-hidden rounded-xl bg-[#EEDFCC] sm:h-28 sm:w-28">
-                  <Image
-                    src="/checkout/surbhi-consultation-session.webp"
-                    alt="Surbhi Gupta at her desk"
-                    fill
-                    sizes="(max-width: 639px) 96px, 112px"
-                    className="object-cover object-center"
-                  />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#8B1E1E]">Personal guidance</p>
-                  <h4 id="consultation-invitation-title" className="mt-1 font-serif text-lg font-semibold leading-6 text-[#2A1400] sm:text-xl">Speak with Surbhi ji</h4>
-                  <p className="mt-1 text-sm leading-5 text-[#6B4423]">Explore a 30-minute voice or video consultation.</p>
-                </div>
-              </div>
-              <div className="mt-3 border-t border-[#E4D2B4] pt-3">
-                <a
-                  href="https://consultation.surabhiastrology.com/?utm_source=kundali_checkout&utm_medium=internal_referral&utm_campaign=consultation"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#8B1E1E] bg-white px-4 py-2.5 text-sm font-semibold text-[#8B1E1E] transition-[background-color,color,transform] duration-200 hover:-translate-y-0.5 hover:bg-[#8B1E1E] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B1E1E] focus-visible:ring-offset-2 motion-reduce:transform-none sm:w-auto"
-                >
-                  Explore options <ArrowUpRight size={16} aria-hidden="true" />
-                </a>
-              </div>
-            </aside>
           )}
 
           <div className="mt-5 grid grid-cols-1 gap-2 rounded-xl bg-[#F8F2E8] px-3 py-3 sm:grid-cols-3 sm:gap-0 sm:px-4" aria-label="Checkout assurances">

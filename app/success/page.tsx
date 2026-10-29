@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { Check, Clock3, ClipboardList, CreditCard, Headset, IndianRupee, LoaderCircle, Mail, MessageCircle, RotateCcw, ShieldCheck, Sparkles, Tag } from "lucide-react";
+import { ArrowUpRight, Check, Clock3, ClipboardList, CreditCard, Headset, IndianRupee, LoaderCircle, Mail, MessageCircle, RotateCcw, ShieldCheck, Sparkles, Tag } from "lucide-react";
 import { trackVerifiedPurchaseOnce } from "@/lib/meta-checkout-events";
 
 type Receipt = {
@@ -311,6 +311,35 @@ export default function SuccessPage() {
                     className="object-cover"
                   />
                 </div>
+              )}
+
+              {isPaid && !isCallService && (
+                <aside aria-labelledby="consultation-invitation-title" className="mb-7 rounded-2xl border border-[#E4D2B4] bg-[#FCF8F0] p-4 sm:p-5">
+                  <div className="flex items-center gap-4">
+                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-[#EEDFCC] sm:h-24 sm:w-24">
+                      <Image
+                        src="/checkout/surbhi-consultation-session.webp"
+                        alt="Surbhi ji at her desk"
+                        fill
+                        sizes="(max-width: 639px) 80px, 96px"
+                        className="object-cover object-center"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#8B1E1E]">Personal guidance</p>
+                      <h2 id="consultation-invitation-title" className="mt-1 font-serif text-xl font-semibold leading-6 text-[#2A1400]">Speak with Surbhi ji</h2>
+                      <p className="mt-1 text-sm leading-5 text-[#6B4423]">Want to discuss your report or a question directly? Explore a private voice or video consultation.</p>
+                    </div>
+                  </div>
+                  <a
+                    href="https://consultation.surabhiastrology.com/?utm_source=kundali_thank_you&utm_medium=internal_referral&utm_campaign=consultation"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#8B1E1E] bg-white px-4 py-2.5 text-sm font-semibold text-[#8B1E1E] transition-colors hover:bg-[#8B1E1E] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B1E1E] focus-visible:ring-offset-2 sm:w-auto"
+                  >
+                    Explore consultation options <ArrowUpRight size={16} aria-hidden="true" />
+                  </a>
+                </aside>
               )}
 
               <div className="border-t border-[#E8D8B8] pt-5 sm:pt-6">
