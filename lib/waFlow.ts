@@ -30,11 +30,11 @@ function getServicePlans(intent: string = "", isHi: boolean) {
     return [{
       title: isHi ? "परामर्श योजनाएं" : "Consultation Plans",
       rows: isHi ? [
-        { id: "consultation_video", title: "वीडियो कॉल (₹11,000)", description: "सुरभि जी से 30 मिनट की निजी बातचीत" },
+        { id: "consultation_video", title: "वीडियो कॉल (₹15,000)", description: "सुरभि जी से 30 मिनट की निजी बातचीत" },
         { id: "consultation_offline", title: "आमने-सामने (₹24,000)", description: "सुरभि जी से व्यक्तिगत मुलाकात" },
         { id: "consultation_priority", title: "प्रायोरिटी (₹51,000)", description: "प्राथमिकता के साथ निजी परामर्श" }
       ] : [
-        { id: "consultation_video", title: "Video Call (₹11,000)", description: "30 minutes, one-to-one with Surbhi ji" },
+        { id: "consultation_video", title: "Video Call (₹15,000)", description: "30 minutes, one-to-one with Surbhi ji" },
         { id: "consultation_offline", title: "In Person (₹24,000)", description: "A private meeting with Surbhi ji" },
         { id: "consultation_priority", title: "Priority (₹51,000)", description: "Priority personal consultation" }
       ]

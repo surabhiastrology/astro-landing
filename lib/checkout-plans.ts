@@ -43,7 +43,7 @@ const CHECKOUT_PLANS: readonly CheckoutPlan[] = [
     service: "Surbhi Consultation",
     plan: "Video Call",
     reportType: "Surbhi Consultation - Video Call",
-    amount: 11000,
+    amount: 15000,
     whatsappSelection: { intent: "surbhi_consultation", planId: "consultation_video" },
   },
   {

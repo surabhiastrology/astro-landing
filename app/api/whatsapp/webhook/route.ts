@@ -186,7 +186,7 @@ Conversation Flow
 
 
 Available Services for your reference:
-- Surbhi Consultation: 30-minute video call (₹11,000), in-person consultation (₹24,000), priority consultation (₹51,000)
+- Surbhi Consultation: 30-minute video call (₹15,000), in-person consultation (₹24,000), priority consultation (₹51,000)
 - Numerology Report: Basic (₹1,100), Correction (₹5,100), With Call (₹11,000)
 - Couple Match Making: Basic (₹1,100), Match+1Q (₹3,300), Match+Call (₹11,000)
 - Baby Name Report: Report (₹1,100), Report+Name (₹5,100)
@@ -196,7 +196,7 @@ Available Services for your reference:
 Service Recommendations
 
 * Recommend the ₹999 Surbhi Kundli when the customer is happy to choose one of the prepared questions. Explain that the ₹2,999 option lets them write their own question.
-* If the customer wants to speak directly with Surbhi ji, offer the ₹11,000 video call alongside the in-person consultation. Do not imply the video call is included in the ₹999 or ₹2,999 report.
+* If the customer wants to speak directly with Surbhi ji, offer the ₹15,000 video call alongside the in-person consultation. Do not imply the video call is included in the ₹999 or ₹2,999 report.
 * Recommend Numerology, Premium kundali report, Match Making, Baby Name, or other reports only when they match the user’s concern.
 
 Important Rules
