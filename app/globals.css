@@ -101,7 +101,24 @@ body::before {
   background: linear-gradient(105deg, #650918 0%, #8b1024 49%, #650918 100%);
   border-top: 1px solid #d9ad5f;
   box-shadow: 0 -8px 28px rgba(42, 14, 0, 0.18), inset 0 -3px #bc872f;
-  padding-bottom: env(safe-area-inset-bottom);
+  /* In-app browsers can report an oversized inset even above their own nav bar. */
+  padding-bottom: min(env(safe-area-inset-bottom, 0px), 12px);
+}
+
+.wa-float {
+  position: absolute;
+  right: 22px;
+  bottom: calc(100% + 12px);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #25d366;
+  font-size: 1.4rem;
+  text-decoration: none;
 }
 
 .sticky-cta-inner {

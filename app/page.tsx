@@ -275,36 +275,6 @@ export default function NewLandingPage() {
     <>
       <GlobalStyles />
 
-      {/* ── WA FLOAT ── */}
-      <a
-        href="https://wa.me/919251151330?text=Hi"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="wa-float"
-        aria-hidden={!stickyVisible}
-        tabIndex={stickyVisible ? 0 : -1}
-        style={{
-          position: "fixed",
-          right: 22,
-          bottom: 88,
-          zIndex: 199,
-          width: 54,
-          height: 54,
-          borderRadius: "50%",
-          background: "#25D366",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "1.4rem",
-          textDecoration: "none",
-          opacity: stickyVisible ? 1 : 0,
-          pointerEvents: stickyVisible ? "auto" : "none",
-          transition: "opacity .2s ease",
-        }}
-      >
-        <FaWhatsapp className="text-white w-8 h-8" />
-      </a>
-
       {/* ════════════════════════════════
           ANNOUNCEMENT BAR — PREMIUM RED
       ════════════════════════════════ */}
@@ -1321,6 +1291,17 @@ export default function NewLandingPage() {
         className={`fixed bottom-0 left-0 right-0 z-[200] transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none ${stickyVisible ? "translate-y-0 opacity-100" : "translate-y-[calc(100%+80px)] opacity-0 pointer-events-none"}`}
         aria-hidden={!stickyVisible}
       >
+        <a
+          href="https://wa.me/919251151330?text=Hi"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="wa-float"
+          aria-hidden={!stickyVisible}
+          tabIndex={stickyVisible ? 0 : -1}
+          aria-label="Chat on WhatsApp"
+        >
+          <FaWhatsapp className="text-white w-8 h-8" />
+        </a>
         <div className="sticky-cta-bar">
           <div className="sticky-cta-inner">
             <div className="sticky-cta-book" aria-hidden="true">
