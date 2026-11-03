@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Karla } from "next/font/google"; // CHANGED: Replaced existing fonts with Cormorant Garamond and Karla
 import Script from "next/script";
 import { META_PRODUCTION_HOSTNAME } from "@/lib/meta-checkout-events";
+import OrderAttributionCapture from "@/components/OrderAttributionCapture";
 import "./globals.css";
 
 // 1. Optimize Font Loading
@@ -90,6 +91,7 @@ export default function RootLayout({
         className="antialiased" 
         style={{ fontFamily: `var(--font-sans), ui-sans-serif, system-ui, sans-serif` }}
       >
+        <OrderAttributionCapture />
         {/* GTM FALLBACK LAYER FOR BROWSERS WITH RUNTIME JAVASCRIPT DISABLED */}
         {hasLiveRazorpayKey && process.env.VERCEL_ENV === "production" && <noscript>
           <iframe 

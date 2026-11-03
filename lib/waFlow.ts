@@ -335,7 +335,7 @@ export function nextMessage(
       data.plan = checkoutPlan.plan;
       const encodedService = encodeURIComponent(checkoutPlan.service);
       const encodedPlan = encodeURIComponent(checkoutPlan.plan);
-      const checkoutUrl = `${paymentLink}?service=${encodedService}&plan=${encodedPlan}`;
+      const checkoutUrl = `${paymentLink}?service=${encodedService}&plan=${encodedPlan}&utm_source=whatsapp&utm_medium=chatbot`;
 
       const selectedService = (data.intent || "").toLowerCase();
       const isSurbhiKundli = selectedService === "surbhi_kundli" || selectedService.includes("सुरभि कुंडली");

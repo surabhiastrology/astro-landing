@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense, useRef } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
+import { captureOrderAttribution } from "@/lib/order-attribution-client";
 import Link from "next/link";
 import Image from "next/image";
 import { LoaderCircle } from "lucide-react";
@@ -1096,6 +1097,7 @@ function CheckoutContent() {
           form: checkoutForm,
           recoveryOptIn: recoveryOptInAvailable && recoveryOptIn,
           recoveryToken,
+          attribution: captureOrderAttribution(),
         }),
       });
       const order = await res.json() as { id?: unknown; amount?: unknown; receiptToken?: unknown; error?: unknown };

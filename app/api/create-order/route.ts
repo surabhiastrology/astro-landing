@@ -6,6 +6,7 @@ import { getCheckoutAmount, getCheckoutPlanByReportType, supportsUrgentDelivery 
 import { isApproximateBirthTimeRange } from "@/lib/birth-time";
 import { CheckoutRecovery, RECOVERY_CONSENT_TEXT, RECOVERY_DELAY_MS, hashRecoveryToken, isRecoveryCheckoutEnabled, recoveryEnvironment, isWhatsAppOptedOut, normalizeWhatsAppPhone } from "@/lib/checkout-recovery";
 import { connectDB } from "@/lib/mongodb";
+import { attributionRazorpayNotes } from "@/lib/order-attribution";
 
 export async function POST(req: Request) {
   const razorpay = new Razorpay({
@@ -71,6 +72,7 @@ export async function POST(req: Request) {
         formData: JSON.stringify(trustedForm),
         receiptTokenHash: crypto.createHash("sha256").update(receiptToken).digest("hex"),
         ...(recoverySourceHash ? { recoverySourceHash } : {}),
+        ...attributionRazorpayNotes(body?.attribution),
       },
     };
 

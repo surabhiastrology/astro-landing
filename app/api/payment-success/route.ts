@@ -10,6 +10,7 @@ import { formatBirthTime } from "@/lib/birth-time";
 import { getPaymentWhatsAppTemplate } from "@/lib/payment-whatsapp-template";
 import { getWhatsAppSenderCredentials } from "@/lib/whatsappEnvironment";
 import { markRecoveredOrder } from "@/lib/checkout-recovery";
+import { attributionFromRazorpayNotes } from "@/lib/order-attribution";
 
 // ==========================================
 // 1. INITIALIZE SERVICES
@@ -40,6 +41,10 @@ const OrderSchema = new mongoose.Schema({
   urgentDelivery: { type: Boolean, default: false },
   isTestOrder: { type: Boolean, default: false },
   recoveredFromCart: { type: Boolean, default: false },
+  attribution: {
+    source: String, utmSource: String, utmMedium: String, utmCampaign: String,
+    referrerHost: String, metaClick: Boolean, googleClick: Boolean,
+  },
   deliveryDueAt: { type: Date },
   customer: {
     name: String, email: String, phone: String,
@@ -192,6 +197,7 @@ export async function POST(req: Request) {
     const isTestOrder = process.env.VERCEL_ENV === "preview";
     const recoveredFromCart = typeof gatewayOrder.notes?.recoverySourceHash === "string"
       && /^[a-f0-9]{64}$/.test(gatewayOrder.notes.recoverySourceHash);
+    const attribution = attributionFromRazorpayNotes(gatewayOrder.notes, recoveredFromCart);
 
     // B. SAVE TO MONGODB
     await connectDB();
@@ -209,6 +215,7 @@ export async function POST(req: Request) {
       urgentDelivery,
       isTestOrder,
       recoveredFromCart,
+      attribution,
       ...(urgentDelivery ? { deliveryDueAt: new Date(Date.now() + 24 * 60 * 60 * 1000) } : {}),
       customer: trustedForm,
       partner: {
@@ -308,6 +315,7 @@ export async function POST(req: Request) {
                   <tr><td style="padding: 5px 0; color: #666;">Report Type:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${trustedForm.reportType}</td></tr>
                   <tr><td style="padding: 5px 0; color: #666;">Language:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${trustedForm.language}</td></tr>
                   <tr><td style="padding: 5px 0; color: #666;">Amount Paid:</td><td style="padding: 5px 0; font-weight: bold; text-align: right; color: #1B4D30;">₹${finalAmount}</td></tr>
+                  <tr><td style="padding: 5px 0; color: #666;">Order Source:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${attribution.source}</td></tr>
                   ${urgentDelivery ? '<tr><td style="padding: 5px 0; color: #666;">Delivery:</td><td style="padding: 5px 0; font-weight: bold; text-align: right; color: #8B1E1E;">Urgent — within 24 hours (+₹199)</td></tr>' : ''}
                 </table>
               </div>

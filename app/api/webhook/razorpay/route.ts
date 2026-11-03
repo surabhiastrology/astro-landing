@@ -11,6 +11,7 @@ import { getCheckoutAmount, getCheckoutPlanByReportType, planIncludesWhatsAppQue
 import { getPaymentWhatsAppTemplate } from "@/lib/payment-whatsapp-template";
 import { getWhatsAppSenderCredentials } from "@/lib/whatsappEnvironment";
 import { markRecoveredOrder } from "@/lib/checkout-recovery";
+import { attributionFromRazorpayNotes, orderSourceLabel } from "@/lib/order-attribution";
 
 // ==========================================
 // 1. INITIALIZE SERVICES (With Caching)
@@ -66,6 +67,10 @@ const OrderSchema = new mongoose.Schema({
   urgentDelivery: { type: Boolean, default: false },
   isTestOrder: { type: Boolean, default: false },
   recoveredFromCart: { type: Boolean, default: false },
+  attribution: {
+    source: String, utmSource: String, utmMedium: String, utmCampaign: String,
+    referrerHost: String, metaClick: Boolean, googleClick: Boolean,
+  },
   deliveryDueAt: { type: Date },
   customer: {
     name: String, email: String, phone: String,
@@ -194,6 +199,7 @@ export async function POST(req: Request) {
       const isTestOrder = process.env.VERCEL_ENV === "preview";
       const recoveredFromCart = typeof gatewayOrder.notes?.recoverySourceHash === "string"
         && /^[a-f0-9]{64}$/.test(gatewayOrder.notes.recoverySourceHash);
+      const attribution = attributionFromRazorpayNotes(gatewayOrder.notes, recoveredFromCart);
       if (
         !checkoutPlan ||
         (urgentDelivery && !supportsUrgentDelivery(checkoutPlan)) ||
@@ -214,6 +220,7 @@ export async function POST(req: Request) {
           urgentDelivery,
           isTestOrder,
           recoveredFromCart,
+          attribution,
           ...(urgentDelivery ? { deliveryDueAt: new Date(Date.now() + 24 * 60 * 60 * 1000) } : {}),
           customer: { ...formData, reportType: checkoutPlan.reportType, urgentDelivery },
           partner: {
@@ -231,7 +238,7 @@ export async function POST(req: Request) {
         // Update existing pending order
         await Order.updateOne(
           { _id: order._id },
-          { $set: { status: "Paid", paymentId, challenge: formData.challenge, urgentDelivery, isTestOrder, recoveredFromCart, ...(urgentDelivery ? { deliveryDueAt: new Date(Date.now() + 24 * 60 * 60 * 1000) } : {}) } }
+          { $set: { status: "Paid", paymentId, challenge: formData.challenge, urgentDelivery, isTestOrder, recoveredFromCart, attribution, ...(urgentDelivery ? { deliveryDueAt: new Date(Date.now() + 24 * 60 * 60 * 1000) } : {}) } }
         );
       }
       await markRecoveredOrder(typeof gatewayOrder.notes?.recoverySourceHash === "string" ? gatewayOrder.notes.recoverySourceHash : undefined, razorpayOrderId, amountPaise / 100);
@@ -327,6 +334,7 @@ async function triggerNotifications(order: any) {
                 <tr><td style="padding: 5px 0; color: #666;">Report Type:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${order.reportType}</td></tr>
                 <tr><td style="padding: 5px 0; color: #666;">Language:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${order.customer.language}</td></tr>
                 <tr><td style="padding: 5px 0; color: #666;">Amount Paid:</td><td style="padding: 5px 0; font-weight: bold; text-align: right; color: #1B4D30;">₹${order.amount}</td></tr>
+                <tr><td style="padding: 5px 0; color: #666;">Order Source:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${orderSourceLabel(order.attribution)}</td></tr>
                 ${order.urgentDelivery ? '<tr><td style="padding: 5px 0; color: #666;">Delivery:</td><td style="padding: 5px 0; font-weight: bold; text-align: right; color: #8B1E1E;">Urgent — within 24 hours (+₹199)</td></tr>' : ''}
               </table>
             </div>

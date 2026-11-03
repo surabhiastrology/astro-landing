@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { formatBirthTime } from "@/lib/birth-time";
+import { orderSourceLabel } from "@/lib/order-attribution";
 import { 
   Package, Send, FileText, User, Phone, X, Loader2, 
   Download, Search, Filter, ArrowUpRight, CheckCircle2,
@@ -57,7 +58,8 @@ export default function OrdersPage() {
       o.customer?.phone?.includes(searchTerm) ||
       o.partner?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       o.reportType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      o.orderId?.includes(searchTerm)
+      o.orderId?.includes(searchTerm) ||
+      orderSourceLabel(o.attribution).toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredOrders(filtered);
   }, [searchTerm, orders]);
@@ -69,6 +71,9 @@ export default function OrdersPage() {
       Phone: o.customer.phone,
       Email: o.customer.email,
       Service: o.reportType,
+      OrderSource: orderSourceLabel(o.attribution),
+      SourceCampaign: o.attribution?.utmCampaign || "",
+      SourceReferrer: o.attribution?.referrerHost || "",
       PartnerName: o.partner?.name || "",
       PartnerDateOfBirth: o.partner?.dob || "",
       PartnerTimeOfBirth: o.partner?.tob || "",
@@ -213,10 +218,11 @@ export default function OrdersPage() {
                   <FileText size={24} />
                 </div>
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="text-[10px] font-black bg-slate-100 px-2 py-0.5 rounded text-slate-500 uppercase tracking-tighter italic">Order #{order.orderId?.slice(-8)}</span>
                     <span className="text-[10px] font-black bg-green-100 text-green-700 px-2 py-0.5 rounded uppercase">PAID</span>
                     {order.isTestOrder === true && <span className="rounded bg-rose-100 px-2 py-0.5 text-[10px] font-black uppercase text-rose-800">TEST ORDER</span>}
+                    <span className="rounded bg-sky-50 px-2 py-0.5 text-[10px] font-bold text-sky-800">{orderSourceLabel(order.attribution)}</span>
                     {order.urgentDelivery && <span className="rounded bg-[#F8E9CC] px-2 py-0.5 text-[10px] font-black uppercase text-[#8B1E1E]">Urgent · 24h</span>}
                   </div>
                   <h3 className="font-bold text-slate-800 mt-1 truncate">{order.reportType}</h3>
@@ -301,6 +307,9 @@ export default function OrdersPage() {
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Order ID: {viewOrder.orderId}</p>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Payment ID: {viewOrder.paymentId}</p>
                 {viewOrder.isTestOrder === true && <p className="mt-2 inline-block rounded bg-rose-100 px-2 py-1 text-xs font-black uppercase text-rose-800">TEST ORDER · Preview payment</p>}
+                <p className="mt-2 text-xs font-bold text-sky-800">Order source: {orderSourceLabel(viewOrder.attribution)}</p>
+                {viewOrder.attribution?.utmCampaign && <p className="mt-1 text-xs text-slate-600">Campaign tag: {viewOrder.attribution.utmCampaign}</p>}
+                {viewOrder.attribution?.referrerHost && <p className="mt-1 text-xs text-slate-600">Referrer: {viewOrder.attribution.referrerHost}</p>}
                 {viewOrder.urgentDelivery && <p className="mt-2 text-xs font-bold text-[#8B1E1E]">Urgent delivery · due {viewOrder.deliveryDueAt ? new Date(viewOrder.deliveryDueAt).toLocaleString("en-IN") : "within 24 hours of payment"}</p>}
               </div>
               <button onClick={() => setViewOrder(null)} className="h-10 w-10 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-slate-100 transition-all text-slate-400">
