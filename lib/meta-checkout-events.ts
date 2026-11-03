@@ -7,6 +7,8 @@ export function isProductionMetaTrackingEnabled() {
 }
 
 type MetaEventKind = "track" | "trackCustom";
+const pendingPurchaseEvents = new Set<string>();
+const dispatchedPurchaseEvents = new Set<string>();
 
 /** The event ID must also be forwarded as event_id by any existing CAPI integration. */
 export function trackMetaCheckoutEvent(
@@ -14,18 +16,27 @@ export function trackMetaCheckoutEvent(
   name: string,
   data: Record<string, string | number>,
   eventId: string,
+  onDispatched?: () => void,
+  onUnavailable?: () => void,
 ) {
   if (!isProductionMetaTrackingEnabled()) return;
 
   let attempts = 0;
   const sendWhenReady = () => {
-    if (typeof window.fbq === "function") {
-      window.fbq(kind, name, data, { eventID: eventId });
+    const fbq = (window as Window & { fbq?: (...args: unknown[]) => void }).fbq;
+    if (typeof fbq === "function") {
+      try {
+        fbq(kind, name, data, { eventID: eventId });
+        onDispatched?.();
+      } catch {
+        onUnavailable?.();
+      }
       return;
     }
 
     // The pixel loads after hydration; retain early visibility/input events.
     if (attempts++ < 100) window.setTimeout(sendWhenReady, 200);
+    else onUnavailable?.();
   };
 
   sendWhenReady();
@@ -36,13 +47,28 @@ export function trackVerifiedPurchaseOnce(orderId: string, amountInr: number, re
   if (!Number.isFinite(amountInr) || amountInr <= 0) return;
 
   const key = `meta:purchase:${orderId}`;
-  if (window.localStorage.getItem(key)) return;
-  window.localStorage.setItem(key, "1");
+  if (pendingPurchaseEvents.has(key) || dispatchedPurchaseEvents.has(key)) return;
+  try {
+    if (window.localStorage.getItem(key)) return;
+  } catch {
+    // Private browsing may disable storage; the in-memory sets still guard this page.
+  }
+  pendingPurchaseEvents.add(key);
 
   trackMetaCheckoutEvent(
     "track",
     "Purchase",
     { value: amountInr, currency: "INR", content_name: reportType },
     `purchase_${orderId}`,
+    () => {
+      pendingPurchaseEvents.delete(key);
+      dispatchedPurchaseEvents.add(key);
+      try {
+        window.localStorage.setItem(key, "1");
+      } catch {
+        // The pixel call succeeded, even if persistent storage is unavailable.
+      }
+    },
+    () => pendingPurchaseEvents.delete(key),
   );
 }
