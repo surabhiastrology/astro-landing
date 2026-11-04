@@ -1,4 +1,3 @@
-import Image from "next/image";
 import SectionEyebrow from "./SectionEyebrow";
 import {
   CalendarDays,
@@ -51,12 +50,15 @@ export default function KundaliFaqSection() {
           <div className={styles.arch}>
             <span className={styles.lotus}>✧</span>
           </div>
-          <Image
+          <video
             className={styles.portrait}
-            src="/surbhi-kundali-guidance.webp"
-            alt=""
-            fill
-            sizes="(max-width: 900px) 100vw, 38vw"
+            src="/surbhi-answering-kundali-questions.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            disablePictureInPicture
           />
         </div>
 
