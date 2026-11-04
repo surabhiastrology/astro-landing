@@ -55,10 +55,10 @@ export default function TrustSurbhiSection() {
 
         <div className={styles.visual}>
           <Image
-            src="/surbhi-gupta-trust-portrait.webp"
-            alt="Celebrity Astrologer Surbhi Gupta"
-            width={858}
-            height={910}
+            src="/surbhi-gupta-trust-event.webp"
+            alt="Celebrity Astrologer Surbhi Gupta speaking at an event"
+            width={1199}
+            height={1312}
             sizes="(max-width: 767px) 100vw, 50vw"
             className={styles.portrait}
           />
